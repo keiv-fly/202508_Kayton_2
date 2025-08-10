@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/kayton_api",
+    "crates/kayton",
+    "crates/plugin_hello"
+]
+resolver = "2"
