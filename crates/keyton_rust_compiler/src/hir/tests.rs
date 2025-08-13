@@ -16,21 +16,43 @@ print(x)
         hir,
         vec![
             HirStmt::Assign {
+                hir_id: HirId(1),
                 name: "x".to_string(),
-                expr: HirExpr::Int(12),
-            },
-            HirStmt::Assign {
-                name: "x".to_string(),
-                expr: HirExpr::Binary {
-                    left: Box::new(HirExpr::Ident("x".to_string())),
-                    op: HirBinOp::Add,
-                    right: Box::new(HirExpr::Int(1)),
+                expr: HirExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12
                 },
             },
-            HirStmt::ExprStmt(HirExpr::Call {
-                func: Box::new(HirExpr::Ident("print".to_string())),
-                args: vec![HirExpr::Ident("x".to_string())],
-            }),
+            HirStmt::Assign {
+                hir_id: HirId(3),
+                name: "x".to_string(),
+                expr: HirExpr::Binary {
+                    hir_id: HirId(4),
+                    left: Box::new(HirExpr::Ident {
+                        hir_id: HirId(5),
+                        name: "x".to_string()
+                    }),
+                    op: HirBinOp::Add,
+                    right: Box::new(HirExpr::Int {
+                        hir_id: HirId(6),
+                        value: 1
+                    }),
+                },
+            },
+            HirStmt::ExprStmt {
+                hir_id: HirId(7),
+                expr: HirExpr::Call {
+                    hir_id: HirId(8),
+                    func: Box::new(HirExpr::Ident {
+                        hir_id: HirId(9),
+                        name: "print".to_string()
+                    }),
+                    args: vec![HirExpr::Ident {
+                        hir_id: HirId(10),
+                        name: "x".to_string()
+                    }],
+                },
+            },
         ]
     );
 }
@@ -43,10 +65,20 @@ fn program2_hir() {
     let hir = lower_program(ast);
     assert_eq!(
         hir,
-        vec![HirStmt::ExprStmt(HirExpr::Call {
-            func: Box::new(HirExpr::Ident("print".to_string())),
-            args: vec![HirExpr::Str("Hello, World".to_string())],
-        })]
+        vec![HirStmt::ExprStmt {
+            hir_id: HirId(1),
+            expr: HirExpr::Call {
+                hir_id: HirId(2),
+                func: Box::new(HirExpr::Ident {
+                    hir_id: HirId(3),
+                    name: "print".to_string()
+                }),
+                args: vec![HirExpr::Str {
+                    hir_id: HirId(4),
+                    value: "Hello, World".to_string()
+                }],
+            },
+        }]
     );
 }
 
@@ -62,17 +94,43 @@ print(f"{x}")
         hir,
         vec![
             HirStmt::Assign {
+                hir_id: HirId(1),
                 name: "x".to_string(),
-                expr: HirExpr::Int(12),
+                expr: HirExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12
+                },
             },
-            HirStmt::ExprStmt(HirExpr::Call {
-                func: Box::new(HirExpr::Ident("print".to_string())),
-                args: vec![HirExpr::InterpolatedString(vec![
-                    HirStringPart::Text("".to_string()),
-                    HirStringPart::Expr(Box::new(HirExpr::Ident("x".to_string()))),
-                    HirStringPart::Text("".to_string()),
-                ])],
-            }),
+            HirStmt::ExprStmt {
+                hir_id: HirId(3),
+                expr: HirExpr::Call {
+                    hir_id: HirId(4),
+                    func: Box::new(HirExpr::Ident {
+                        hir_id: HirId(5),
+                        name: "print".to_string()
+                    }),
+                    args: vec![HirExpr::InterpolatedString {
+                        hir_id: HirId(6),
+                        parts: vec![
+                            HirStringPart::Text {
+                                hir_id: HirId(7),
+                                text: "".to_string()
+                            },
+                            HirStringPart::Expr {
+                                hir_id: HirId(8),
+                                expr: Box::new(HirExpr::Ident {
+                                    hir_id: HirId(9),
+                                    name: "x".to_string(),
+                                }),
+                            },
+                            HirStringPart::Text {
+                                hir_id: HirId(10),
+                                text: "".to_string()
+                            },
+                        ],
+                    }],
+                },
+            },
         ]
     );
 }

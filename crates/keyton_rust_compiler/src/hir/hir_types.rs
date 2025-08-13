@@ -1,24 +1,48 @@
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct HirId(pub u32);
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum HirStmt {
-    Assign { name: String, expr: HirExpr },
-    ExprStmt(HirExpr),
+    Assign {
+        hir_id: HirId,
+        name: String,
+        expr: HirExpr,
+    },
+    ExprStmt {
+        hir_id: HirId,
+        expr: HirExpr,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum HirExpr {
-    Int(i64),
-    Str(String),
-    Ident(String),
+    Int {
+        hir_id: HirId,
+        value: i64,
+    },
+    Str {
+        hir_id: HirId,
+        value: String,
+    },
+    Ident {
+        hir_id: HirId,
+        name: String,
+    },
     Binary {
+        hir_id: HirId,
         left: Box<HirExpr>,
         op: HirBinOp,
         right: Box<HirExpr>,
     },
     Call {
+        hir_id: HirId,
         func: Box<HirExpr>,
         args: Vec<HirExpr>,
     },
-    InterpolatedString(Vec<HirStringPart>),
+    InterpolatedString {
+        hir_id: HirId,
+        parts: Vec<HirStringPart>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,6 +52,6 @@ pub enum HirBinOp {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum HirStringPart {
-    Text(String),
-    Expr(Box<HirExpr>),
+    Text { hir_id: HirId, text: String },
+    Expr { hir_id: HirId, expr: Box<HirExpr> },
 }

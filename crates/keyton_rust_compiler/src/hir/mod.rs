@@ -1,39 +1,75 @@
 pub mod hir_types;
 
 use crate::parser::{BinOp, Expr, Stmt, StringPart};
-use hir_types::{HirBinOp, HirExpr, HirStmt, HirStringPart};
+use hir_types::{HirBinOp, HirExpr, HirId, HirStmt, HirStringPart};
 
-pub fn lower_program(ast: Vec<Stmt>) -> Vec<HirStmt> {
-    ast.into_iter().map(lower_stmt).collect()
+struct LoweringCtx {
+    next_id: u32,
 }
 
-pub fn lower_stmt(stmt: Stmt) -> HirStmt {
-    match stmt {
-        Stmt::Assign { name, expr } => HirStmt::Assign {
-            name,
-            expr: lower_expr(expr),
-        },
-        Stmt::ExprStmt(expr) => HirStmt::ExprStmt(lower_expr(expr)),
+impl LoweringCtx {
+    fn new() -> Self {
+        Self { next_id: 1 }
+    }
+
+    fn new_id(&mut self) -> HirId {
+        let id = self.next_id;
+        self.next_id += 1;
+        HirId(id)
     }
 }
 
-pub fn lower_expr(expr: Expr) -> HirExpr {
+pub fn lower_program(ast: Vec<Stmt>) -> Vec<HirStmt> {
+    let mut ctx = LoweringCtx::new();
+    ast.into_iter().map(|s| lower_stmt(&mut ctx, s)).collect()
+}
+
+fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {
+    match stmt {
+        Stmt::Assign { name, expr } => HirStmt::Assign {
+            hir_id: ctx.new_id(),
+            name,
+            expr: lower_expr(ctx, expr),
+        },
+        Stmt::ExprStmt(expr) => HirStmt::ExprStmt {
+            hir_id: ctx.new_id(),
+            expr: lower_expr(ctx, expr),
+        },
+    }
+}
+
+fn lower_expr(ctx: &mut LoweringCtx, expr: Expr) -> HirExpr {
     match expr {
-        Expr::Int(n) => HirExpr::Int(n),
-        Expr::Str(s) => HirExpr::Str(s),
-        Expr::Ident(s) => HirExpr::Ident(s),
+        Expr::Int(n) => HirExpr::Int {
+            hir_id: ctx.new_id(),
+            value: n,
+        },
+        Expr::Str(s) => HirExpr::Str {
+            hir_id: ctx.new_id(),
+            value: s,
+        },
+        Expr::Ident(s) => HirExpr::Ident {
+            hir_id: ctx.new_id(),
+            name: s,
+        },
         Expr::Binary { left, op, right } => HirExpr::Binary {
-            left: Box::new(lower_expr(*left)),
+            hir_id: ctx.new_id(),
+            left: Box::new(lower_expr(ctx, *left)),
             op: lower_bin_op(op),
-            right: Box::new(lower_expr(*right)),
+            right: Box::new(lower_expr(ctx, *right)),
         },
         Expr::Call { func, args } => HirExpr::Call {
-            func: Box::new(lower_expr(*func)),
-            args: args.into_iter().map(lower_expr).collect(),
+            hir_id: ctx.new_id(),
+            func: Box::new(lower_expr(ctx, *func)),
+            args: args.into_iter().map(|a| lower_expr(ctx, a)).collect(),
         },
-        Expr::InterpolatedString(parts) => {
-            HirExpr::InterpolatedString(parts.into_iter().map(lower_string_part).collect())
-        }
+        Expr::InterpolatedString(parts) => HirExpr::InterpolatedString {
+            hir_id: ctx.new_id(),
+            parts: parts
+                .into_iter()
+                .map(|p| lower_string_part(ctx, p))
+                .collect(),
+        },
     }
 }
 
@@ -43,10 +79,16 @@ fn lower_bin_op(op: BinOp) -> HirBinOp {
     }
 }
 
-fn lower_string_part(part: StringPart) -> HirStringPart {
+fn lower_string_part(ctx: &mut LoweringCtx, part: StringPart) -> HirStringPart {
     match part {
-        StringPart::Text(t) => HirStringPart::Text(t),
-        StringPart::Expr(e) => HirStringPart::Expr(Box::new(lower_expr(*e))),
+        StringPart::Text(t) => HirStringPart::Text {
+            hir_id: ctx.new_id(),
+            text: t,
+        },
+        StringPart::Expr(e) => HirStringPart::Expr {
+            hir_id: ctx.new_id(),
+            expr: Box::new(lower_expr(ctx, *e)),
+        },
     }
 }
 
