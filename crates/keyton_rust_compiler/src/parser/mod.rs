@@ -1,26 +1,50 @@
 use crate::lexer::{FStringPart, Lexer, Token};
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct NodeId(pub u32);
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
-    Assign { name: String, expr: Expr },
-    ExprStmt(Expr),
+    Assign {
+        node_id: NodeId,
+        name: String,
+        expr: Expr,
+    },
+    ExprStmt {
+        node_id: NodeId,
+        expr: Expr,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
-    Int(i64),
-    Str(String),
-    Ident(String),
+    Int {
+        node_id: NodeId,
+        value: i64,
+    },
+    Str {
+        node_id: NodeId,
+        value: String,
+    },
+    Ident {
+        node_id: NodeId,
+        name: String,
+    },
     Binary {
+        node_id: NodeId,
         left: Box<Expr>,
         op: BinOp,
         right: Box<Expr>,
     },
     Call {
+        node_id: NodeId,
         func: Box<Expr>,
         args: Vec<Expr>,
     },
-    InterpolatedString(Vec<StringPart>),
+    InterpolatedString {
+        node_id: NodeId,
+        parts: Vec<StringPart>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -30,18 +54,29 @@ pub enum BinOp {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum StringPart {
-    Text(String),
-    Expr(Box<Expr>),
+    Text { node_id: NodeId, text: String },
+    Expr { node_id: NodeId, expr: Box<Expr> },
 }
 
 pub struct Parser {
     tokens: Vec<Token>,
     pos: usize,
+    next_node_id: u32,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0 }
+        Self {
+            tokens,
+            pos: 0,
+            next_node_id: 1,
+        }
+    }
+
+    fn new_id(&mut self) -> NodeId {
+        let id = self.next_node_id;
+        self.next_node_id += 1;
+        NodeId(id)
     }
 
     pub fn parse_program(&mut self) -> Vec<Stmt> {
@@ -62,6 +97,7 @@ impl Parser {
             self.advance();
             let right = self.parse_primary();
             left = Expr::Binary {
+                node_id: self.new_id(),
                 left: Box::new(left),
                 op: BinOp::Add,
                 right: Box::new(right),
@@ -78,34 +114,58 @@ impl Parser {
             if self.peek_next_is(Token::Equal) {
                 self.advance(); // ident
                 self.advance(); // '='
+                let node_id = self.new_id();
                 let expr = self.parse_expr();
-                return Some(Stmt::Assign { name, expr });
+                return Some(Stmt::Assign {
+                    node_id,
+                    name,
+                    expr,
+                });
             }
         }
+        let node_id = self.new_id();
         let expr = self.parse_expr();
-        Some(Stmt::ExprStmt(expr))
+        Some(Stmt::ExprStmt { node_id, expr })
     }
 
     fn parse_primary(&mut self) -> Expr {
         match self.advance() {
-            Token::Int(n) => Expr::Int(n),
-            Token::Str(s) => Expr::Str(s),
+            Token::Int(n) => Expr::Int {
+                node_id: self.new_id(),
+                value: n,
+            },
+            Token::Str(s) => Expr::Str {
+                node_id: self.new_id(),
+                value: s,
+            },
             Token::Ident(s) => {
-                let expr = Expr::Ident(s);
+                let expr = Expr::Ident {
+                    node_id: self.new_id(),
+                    name: s,
+                };
                 self.parse_call(expr)
             }
             Token::InterpolatedString(parts) => {
                 let mut ast_parts = Vec::new();
                 for part in parts {
                     match part {
-                        FStringPart::Text(t) => ast_parts.push(StringPart::Text(t)),
+                        FStringPart::Text(t) => ast_parts.push(StringPart::Text {
+                            node_id: self.new_id(),
+                            text: t,
+                        }),
                         FStringPart::Expr(src) => {
-                            let expr = parse_embedded_expr(&src);
-                            ast_parts.push(StringPart::Expr(Box::new(expr)));
+                            let expr = self.parse_embedded_expr(&src);
+                            ast_parts.push(StringPart::Expr {
+                                node_id: self.new_id(),
+                                expr: Box::new(expr),
+                            });
                         }
                     }
                 }
-                Expr::InterpolatedString(ast_parts)
+                Expr::InterpolatedString {
+                    node_id: self.new_id(),
+                    parts: ast_parts,
+                }
             }
             Token::LParen => {
                 let expr = self.parse_expr();
@@ -131,6 +191,7 @@ impl Parser {
                     }
                     self.expect(Token::RParen);
                     expr = Expr::Call {
+                        node_id: self.new_id(),
                         func: Box::new(expr),
                         args,
                     };
@@ -178,10 +239,19 @@ impl Parser {
     }
 }
 
-fn parse_embedded_expr(src: &str) -> Expr {
-    let tokens = Lexer::new(src).tokenize();
-    let mut parser = Parser::new(tokens);
-    parser.parse_expr()
+impl Parser {
+    fn parse_embedded_expr(&mut self, src: &str) -> Expr {
+        let tokens = Lexer::new(src).tokenize();
+        let mut sub = Parser {
+            tokens,
+            pos: 0,
+            next_node_id: self.next_node_id,
+        };
+        let expr = sub.parse_expr();
+        // Synchronize the id counter so node ids remain unique across the whole AST
+        self.next_node_id = sub.next_node_id;
+        expr
+    }
 }
 
 #[cfg(test)]
