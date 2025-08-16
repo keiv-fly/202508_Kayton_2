@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::hir::hir_types::{HirExpr, HirId, HirStmt, HirStringPart};
 
-use super::sym::{ScopeId, SymKind, SymbolId, SymbolTable};
+use super::sym::{FuncSig, ScopeId, SymKind, SymbolId, SymbolTable, Type};
 use super::types::{RExpr, RStmt, RStringPart};
 
 #[derive(Debug, Clone)]
@@ -35,7 +35,14 @@ impl Resolver {
 
     pub fn add_builtin(&mut self, name: &str) -> SymbolId {
         let g = self.global_scope();
-        let sid = self.syms.define(g, name, SymKind::Global);
+        let sid = self.syms.define(g, name, SymKind::BuiltinFunc);
+        // Seed a simple signature for builtins like print(name: Any) -> Unit
+        if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+            info.sig = Some(FuncSig {
+                params: vec![Type::Any],
+                ret: Type::Unit,
+            });
+        }
         self.builtins.insert(name.to_string(), sid);
         sid
     }
@@ -66,9 +73,9 @@ impl Resolver {
             match stmt {
                 HirStmt::Assign { name, .. } => {
                     let kind = if scope == self.global_scope() {
-                        SymKind::Global
+                        SymKind::GlobalVar
                     } else {
-                        SymKind::Local
+                        SymKind::LocalVar
                     };
                     self.syms.define(scope, name, kind);
                 }
@@ -96,9 +103,9 @@ impl Resolver {
                     .or_else(|| self.builtins.get(name).copied())
                     .unwrap_or_else(|| {
                         let kind = if scope == self.global_scope() {
-                            SymKind::Global
+                            SymKind::GlobalVar
                         } else {
-                            SymKind::Local
+                            SymKind::LocalVar
                         };
                         let sid = self.syms.define(scope, name, kind);
                         self.report.errors.push(ResolveError::UnresolvedName {
@@ -194,7 +201,9 @@ impl Resolver {
         if let Some(&sid) = self.builtins.get(name) {
             return sid;
         }
-        let sid = self.syms.define(self.global_scope(), name, SymKind::Global);
+        let sid = self
+            .syms
+            .define(self.global_scope(), name, SymKind::GlobalVar);
         self.report.errors.push(ResolveError::UnresolvedName {
             hir_id: use_hir,
             name: name.to_string(),

@@ -60,12 +60,12 @@ print(x)
         ]
     );
 
-    // Symbols: print (0, Global), x (1, Global)
+    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar)
     assert_eq!(resolved.symbols.infos.len(), 2);
     assert_eq!(resolved.symbols.infos[0].name, "print");
     assert_eq!(resolved.symbols.infos[1].name, "x");
-    assert_eq!(resolved.symbols.infos[0].kind, SymKind::Global);
-    assert_eq!(resolved.symbols.infos[1].kind, SymKind::Global);
+    assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
+    assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
 }
 
 #[test]
@@ -184,6 +184,6 @@ fn unresolved_name_reports_error() {
     assert_eq!(resolver.syms.infos.len(), 2);
     assert_eq!(resolver.syms.infos[0].name, "y");
     assert_eq!(resolver.syms.infos[1].name, "x");
-    assert_eq!(resolver.syms.infos[0].kind, SymKind::Global);
-    assert_eq!(resolver.syms.infos[1].kind, SymKind::Global);
+    assert_eq!(resolver.syms.infos[0].kind, SymKind::GlobalVar);
+    assert_eq!(resolver.syms.infos[1].kind, SymKind::GlobalVar);
 }

@@ -8,8 +8,24 @@ pub struct ScopeId(pub u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymKind {
-    Local,
-    Global,
+    GlobalVar,
+    LocalVar,
+    Func,
+    BuiltinFunc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Type {
+    Int,
+    Str,
+    Unit,
+    Any,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FuncSig {
+    pub params: Vec<Type>,
+    pub ret: Type,
 }
 
 #[derive(Debug, Clone)]
@@ -17,6 +33,7 @@ pub struct SymInfo {
     pub name: String,
     pub scope: ScopeId,
     pub kind: SymKind,
+    pub sig: Option<FuncSig>,
 }
 
 #[derive(Debug, Clone)]
@@ -66,6 +83,7 @@ impl SymbolTable {
             name: name.to_string(),
             scope,
             kind,
+            sig: None,
         });
         self.scopes[scope.0 as usize]
             .names
