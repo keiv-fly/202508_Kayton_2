@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use crate::hir::hir_types::{HirBinOp, HirId};
 use crate::shir::resolver::ResolvedProgram;
 use crate::shir::sym::{ScopeId, SymKind, SymbolId, SymbolTable, Type};
-use crate::shir::types::{RExpr, RStmt, RStringPart};
+use crate::shir::types::{SExpr, SStmt, SStringPart};
 
 use super::types::{TExpr, TStmt, TStringPart, TypeError, TypeReport, TypedProgram};
 
 pub fn typecheck_program(resolved: &mut ResolvedProgram) -> TypedProgram {
     let mut c = Checker::new(&mut resolved.symbols);
-    let thir = resolved.rhir.iter().map(|s| c.check_stmt(s)).collect();
+    let thir = resolved.shir.iter().map(|s| c.check_stmt(s)).collect();
     TypedProgram {
         thir,
         var_types: c.var_types,
@@ -34,9 +34,9 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn check_stmt(&mut self, s: &RStmt) -> TStmt {
+    fn check_stmt(&mut self, s: &SStmt) -> TStmt {
         match s {
-            RStmt::Assign { hir_id, sym, expr } => {
+            SStmt::Assign { hir_id, sym, expr } => {
                 let texpr = self.check_expr(expr);
                 let expr_ty = texpr.ty().clone();
 
@@ -73,7 +73,7 @@ impl<'a> Checker<'a> {
                     expr: texpr,
                 }
             }
-            RStmt::ExprStmt { hir_id, expr } => {
+            SStmt::ExprStmt { hir_id, expr } => {
                 let texpr = self.check_expr(expr);
                 TStmt::ExprStmt {
                     hir_id: *hir_id,
@@ -83,19 +83,19 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn check_expr(&mut self, e: &RExpr) -> TExpr {
+    fn check_expr(&mut self, e: &SExpr) -> TExpr {
         match e {
-            RExpr::Int { hir_id, value } => TExpr::Int {
+            SExpr::Int { hir_id, value } => TExpr::Int {
                 hir_id: *hir_id,
                 value: *value,
                 ty: Type::Int,
             },
-            RExpr::Str { hir_id, value } => TExpr::Str {
+            SExpr::Str { hir_id, value } => TExpr::Str {
                 hir_id: *hir_id,
                 value: value.clone(),
                 ty: Type::Str,
             },
-            RExpr::Name { hir_id, sym } => {
+            SExpr::Name { hir_id, sym } => {
                 let var_name = &self.symbols.infos[sym.0 as usize].name;
                 let kind = self.symbols.infos[sym.0 as usize].kind;
 
@@ -118,7 +118,7 @@ impl<'a> Checker<'a> {
                     ty,
                 }
             }
-            RExpr::Binary {
+            SExpr::Binary {
                 hir_id,
                 left,
                 op,
@@ -143,7 +143,7 @@ impl<'a> Checker<'a> {
                     ty: out_ty,
                 }
             }
-            RExpr::Call { hir_id, func, args } => {
+            SExpr::Call { hir_id, func, args } => {
                 // Extract all needed information before any mutable borrows
                 let func_info = Self::extract_func_info(&self.symbols, func);
 
@@ -180,15 +180,15 @@ impl<'a> Checker<'a> {
                     ty: func_info.ret_ty,
                 }
             }
-            RExpr::InterpolatedString { hir_id, parts } => {
+            SExpr::InterpolatedString { hir_id, parts } => {
                 let parts = parts
                     .iter()
                     .map(|p| match p {
-                        RStringPart::Text { hir_id, value } => TStringPart::Text {
+                        SStringPart::Text { hir_id, value } => TStringPart::Text {
                             hir_id: *hir_id,
                             value: value.clone(),
                         },
-                        RStringPart::Expr { hir_id, expr } => {
+                        SStringPart::Expr { hir_id, expr } => {
                             let te = self.check_expr(expr);
                             // Allow any type inside interpolation (implicitly to-string).
                             TStringPart::Expr {
@@ -207,9 +207,9 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn extract_func_info(symbols: &SymbolTable, func: &RExpr) -> FuncInfo {
+    fn extract_func_info(symbols: &SymbolTable, func: &SExpr) -> FuncInfo {
         match func {
-            RExpr::Name { sym, .. } => {
+            SExpr::Name { sym, .. } => {
                 let info = &symbols.infos[sym.0 as usize];
                 let name = info.name.clone();
                 let sig = info.sig.clone();

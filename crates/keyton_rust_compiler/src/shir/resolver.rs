@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::hir::hir_types::{HirExpr, HirId, HirStmt, HirStringPart};
 
 use super::sym::{FuncSig, ScopeId, SymKind, SymbolId, SymbolTable, Type};
-use super::types::{RExpr, RStmt, RStringPart};
+use super::types::{SExpr, SStmt, SStringPart};
 
 #[derive(Debug, Clone)]
 pub enum ResolveError {
@@ -84,7 +84,7 @@ impl Resolver {
         }
     }
 
-    pub fn resolve_program(&mut self, hir: &[HirStmt]) -> Vec<RStmt> {
+    pub fn resolve_program(&mut self, hir: &[HirStmt]) -> Vec<SStmt> {
         self.collect_defs(hir);
         let mut out = Vec::with_capacity(hir.len());
         for stmt in hir {
@@ -93,7 +93,7 @@ impl Resolver {
         out
     }
 
-    fn resolve_stmt(&mut self, s: &HirStmt) -> RStmt {
+    fn resolve_stmt(&mut self, s: &HirStmt) -> SStmt {
         match s {
             HirStmt::Assign { hir_id, name, expr } => {
                 let scope = self.current_scope();
@@ -115,7 +115,7 @@ impl Resolver {
                         sid
                     });
                 let rexpr = self.resolve_expr(expr);
-                RStmt::Assign {
+                SStmt::Assign {
                     hir_id: *hir_id,
                     sym,
                     expr: rexpr,
@@ -123,7 +123,7 @@ impl Resolver {
             }
             HirStmt::ExprStmt { hir_id, expr } => {
                 let rexpr = self.resolve_expr(expr);
-                RStmt::ExprStmt {
+                SStmt::ExprStmt {
                     hir_id: *hir_id,
                     expr: rexpr,
                 }
@@ -131,19 +131,19 @@ impl Resolver {
         }
     }
 
-    fn resolve_expr(&mut self, e: &HirExpr) -> RExpr {
+    fn resolve_expr(&mut self, e: &HirExpr) -> SExpr {
         match e {
-            HirExpr::Int { hir_id, value } => RExpr::Int {
+            HirExpr::Int { hir_id, value } => SExpr::Int {
                 hir_id: *hir_id,
                 value: *value,
             },
-            HirExpr::Str { hir_id, value } => RExpr::Str {
+            HirExpr::Str { hir_id, value } => SExpr::Str {
                 hir_id: *hir_id,
                 value: value.clone(),
             },
             HirExpr::Ident { hir_id, name } => {
                 let sym = self.lookup_name(*hir_id, name);
-                RExpr::Name {
+                SExpr::Name {
                     hir_id: *hir_id,
                     sym,
                 }
@@ -156,7 +156,7 @@ impl Resolver {
             } => {
                 let l = self.resolve_expr(left);
                 let r = self.resolve_expr(right);
-                RExpr::Binary {
+                SExpr::Binary {
                     hir_id: *hir_id,
                     left: Box::new(l),
                     op: op.clone(),
@@ -166,7 +166,7 @@ impl Resolver {
             HirExpr::Call { hir_id, func, args } => {
                 let f = self.resolve_expr(func);
                 let a = args.iter().map(|x| self.resolve_expr(x)).collect();
-                RExpr::Call {
+                SExpr::Call {
                     hir_id: *hir_id,
                     func: Box::new(f),
                     args: a,
@@ -176,17 +176,17 @@ impl Resolver {
                 let parts = parts
                     .iter()
                     .map(|p| match p {
-                        HirStringPart::Text { hir_id, text } => RStringPart::Text {
+                        HirStringPart::Text { hir_id, text } => SStringPart::Text {
                             hir_id: *hir_id,
                             value: text.clone(),
                         },
-                        HirStringPart::Expr { hir_id, expr } => RStringPart::Expr {
+                        HirStringPart::Expr { hir_id, expr } => SStringPart::Expr {
                             hir_id: *hir_id,
                             expr: self.resolve_expr(expr),
                         },
                     })
                     .collect();
-                RExpr::InterpolatedString {
+                SExpr::InterpolatedString {
                     hir_id: *hir_id,
                     parts,
                 }
@@ -213,16 +213,16 @@ impl Resolver {
 }
 
 pub struct ResolvedProgram {
-    pub rhir: Vec<RStmt>,
+    pub shir: Vec<SStmt>,
     pub symbols: SymbolTable,
 }
 
 pub fn resolve_program(hir: &[HirStmt]) -> ResolvedProgram {
     let mut resolver = Resolver::new();
     resolver.add_builtin("print");
-    let rhir = resolver.resolve_program(hir);
+    let shir = resolver.resolve_program(hir);
     ResolvedProgram {
-        rhir,
+        shir,
         symbols: resolver.syms,
     }
 }
