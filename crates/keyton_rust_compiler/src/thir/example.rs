@@ -1,11 +1,11 @@
-// Example usage of the SHIR (Symbol HIR) module
+// Example usage of the THIR (Typed HIR) module
 // This shows the complete pipeline from source code to typed IR
 
 use crate::hir::lower_program;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::rhir::resolve_program;
-use crate::shir::typecheck_program;
+use crate::thir::typecheck_program;
 
 pub fn example_usage() {
     let source_code = r#"
@@ -31,11 +31,11 @@ print("Hello, World!")
     let resolved = resolve_program(&hir);
     println!("Resolved symbols: {:?}", resolved.symbols.infos);
 
-    // Step 5: Type checking (SHIR)
+    // Step 5: Type checking (THIR)
     let typed = typecheck_program(&resolved);
     println!("Type errors: {:?}", typed.report.errors);
     println!("Variable types: {:?}", typed.var_types);
-    println!("Typed IR: {:?}", typed.shir);
+    println!("Typed IR: {:?}", typed.thir);
 
     // Check if there were any type errors
     if typed.report.errors.is_empty() {

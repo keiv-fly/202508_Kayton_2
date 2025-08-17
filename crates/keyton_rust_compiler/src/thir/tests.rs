@@ -7,7 +7,7 @@ use crate::rhir::resolve_program;
 use crate::rhir::sym::{SymKind, SymbolId, Type};
 
 #[test]
-fn program1_shir() {
+fn program1_thir() {
     let input = r#"x = 12
 x = x + 1
 print(x)
@@ -31,9 +31,9 @@ print(x)
     assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
     assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
 
-    // Full SHIR tree comparison
+    // Full THIR tree comparison
     assert_eq!(
-        typed.shir,
+        typed.thir,
         vec![
             TStmt::Assign {
                 hir_id: HirId(1),
@@ -88,7 +88,7 @@ print(x)
 }
 
 #[test]
-fn program2_shir() {
+fn program2_thir() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
@@ -103,7 +103,7 @@ fn program2_shir() {
     );
 
     assert_eq!(
-        typed.shir,
+        typed.thir,
         vec![TStmt::ExprStmt {
             hir_id: HirId(1),
             expr: TExpr::Call {
@@ -125,7 +125,7 @@ fn program2_shir() {
 }
 
 #[test]
-fn program3_shir() {
+fn program3_thir() {
     let input = r#"x = 12
 print(f"{x}")
 "#;
@@ -142,7 +142,7 @@ print(f"{x}")
     );
 
     assert_eq!(
-        typed.shir,
+        typed.thir,
         vec![
             TStmt::Assign {
                 hir_id: HirId(1),

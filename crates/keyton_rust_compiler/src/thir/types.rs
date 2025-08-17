@@ -86,7 +86,7 @@ pub struct TypeReport {
 
 #[derive(Debug)]
 pub struct TypedProgram {
-    pub shir: Vec<TStmt>,
+    pub thir: Vec<TStmt>,
     // Snapshot of inferred var types (for debugging/consumers); expressions carry their own types.
     pub var_types: std::collections::HashMap<SymbolId, Type>,
     pub report: TypeReport,
