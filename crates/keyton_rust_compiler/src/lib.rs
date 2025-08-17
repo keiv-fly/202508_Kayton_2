@@ -1,3 +1,4 @@
+pub mod compile_rust;
 pub mod hir;
 pub mod lexer;
 pub mod parser;

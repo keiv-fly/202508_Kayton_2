@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+tempfile = "3.10"
+anyhow = "1"
 
 [features]
 examples = []
+
+[dev-dependencies]
+libloading = "0.8"
