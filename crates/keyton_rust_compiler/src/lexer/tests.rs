@@ -31,6 +31,34 @@ print(x)
 }
 
 #[test]
+fn program4_tokens() {
+    let input = r#"x = 12
+x = "Hello"
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    assert_eq!(
+        tokens,
+        vec![
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Int(12),
+            Token::Newline,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Str("Hello".to_string()),
+            Token::Newline,
+            Token::Ident("print".to_string()),
+            Token::LParen,
+            Token::Ident("x".to_string()),
+            Token::RParen,
+            Token::Newline,
+            Token::EOF,
+        ]
+    );
+}
+
+#[test]
 fn program2_tokens() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();

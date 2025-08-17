@@ -69,6 +69,61 @@ print(x)
 }
 
 #[test]
+fn program4_rhir() {
+    let input = r#"x = 12
+x = "Hello"
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let resolved = resolve_program(&hir);
+
+    assert_eq!(
+        resolved.rhir,
+        vec![
+            RStmt::Assign {
+                hir_id: HirId(1),
+                sym: SymbolId(1),
+                expr: RExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12,
+                },
+            },
+            RStmt::Assign {
+                hir_id: HirId(3),
+                sym: SymbolId(1),
+                expr: RExpr::Str {
+                    hir_id: HirId(4),
+                    value: "Hello".to_string(),
+                },
+            },
+            RStmt::ExprStmt {
+                hir_id: HirId(5),
+                expr: RExpr::Call {
+                    hir_id: HirId(6),
+                    func: Box::new(RExpr::Name {
+                        hir_id: HirId(7),
+                        sym: SymbolId(0),
+                    }),
+                    args: vec![RExpr::Name {
+                        hir_id: HirId(8),
+                        sym: SymbolId(1),
+                    }],
+                },
+            },
+        ]
+    );
+
+    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar)
+    assert_eq!(resolved.symbols.infos.len(), 2);
+    assert_eq!(resolved.symbols.infos[0].name, "print");
+    assert_eq!(resolved.symbols.infos[1].name, "x");
+    assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
+    assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
+}
+
+#[test]
 fn program2_rhir() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();

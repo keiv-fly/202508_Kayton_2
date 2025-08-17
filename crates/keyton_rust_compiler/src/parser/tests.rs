@@ -33,6 +33,33 @@ print(x)
 }
 
 #[test]
+fn program4_ast() {
+    let input = r#"x = 12
+x = "Hello"
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![
+            Stmt::Assign {
+                name: "x".to_string(),
+                expr: Expr::Int(12),
+            },
+            Stmt::Assign {
+                name: "x".to_string(),
+                expr: Expr::Str("Hello".to_string()),
+            },
+            Stmt::ExprStmt(Expr::Call {
+                func: Box::new(Expr::Ident("print".to_string())),
+                args: vec![Expr::Ident("x".to_string())],
+            }),
+        ]
+    );
+}
+
+#[test]
 fn program2_ast() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();

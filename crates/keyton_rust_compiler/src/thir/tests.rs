@@ -88,6 +88,77 @@ print(x)
 }
 
 #[test]
+fn program4_thir() {
+    let input = r#"x = 12
+x = "Hello"
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let resolved = resolve_program(&hir);
+    let typed = typecheck_program(&resolved);
+
+    // No hard error on reassignment; types unify to Any.
+    assert!(
+        typed.report.errors.is_empty(),
+        "unexpected type errors: {:?}",
+        typed.report.errors
+    );
+
+    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar)
+    assert_eq!(resolved.symbols.infos.len(), 2);
+    assert_eq!(resolved.symbols.infos[0].name, "print");
+    assert_eq!(resolved.symbols.infos[1].name, "x");
+    assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
+    assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
+
+    assert_eq!(
+        typed.thir,
+        vec![
+            TStmt::Assign {
+                hir_id: HirId(1),
+                sym: SymbolId(1),
+                expr: TExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12,
+                    ty: Type::Int,
+                },
+            },
+            TStmt::Assign {
+                hir_id: HirId(3),
+                sym: SymbolId(1),
+                expr: TExpr::Str {
+                    hir_id: HirId(4),
+                    value: "Hello".to_string(),
+                    ty: Type::Str,
+                },
+            },
+            TStmt::ExprStmt {
+                hir_id: HirId(5),
+                expr: TExpr::Call {
+                    hir_id: HirId(6),
+                    func: Box::new(TExpr::Name {
+                        hir_id: HirId(7),
+                        sym: SymbolId(0),
+                        ty: Type::Any,
+                    }),
+                    args: vec![TExpr::Name {
+                        hir_id: HirId(8),
+                        sym: SymbolId(1),
+                        ty: Type::Any,
+                    }],
+                    ty: Type::Unit,
+                },
+            },
+        ]
+    );
+
+    // Var type snapshot: x unified to Any after Int then Str assignments
+    assert_eq!(typed.var_types.get(&SymbolId(1)), Some(&Type::Any));
+}
+
+#[test]
 fn program2_thir() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();

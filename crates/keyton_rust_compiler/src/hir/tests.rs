@@ -58,6 +58,52 @@ print(x)
 }
 
 #[test]
+fn program4_hir() {
+    let input = r#"x = 12
+x = "Hello"
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    assert_eq!(
+        hir,
+        vec![
+            HirStmt::Assign {
+                hir_id: HirId(1),
+                name: "x".to_string(),
+                expr: HirExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12
+                },
+            },
+            HirStmt::Assign {
+                hir_id: HirId(3),
+                name: "x".to_string(),
+                expr: HirExpr::Str {
+                    hir_id: HirId(4),
+                    value: "Hello".to_string()
+                },
+            },
+            HirStmt::ExprStmt {
+                hir_id: HirId(5),
+                expr: HirExpr::Call {
+                    hir_id: HirId(6),
+                    func: Box::new(HirExpr::Ident {
+                        hir_id: HirId(7),
+                        name: "print".to_string()
+                    }),
+                    args: vec![HirExpr::Ident {
+                        hir_id: HirId(8),
+                        name: "x".to_string()
+                    }],
+                },
+            },
+        ]
+    );
+}
+
+#[test]
 fn program2_hir() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();
