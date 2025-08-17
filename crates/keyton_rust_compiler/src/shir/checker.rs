@@ -9,9 +9,9 @@ use super::types::{TExpr, TStmt, TStringPart, TypeError, TypeReport, TypedProgra
 
 pub fn typecheck_program(resolved: &ResolvedProgram) -> TypedProgram {
     let mut c = Checker::new(&resolved.symbols);
-    let thir = resolved.rhir.iter().map(|s| c.check_stmt(s)).collect();
+    let shir = resolved.rhir.iter().map(|s| c.check_stmt(s)).collect();
     TypedProgram {
-        thir,
+        shir,
         var_types: c.var_types,
         report: TypeReport { errors: c.errors },
     }
