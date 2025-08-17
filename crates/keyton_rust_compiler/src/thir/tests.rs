@@ -15,8 +15,8 @@ print(x)
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
     let hir = lower_program(ast);
-    let resolved = resolve_program(&hir);
-    let typed = typecheck_program(&resolved);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
 
     assert!(
         typed.report.errors.is_empty(),
@@ -96,29 +96,31 @@ print(x)
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
     let hir = lower_program(ast);
-    let resolved = resolve_program(&hir);
-    let typed = typecheck_program(&resolved);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
 
-    // No hard error on reassignment; types unify to Any.
+    // No errors - shadowing is allowed
     assert!(
         typed.report.errors.is_empty(),
         "unexpected type errors: {:?}",
         typed.report.errors
     );
 
-    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar)
-    assert_eq!(resolved.symbols.infos.len(), 2);
+    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar), x (2, GlobalVar) - shadowed
+    assert_eq!(resolved.symbols.infos.len(), 3);
     assert_eq!(resolved.symbols.infos[0].name, "print");
     assert_eq!(resolved.symbols.infos[1].name, "x");
+    assert_eq!(resolved.symbols.infos[2].name, "x");
     assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
     assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
+    assert_eq!(resolved.symbols.infos[2].kind, SymKind::GlobalVar);
 
     assert_eq!(
         typed.thir,
         vec![
             TStmt::Assign {
                 hir_id: HirId(1),
-                sym: SymbolId(1),
+                sym: SymbolId(1), // First x assignment
                 expr: TExpr::Int {
                     hir_id: HirId(2),
                     value: 12,
@@ -127,7 +129,7 @@ print(x)
             },
             TStmt::Assign {
                 hir_id: HirId(3),
-                sym: SymbolId(1),
+                sym: SymbolId(2), // Second x assignment - new symbol
                 expr: TExpr::Str {
                     hir_id: HirId(4),
                     value: "Hello".to_string(),
@@ -145,8 +147,8 @@ print(x)
                     }),
                     args: vec![TExpr::Name {
                         hir_id: HirId(8),
-                        sym: SymbolId(1),
-                        ty: Type::Any,
+                        sym: SymbolId(2), // Uses the shadowed x (SymbolId(2))
+                        ty: Type::Str,
                     }],
                     ty: Type::Unit,
                 },
@@ -154,8 +156,9 @@ print(x)
         ]
     );
 
-    // Var type snapshot: x unified to Any after Int then Str assignments
-    assert_eq!(typed.var_types.get(&SymbolId(1)), Some(&Type::Any));
+    // Var type snapshot: x(1): Int, x(2): Str
+    assert_eq!(typed.var_types.get(&SymbolId(1)), Some(&Type::Int));
+    assert_eq!(typed.var_types.get(&SymbolId(2)), Some(&Type::Str));
 }
 
 #[test]
@@ -164,8 +167,8 @@ fn program2_thir() {
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
     let hir = lower_program(ast);
-    let resolved = resolve_program(&hir);
-    let typed = typecheck_program(&resolved);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
 
     assert!(
         typed.report.errors.is_empty(),
@@ -203,8 +206,8 @@ print(f"{x}")
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
     let hir = lower_program(ast);
-    let resolved = resolve_program(&hir);
-    let typed = typecheck_program(&resolved);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
 
     assert!(
         typed.report.errors.is_empty(),
@@ -260,4 +263,75 @@ print(f"{x}")
             },
         ]
     );
+}
+
+#[test]
+fn program5_thir_same_type_reuse() {
+    let input = r#"x = 12
+x = 42
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
+
+    // No errors - same type reuse is allowed
+    assert!(
+        typed.report.errors.is_empty(),
+        "unexpected type errors: {:?}",
+        typed.report.errors
+    );
+
+    // Symbols: print (0, BuiltinFunc), x (1, GlobalVar) - same symbol reused
+    assert_eq!(resolved.symbols.infos.len(), 2);
+    assert_eq!(resolved.symbols.infos[0].name, "print");
+    assert_eq!(resolved.symbols.infos[1].name, "x");
+    assert_eq!(resolved.symbols.infos[0].kind, SymKind::BuiltinFunc);
+    assert_eq!(resolved.symbols.infos[1].kind, SymKind::GlobalVar);
+
+    assert_eq!(
+        typed.thir,
+        vec![
+            TStmt::Assign {
+                hir_id: HirId(1),
+                sym: SymbolId(1), // First x assignment
+                expr: TExpr::Int {
+                    hir_id: HirId(2),
+                    value: 12,
+                    ty: Type::Int,
+                },
+            },
+            TStmt::Assign {
+                hir_id: HirId(3),
+                sym: SymbolId(1), // Second x assignment - same symbol reused
+                expr: TExpr::Int {
+                    hir_id: HirId(4),
+                    value: 42,
+                    ty: Type::Int,
+                },
+            },
+            TStmt::ExprStmt {
+                hir_id: HirId(5),
+                expr: TExpr::Call {
+                    hir_id: HirId(6),
+                    func: Box::new(TExpr::Name {
+                        hir_id: HirId(7),
+                        sym: SymbolId(0),
+                        ty: Type::Any,
+                    }),
+                    args: vec![TExpr::Name {
+                        hir_id: HirId(8),
+                        sym: SymbolId(1), // Uses the same x (SymbolId(1))
+                        ty: Type::Int,
+                    }],
+                    ty: Type::Unit,
+                },
+            },
+        ]
+    );
+
+    // Var type snapshot: x(1): Int (same symbol reused)
+    assert_eq!(typed.var_types.get(&SymbolId(1)), Some(&Type::Int));
 }

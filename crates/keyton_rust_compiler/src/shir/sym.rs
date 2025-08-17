@@ -91,6 +91,20 @@ impl SymbolTable {
         sid
     }
 
+    pub fn define_new(&mut self, scope: ScopeId, name: &str, kind: SymKind) -> SymbolId {
+        let sid = SymbolId(self.infos.len() as u32);
+        self.infos.push(SymInfo {
+            name: name.to_string(),
+            scope,
+            kind,
+            sig: None,
+        });
+        self.scopes[scope.0 as usize]
+            .names
+            .insert(name.to_string(), sid);
+        sid
+    }
+
     pub fn lookup(&self, mut scope: ScopeId, name: &str) -> Option<SymbolId> {
         loop {
             if let Some(&sid) = self.scopes[scope.0 as usize].names.get(name) {

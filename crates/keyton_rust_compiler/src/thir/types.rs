@@ -77,6 +77,10 @@ pub enum TypeError {
         hir_id: HirId,
         sym: SymbolId,
     },
+    ShadowingImpossible {
+        hir_id: HirId,
+        var_name: String,
+    },
 }
 
 #[derive(Debug, Default)]

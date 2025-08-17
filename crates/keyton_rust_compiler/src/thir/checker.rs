@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 use crate::hir::hir_types::{HirBinOp, HirId};
 use crate::shir::resolver::ResolvedProgram;
-use crate::shir::sym::{SymKind, SymbolId, SymbolTable, Type};
+use crate::shir::sym::{ScopeId, SymKind, SymbolId, SymbolTable, Type};
 use crate::shir::types::{RExpr, RStmt, RStringPart};
 
 use super::types::{TExpr, TStmt, TStringPart, TypeError, TypeReport, TypedProgram};
 
-pub fn typecheck_program(resolved: &ResolvedProgram) -> TypedProgram {
-    let mut c = Checker::new(&resolved.symbols);
+pub fn typecheck_program(resolved: &mut ResolvedProgram) -> TypedProgram {
+    let mut c = Checker::new(&mut resolved.symbols);
     let thir = resolved.rhir.iter().map(|s| c.check_stmt(s)).collect();
     TypedProgram {
         thir,
@@ -18,17 +18,19 @@ pub fn typecheck_program(resolved: &ResolvedProgram) -> TypedProgram {
 }
 
 struct Checker<'a> {
-    symbols: &'a SymbolTable,
+    symbols: &'a mut SymbolTable,
     var_types: HashMap<SymbolId, Type>,
     errors: Vec<TypeError>,
+    current_scope: ScopeId,
 }
 
 impl<'a> Checker<'a> {
-    fn new(symbols: &'a SymbolTable) -> Self {
+    fn new(symbols: &'a mut SymbolTable) -> Self {
         Self {
             symbols,
             var_types: HashMap::new(),
             errors: Vec::new(),
+            current_scope: ScopeId(0),
         }
     }
 
@@ -36,12 +38,38 @@ impl<'a> Checker<'a> {
         match s {
             RStmt::Assign { hir_id, sym, expr } => {
                 let texpr = self.check_expr(expr);
-                // Assignments define or constrain variable type.
-                let ty = texpr.ty().clone();
-                self.assign_var_type(*hir_id, *sym, ty);
+                let expr_ty = texpr.ty().clone();
+
+                // Check if this symbol already has a type
+                let existing_ty = self.var_types.get(sym).cloned();
+
+                let final_sym = match existing_ty {
+                    None => {
+                        // First assignment - use the original symbol
+                        self.var_types.insert(*sym, expr_ty);
+                        *sym
+                    }
+                    Some(existing_ty) => {
+                        if existing_ty == expr_ty {
+                            // Same type - reuse the symbol
+                            *sym
+                        } else {
+                            // Different type - create a new symbol for shadowing
+                            let var_name = self.symbols.infos[sym.0 as usize].name.clone();
+                            let kind = self.symbols.infos[sym.0 as usize].kind;
+
+                            // Create new symbol with same name but different ID
+                            let new_sym =
+                                self.symbols.define_new(self.current_scope, &var_name, kind);
+                            self.var_types.insert(new_sym, expr_ty);
+                            new_sym
+                        }
+                    }
+                };
+
                 TStmt::Assign {
                     hir_id: *hir_id,
-                    sym: *sym,
+                    sym: final_sym,
                     expr: texpr,
                 }
             }
@@ -68,10 +96,25 @@ impl<'a> Checker<'a> {
                 ty: Type::Str,
             },
             RExpr::Name { hir_id, sym } => {
-                let ty = self.lookup_var_type(*hir_id, *sym);
+                let var_name = &self.symbols.infos[sym.0 as usize].name;
+                let kind = self.symbols.infos[sym.0 as usize].kind;
+
+                // Find the most recent shadowed symbol with the same name
+                let mut final_sym = *sym;
+                for i in (0..self.symbols.infos.len()).rev() {
+                    let info = &self.symbols.infos[i];
+                    if info.name == *var_name && info.kind == kind {
+                        if self.var_types.contains_key(&SymbolId(i as u32)) {
+                            final_sym = SymbolId(i as u32);
+                            break;
+                        }
+                    }
+                }
+
+                let ty = self.lookup_var_type(*hir_id, final_sym);
                 TExpr::Name {
                     hir_id: *hir_id,
-                    sym: *sym,
+                    sym: final_sym,
                     ty,
                 }
             }
@@ -181,28 +224,27 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn assign_var_type(&mut self, _hir_id: HirId, sym: SymbolId, expr_ty: Type) {
-        let existing_ty = self.var_types.get(&sym).cloned();
-        match existing_ty {
-            None => {
-                self.var_types.insert(sym, expr_ty);
-            }
-            Some(existing) => {
-                let unified = self.unify(existing.clone(), expr_ty.clone());
-                if unified != existing {
-                    self.var_types.insert(sym, unified);
-                }
-            }
-        }
-    }
-
     fn lookup_var_type(&mut self, hir_id: HirId, sym: SymbolId) -> Type {
-        // Vars: inferred in var_types; Builtins: don't have var types (only sigs).
+        // First check if we have a type for this exact symbol
         if let Some(ty) = self.var_types.get(&sym) {
             return ty.clone();
         }
-        // Extract symbol info before any mutable operations
+
+        // If not found, look for the most recent shadowed symbol with the same name
+        let var_name = &self.symbols.infos[sym.0 as usize].name;
         let kind = self.symbols.infos[sym.0 as usize].kind;
+
+        // Look for the most recent symbol with the same name
+        for i in (0..self.symbols.infos.len()).rev() {
+            let info = &self.symbols.infos[i];
+            if info.name == *var_name && info.kind == kind {
+                if let Some(ty) = self.var_types.get(&SymbolId(i as u32)) {
+                    return ty.clone();
+                }
+            }
+        }
+
+        // Extract symbol info before any mutable operations
         match kind {
             SymKind::BuiltinFunc | SymKind::Func => {
                 // As a value, treat functions as Any for now (no first-class function type).
@@ -224,20 +266,6 @@ impl<'a> Checker<'a> {
                 found,
             });
         }
-    }
-
-    fn unify(&mut self, a: Type, b: Type) -> Type {
-        if a == b {
-            return a;
-        }
-        if a == Type::Any {
-            return b;
-        }
-        if b == Type::Any {
-            return a;
-        }
-        // No structural types; fall back to Any and record a mismatch.
-        Type::Any
     }
 
     fn is_compatible(&self, expected: &Type, found: &Type) -> bool {
