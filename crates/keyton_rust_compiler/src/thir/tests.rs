@@ -3,8 +3,8 @@ use crate::hir::hir_types::{HirBinOp, HirId};
 use crate::hir::lower_program;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::rhir::resolve_program;
-use crate::rhir::sym::{SymKind, SymbolId, Type};
+use crate::shir::resolve_program;
+use crate::shir::sym::{SymKind, SymbolId, Type};
 
 #[test]
 fn program1_thir() {

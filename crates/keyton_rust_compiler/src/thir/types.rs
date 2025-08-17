@@ -1,5 +1,5 @@
 use crate::hir::hir_types::{HirBinOp, HirId};
-use crate::rhir::sym::{SymbolId, Type};
+use crate::shir::sym::{SymbolId, Type};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TStmt {

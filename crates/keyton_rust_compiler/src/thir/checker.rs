@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use crate::hir::hir_types::{HirBinOp, HirId};
-use crate::rhir::resolver::ResolvedProgram;
-use crate::rhir::sym::{SymKind, SymbolId, SymbolTable, Type};
-use crate::rhir::types::{RExpr, RStmt, RStringPart};
+use crate::shir::resolver::ResolvedProgram;
+use crate::shir::sym::{SymKind, SymbolId, SymbolTable, Type};
+use crate::shir::types::{RExpr, RStmt, RStringPart};
 
 use super::types::{TExpr, TStmt, TStringPart, TypeError, TypeReport, TypedProgram};
 
@@ -247,7 +247,7 @@ impl<'a> Checker<'a> {
 
 struct FuncInfo {
     name: String,
-    sig: Option<crate::rhir::sym::FuncSig>,
+    sig: Option<crate::shir::sym::FuncSig>,
     ret_ty: Type,
 }
 
