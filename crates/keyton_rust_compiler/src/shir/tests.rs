@@ -6,7 +6,7 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 
 #[test]
-fn program1_rhir() {
+fn program1_shir() {
     let input = r#"x = 12
 x = x + 1
 print(x)
@@ -69,7 +69,7 @@ print(x)
 }
 
 #[test]
-fn program4_rhir() {
+fn program4_shir() {
     let input = r#"x = 12
 x = "Hello"
 print(x)
@@ -124,7 +124,7 @@ print(x)
 }
 
 #[test]
-fn program2_rhir() {
+fn program2_shir() {
     let input = r#"print("Hello, World")"#;
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
@@ -150,7 +150,7 @@ fn program2_rhir() {
 }
 
 #[test]
-fn program3_rhir() {
+fn program3_shir() {
     let input = r#"x = 12
 print(f"{x}")
 "#;
