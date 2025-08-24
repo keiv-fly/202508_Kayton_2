@@ -1,38 +1,38 @@
 use core::ptr::{null, null_mut};
 
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{HKayGlobal, KaytonContext, KaytonStatus};
+use kayton_api::types::{HKayGlobal, KaytonContext, KaytonError};
 
 // Dummy implementations to populate the vtable
-fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayGlobal, KaytonStatus> {
+fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayGlobal, KaytonError> {
     Ok(HKayGlobal(0xABCD))
 }
 
-fn get_u64(_ctx: &mut KaytonContext, _name: &str) -> Result<u64, KaytonStatus> {
+fn get_u64(_ctx: &mut KaytonContext, _name: &str) -> Result<u64, KaytonError> {
     Ok(42)
 }
 
-fn set_u8(_ctx: &mut KaytonContext, _name: &str, _value: u8) -> Result<HKayGlobal, KaytonStatus> {
+fn set_u8(_ctx: &mut KaytonContext, _name: &str, _value: u8) -> Result<HKayGlobal, KaytonError> {
     Ok(HKayGlobal(7))
 }
 
-fn get_u8(_ctx: &mut KaytonContext, _name: &str) -> Result<u8, KaytonStatus> {
+fn get_u8(_ctx: &mut KaytonContext, _name: &str) -> Result<u8, KaytonError> {
     Ok(7)
 }
 
-fn set_f64(_ctx: &mut KaytonContext, _name: &str, _value: f64) -> Result<HKayGlobal, KaytonStatus> {
+fn set_f64(_ctx: &mut KaytonContext, _name: &str, _value: f64) -> Result<HKayGlobal, KaytonError> {
     Ok(HKayGlobal(1))
 }
 
-fn get_f64(_ctx: &mut KaytonContext, _name: &str) -> Result<f64, KaytonStatus> {
+fn get_f64(_ctx: &mut KaytonContext, _name: &str) -> Result<f64, KaytonError> {
     Ok(3.14)
 }
 
-fn set_f32(_ctx: &mut KaytonContext, _name: &str, _value: f32) -> Result<HKayGlobal, KaytonStatus> {
+fn set_f32(_ctx: &mut KaytonContext, _name: &str, _value: f32) -> Result<HKayGlobal, KaytonError> {
     Ok(HKayGlobal(2))
 }
 
-fn get_f32(_ctx: &mut KaytonContext, _name: &str) -> Result<f32, KaytonStatus> {
+fn get_f32(_ctx: &mut KaytonContext, _name: &str) -> Result<f32, KaytonError> {
     Ok(2.71)
 }
 

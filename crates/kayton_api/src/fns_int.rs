@@ -1,15 +1,15 @@
-use crate::{HKayGlobal, KaytonContext, KaytonStatus};
+use crate::{HKayGlobal, KaytonContext, KaytonError};
 
 /// Set/overwrite a named u64 global, return handle.
 pub type SetGlobalU64Fn =
-    fn(ctx: &mut KaytonContext, name: &str, value: u64) -> Result<HKayGlobal, KaytonStatus>;
+    fn(ctx: &mut KaytonContext, name: &str, value: u64) -> Result<HKayGlobal, KaytonError>;
 
 /// Read an existing u64 global by name.
-pub type GetGlobalU64Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<u64, KaytonStatus>;
+pub type GetGlobalU64Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<u64, KaytonError>;
 
 /// Set/overwrite a named u8 global, return handle.
 pub type SetGlobalU8Fn =
-    fn(ctx: &mut KaytonContext, name: &str, value: u8) -> Result<HKayGlobal, KaytonStatus>;
+    fn(ctx: &mut KaytonContext, name: &str, value: u8) -> Result<HKayGlobal, KaytonError>;
 
 /// Read an existing u8 global by name.
-pub type GetGlobalU8Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<u8, KaytonStatus>;
+pub type GetGlobalU8Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<u8, KaytonError>;
