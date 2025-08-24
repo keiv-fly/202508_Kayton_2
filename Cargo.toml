@@ -2,7 +2,8 @@
 members = [
     "crates/kayton_api",
     "crates/kayton",
-    "crates/plugin_hello", 
-    "crates/keyton_rust_compiler"
+    "crates/plugin_hello",
+    "crates/keyton_rust_compiler",
+    "crates/kayton_repl",
 ]
 resolver = "2"
