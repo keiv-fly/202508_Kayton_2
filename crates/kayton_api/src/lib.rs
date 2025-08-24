@@ -11,6 +11,6 @@ pub use types::{HKayGlobal, KaytonContext, KaytonStatus};
 
 pub use api::KaytonApi;
 
-// Re-export function pointer typedefs at crate root so cbindgen can include them
+// Re-export function pointer typedefs for convenience within Rust-only dynamic linking
 pub use fns_float::*;
 pub use fns_int::*;
