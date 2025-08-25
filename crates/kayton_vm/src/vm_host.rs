@@ -146,6 +146,17 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
+    fn get_u64_by_handle(&self, h: HKayGlobal) -> Result<u64, KaytonError> {
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_U64 {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        self.u64s
+            .get(idx as usize)
+            .copied()
+            .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
     fn set_u8(&mut self, name: &str, value: u8) -> HKayGlobal {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
@@ -164,6 +175,17 @@ impl HostState {
         let h = self
             .resolve(name)
             .ok_or_else(|| KaytonError::not_found("no global"))?;
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_U8 {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        self.u8s
+            .get(idx as usize)
+            .copied()
+            .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
+    fn get_u8_by_handle(&self, h: HKayGlobal) -> Result<u8, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_U8 {
             return Err(KaytonError::generic("wrong kind"));
@@ -202,6 +224,17 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
+    fn get_f64_by_handle(&self, h: HKayGlobal) -> Result<f64, KaytonError> {
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_F64 {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        self.f64s
+            .get(idx as usize)
+            .copied()
+            .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
     fn set_f32(&mut self, name: &str, value: f32) -> HKayGlobal {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
@@ -220,6 +253,17 @@ impl HostState {
         let h = self
             .resolve(name)
             .ok_or_else(|| KaytonError::not_found("no global"))?;
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_F32 {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        self.f32s
+            .get(idx as usize)
+            .copied()
+            .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
+    fn get_f32_by_handle(&self, h: HKayGlobal) -> Result<f32, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_F32 {
             return Err(KaytonError::generic("wrong kind"));
@@ -258,6 +302,17 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
+    fn get_static_str_by_handle(&self, h: HKayGlobal) -> Result<&'static str, KaytonError> {
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_STATICSTR {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        self.static_strs
+            .get(idx as usize)
+            .copied()
+            .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
     fn set_str_buf(&mut self, name: &str, value: GlobalStrBuf) -> HKayGlobal {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
@@ -279,6 +334,18 @@ impl HostState {
         let h = self
             .resolve(name)
             .ok_or_else(|| KaytonError::not_found("no global"))?;
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_STRBUF {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        if let Some(sb) = self.str_bufs.get(idx as usize) {
+            Ok(GlobalStrBuf::from_raw(sb.ptr, sb.len, sb.capacity))
+        } else {
+            Err(KaytonError::generic("index out of range"))
+        }
+    }
+
+    fn get_str_buf_by_handle(&self, h: HKayGlobal) -> Result<GlobalStrBuf, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_STRBUF {
             return Err(KaytonError::generic("wrong kind"));
@@ -456,10 +523,32 @@ impl KaytonVm {
                 s.get_dyn_by_handle(h)
             },
 
-            _reserved0: core::ptr::null(),
-            _reserved1: core::ptr::null(),
-            _reserved2: core::ptr::null(),
-            _reserved3: core::ptr::null(),
+            get_global_u64_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_u64_by_handle(h)
+            },
+            get_global_u8_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_u8_by_handle(h)
+            },
+
+            get_global_f64_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_f64_by_handle(h)
+            },
+            get_global_f32_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_f32_by_handle(h)
+            },
+
+            get_global_static_str_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_static_str_by_handle(h)
+            },
+            get_global_str_buf_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_str_buf_by_handle(h)
+            },
         });
 
         KaytonVm { host, api }

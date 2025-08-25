@@ -7,9 +7,17 @@ pub type SetGlobalF64Fn =
 /// Read an existing f64 global by name.
 pub type GetGlobalF64Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<f64, KaytonError>;
 
+/// Fast path: read an f64 global by handle.
+pub type GetGlobalF64ByHandleFn =
+    fn(ctx: &mut KaytonContext, h: HKayGlobal) -> Result<f64, KaytonError>;
+
 /// Set/overwrite a named f32 global, return handle.
 pub type SetGlobalF32Fn =
     fn(ctx: &mut KaytonContext, name: &str, value: f32) -> Result<HKayGlobal, KaytonError>;
 
 /// Read an existing f32 global by name.
 pub type GetGlobalF32Fn = fn(ctx: &mut KaytonContext, name: &str) -> Result<f32, KaytonError>;
+
+/// Fast path: read an f32 global by handle.
+pub type GetGlobalF32ByHandleFn =
+    fn(ctx: &mut KaytonContext, h: HKayGlobal) -> Result<f32, KaytonError>;

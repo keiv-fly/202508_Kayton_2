@@ -1,4 +1,4 @@
-use core::ptr::{null, null_mut};
+use core::ptr::null_mut;
 
 use core::ffi::c_void;
 use kayton_api::api::KaytonApi;
@@ -93,30 +93,63 @@ fn get_global_dyn_ptr_by_handle(
     Ok(core::ptr::null_mut())
 }
 
+fn get_u64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u64, KaytonError> {
+    Ok(42)
+}
+
+fn get_u8_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u8, KaytonError> {
+    Ok(7)
+}
+
+fn get_f64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<f64, KaytonError> {
+    Ok(3.14)
+}
+
+fn get_f32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<f32, KaytonError> {
+    Ok(2.71)
+}
+
+fn get_static_str_by_handle(
+    _ctx: &mut KaytonContext,
+    _h: HKayGlobal,
+) -> Result<&'static str, KaytonError> {
+    Ok("test_string")
+}
+
+fn get_str_buf_by_handle(
+    _ctx: &mut KaytonContext,
+    _h: HKayGlobal,
+) -> Result<GlobalStrBuf, KaytonError> {
+    let test_str = "test_buffer".to_string();
+    Ok(GlobalStrBuf::new(test_str))
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     let api = KaytonApi {
         size: core::mem::size_of::<KaytonApi>() as u64,
         set_global_u64: set_u64,
         get_global_u64: get_u64,
+        get_global_u64_by_handle: get_u64_by_handle,
         set_global_u8: set_u8,
         get_global_u8: get_u8,
+        get_global_u8_by_handle: get_u8_by_handle,
         set_global_f64: set_f64,
         get_global_f64: get_f64,
+        get_global_f64_by_handle: get_f64_by_handle,
         set_global_f32: set_f32,
         get_global_f32: get_f32,
+        get_global_f32_by_handle: get_f32_by_handle,
         set_global_static_str: set_static_str,
         get_global_static_str: get_static_str,
+        get_global_static_str_by_handle: get_static_str_by_handle,
         set_global_str_buf: set_global_str_buf,
         get_global_str_buf: get_global_str_buf,
+        get_global_str_buf_by_handle: get_str_buf_by_handle,
         register_dynamic_kind: register_dynamic_kind,
         set_global_dyn_ptr: set_global_dyn_ptr,
         get_global_dyn_ptr: get_global_dyn_ptr,
         get_global_dyn_ptr_by_handle: get_global_dyn_ptr_by_handle,
-        _reserved0: null(),
-        _reserved1: null(),
-        _reserved2: null(),
-        _reserved3: null(),
     };
 
     let api_box = Box::new(api);
