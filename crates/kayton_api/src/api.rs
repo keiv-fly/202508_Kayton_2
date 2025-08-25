@@ -24,6 +24,10 @@ pub struct KaytonApi {
     pub set_global_static_str: crate::fns_string::SetGlobalStaticStrFn,
     pub get_global_static_str: crate::fns_string::GetGlobalStaticStrFn,
 
+    // === String block: GlobalStrBuf (append-only; keep order stable) ===
+    pub set_global_str_buf: crate::fns_string::SetGlobalStrBufFn,
+    pub get_global_str_buf: crate::fns_string::GetGlobalStrBufFn,
+
     // --- Reserved for future expansion (keep at end; append more as needed) ---
     pub _reserved0: *const c_void,
     pub _reserved1: *const c_void,

@@ -1,7 +1,7 @@
 use core::ptr::{null, null_mut};
 
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{HKayGlobal, KaytonContext, KaytonError};
+use kayton_api::types::{GlobalStrBuf, HKayGlobal, KaytonContext, KaytonError};
 
 // Dummy implementations to populate the vtable
 fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayGlobal, KaytonError> {
@@ -48,6 +48,19 @@ fn get_static_str(_ctx: &mut KaytonContext, _name: &str) -> Result<&'static str,
     Ok("test_string")
 }
 
+fn set_global_str_buf(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: GlobalStrBuf,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(0x5678))
+}
+
+fn get_global_str_buf(_ctx: &mut KaytonContext, _name: &str) -> Result<GlobalStrBuf, KaytonError> {
+    let test_str = "test_buffer".to_string();
+    Ok(GlobalStrBuf::new(test_str))
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     let api = KaytonApi {
@@ -62,6 +75,8 @@ fn context_api_accessor_and_calls() {
         get_global_f32: get_f32,
         set_global_static_str: set_static_str,
         get_global_static_str: get_static_str,
+        set_global_str_buf: set_global_str_buf,
+        get_global_str_buf: get_global_str_buf,
         _reserved0: null(),
         _reserved1: null(),
         _reserved2: null(),

@@ -8,7 +8,7 @@ pub mod fns_string;
 pub mod types;
 
 // Explicit re-exports (no globs); function typedefs are NOT re-exported.
-pub use types::{ErrorKind, HKayGlobal, KaytonContext, KaytonError};
+pub use types::{ErrorKind, GlobalStrBuf, HKayGlobal, KaytonContext, KaytonError};
 
 pub use api::KaytonApi;
 
