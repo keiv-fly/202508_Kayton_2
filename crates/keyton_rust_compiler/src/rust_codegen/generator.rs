@@ -44,6 +44,55 @@ impl<'a> CodeGenerator<'a> {
         }
     }
 
+    /// Same as generate_code but seeds the assigned set and inserts a prelude at the top of main.
+    pub fn generate_code_with_preassigned_and_prelude(
+        &mut self,
+        rhir_program: &RustProgram,
+        pre_assigned: &std::collections::HashSet<SymbolId>,
+        prelude_lines: &[String],
+        epilogue_lines: &[String],
+    ) -> RustCode {
+        // Seed with already-assigned variable symbols so we emit `x = ...;` instead of `let mut x = ...;`
+        for sym in pre_assigned.iter() {
+            self.assigned_vars.insert(*sym);
+        }
+
+        let mut source_code = String::new();
+        source_code.push_str("fn main() {\n");
+
+        // Insert prelude lines (already indented by 4 spaces here)
+        for line in prelude_lines {
+            source_code.push_str("    ");
+            source_code.push_str(line);
+            if !line.ends_with('\n') {
+                source_code.push('\n');
+            }
+        }
+
+        // Generate statements
+        for stmt in &rhir_program.rhir {
+            source_code.push_str("    ");
+            source_code.push_str(&self.convert_stmt_to_string(stmt));
+            source_code.push_str("\n");
+        }
+
+        // Insert epilogue lines at end of main
+        for line in epilogue_lines {
+            source_code.push_str("    ");
+            source_code.push_str(line);
+            if !line.ends_with('\n') {
+                source_code.push('\n');
+            }
+        }
+
+        source_code.push_str("}\n");
+
+        RustCode {
+            source_code,
+            var_names: self.var_names.clone(),
+        }
+    }
+
     fn convert_stmt_to_string(&mut self, stmt: &RStmt) -> String {
         match stmt {
             RStmt::Assign { sym, expr, .. } => {

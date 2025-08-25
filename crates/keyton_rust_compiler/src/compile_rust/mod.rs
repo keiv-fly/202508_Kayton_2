@@ -47,7 +47,7 @@ crate-type = ["dylib"]
         replaced
     };
 
-    // Prepend compatibility macro for println!
+    // Prepend compatibility macro for println! and REPL reporting hooks
     let macro_header = r#"
 macro_rules! println {
     ($e:expr) => {
@@ -56,6 +56,32 @@ macro_rules! println {
     ($($arg:tt)*) => {
         ::std::println!($($arg)*);
     };
+}
+
+// ----- REPL host reporting hooks (set by host via kayton_set_reporters) -----
+#[allow(non_camel_case_types)]
+type ReportIntFn = extern "C" fn(name_ptr: *const u8, name_len: usize, value: i64);
+#[allow(non_camel_case_types)]
+type ReportStrFn = extern "C" fn(name_ptr: *const u8, name_len: usize, str_ptr: *const u8, str_len: usize);
+
+static mut REPORT_INT: Option<ReportIntFn> = None;
+static mut REPORT_STR: Option<ReportStrFn> = None;
+
+#[no_mangle]
+pub extern "C" fn kayton_set_reporters(int_fn: ReportIntFn, str_fn: ReportStrFn) {
+    unsafe {
+        REPORT_INT = Some(int_fn);
+        REPORT_STR = Some(str_fn);
+    }
+}
+
+#[inline]
+unsafe fn report_int(name: &str, value: i64) {
+    if let Some(f) = REPORT_INT { f(name.as_ptr(), name.len(), value); }
+}
+#[inline]
+unsafe fn report_str(name: &str, s: &str) {
+    if let Some(f) = REPORT_STR { f(name.as_ptr(), name.len(), s.as_ptr(), s.len()); }
 }
 "#;
 

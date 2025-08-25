@@ -4,3 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1"
+tempfile = "3.10"
+libloading = "0.8"
+
+# Workspace crates
+keyton_rust_compiler = { path = "../keyton_rust_compiler" }
+kayton_vm = { path = "../kayton_vm" }
+kayton_api = { path = "../kayton_api" }
+
+[[bin]]
+name = "kayton_repl"
+path = "src/main.rs"

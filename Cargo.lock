@@ -63,6 +63,14 @@ version = "0.1.0"
 [[package]]
 name = "kayton_repl"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kayton_api",
+ "kayton_vm",
+ "keyton_rust_compiler",
+ "libloading",
+ "tempfile",
+]
 
 [[package]]
 name = "kayton_vm"
