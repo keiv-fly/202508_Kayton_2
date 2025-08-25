@@ -67,6 +67,9 @@ version = "0.1.0"
 [[package]]
 name = "kayton_vm"
 version = "0.1.0"
+dependencies = [
+ "kayton_api",
+]
 
 [[package]]
 name = "keyton_rust_compiler"

@@ -1,14 +1,10 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+// std-enabled VM crate
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod vm_host;
+pub use vm_host::{KIND_F32, KIND_F64, KIND_STATICSTR, KIND_STRBUF, KIND_U8, KIND_U64, KaytonVm};
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+// Re-export common API types for convenience of VM users
+pub use kayton_api::{
+    ErrorKind, GlobalStrBuf as VmGlobalStrBuf, HKayGlobal as VmHKayGlobal, KaytonApi as Api,
+    KaytonContext as VmKaytonContext, KaytonError as VmKaytonError,
+};

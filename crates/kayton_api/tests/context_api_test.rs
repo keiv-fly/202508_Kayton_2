@@ -1,5 +1,6 @@
 use core::ptr::{null, null_mut};
 
+use core::ffi::c_void;
 use kayton_api::api::KaytonApi;
 use kayton_api::types::{GlobalStrBuf, HKayGlobal, KaytonContext, KaytonError};
 
@@ -61,6 +62,37 @@ fn get_global_str_buf(_ctx: &mut KaytonContext, _name: &str) -> Result<GlobalStr
     Ok(GlobalStrBuf::new(test_str))
 }
 
+fn register_dynamic_kind(
+    _ctx: &mut KaytonContext,
+    _name: &'static str,
+    _drop_fn: unsafe extern "C" fn(*mut c_void),
+) -> u32 {
+    1000
+}
+
+fn set_global_dyn_ptr(
+    _ctx: &mut KaytonContext,
+    _kind: u32,
+    _name: &str,
+    _value: *mut c_void,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(0xDEAD_BEEF))
+}
+
+fn get_global_dyn_ptr(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+) -> Result<(*mut c_void, u32), KaytonError> {
+    Ok((core::ptr::null_mut(), 1000))
+}
+
+fn get_global_dyn_ptr_by_handle(
+    _ctx: &mut KaytonContext,
+    _h: HKayGlobal,
+) -> Result<*mut c_void, KaytonError> {
+    Ok(core::ptr::null_mut())
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     let api = KaytonApi {
@@ -77,6 +109,10 @@ fn context_api_accessor_and_calls() {
         get_global_static_str: get_static_str,
         set_global_str_buf: set_global_str_buf,
         get_global_str_buf: get_global_str_buf,
+        register_dynamic_kind: register_dynamic_kind,
+        set_global_dyn_ptr: set_global_dyn_ptr,
+        get_global_dyn_ptr: get_global_dyn_ptr,
+        get_global_dyn_ptr_by_handle: get_global_dyn_ptr_by_handle,
         _reserved0: null(),
         _reserved1: null(),
         _reserved2: null(),

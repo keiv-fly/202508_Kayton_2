@@ -28,6 +28,12 @@ pub struct KaytonApi {
     pub set_global_str_buf: crate::fns_string::SetGlobalStrBufFn,
     pub get_global_str_buf: crate::fns_string::GetGlobalStrBufFn,
 
+    // === Dynamic kinds (append-only; keep order stable) ===
+    pub register_dynamic_kind: crate::fns_dynamic::RegisterDynamicKindFn,
+    pub set_global_dyn_ptr: crate::fns_dynamic::SetGlobalDynPtrFn,
+    pub get_global_dyn_ptr: crate::fns_dynamic::GetGlobalDynPtrFn,
+    pub get_global_dyn_ptr_by_handle: crate::fns_dynamic::GetGlobalDynPtrByHandleFn,
+
     // --- Reserved for future expansion (keep at end; append more as needed) ---
     pub _reserved0: *const c_void,
     pub _reserved1: *const c_void,

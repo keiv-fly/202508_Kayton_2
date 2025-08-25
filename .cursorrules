@@ -1,3 +1,4 @@
 Always generate shell commands for Windows PowerShell.
 Use `Get-Content` instead of `cat`, `dir` instead of `ls`.
 && is not allowed in PowerShell
+Run tests with `cargo test`
