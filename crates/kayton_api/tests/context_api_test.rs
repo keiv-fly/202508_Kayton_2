@@ -36,6 +36,18 @@ fn get_f32(_ctx: &mut KaytonContext, _name: &str) -> Result<f32, KaytonError> {
     Ok(2.71)
 }
 
+fn set_static_str(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: &'static str,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(0x1234))
+}
+
+fn get_static_str(_ctx: &mut KaytonContext, _name: &str) -> Result<&'static str, KaytonError> {
+    Ok("test_string")
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     let api = KaytonApi {
@@ -48,6 +60,8 @@ fn context_api_accessor_and_calls() {
         get_global_f64: get_f64,
         set_global_f32: set_f32,
         get_global_f32: get_f32,
+        set_global_static_str: set_static_str,
+        get_global_static_str: get_static_str,
         _reserved0: null(),
         _reserved1: null(),
         _reserved2: null(),
