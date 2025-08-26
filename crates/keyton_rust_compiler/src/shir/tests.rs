@@ -1,7 +1,7 @@
 use super::resolver::ResolveError;
 use super::*;
 use crate::hir::hir_types::{HirBinOp, HirId};
-use crate::hir::lower_program;
+use crate::hir::{lower_program, lower_program_with_spans};
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 
@@ -209,9 +209,9 @@ fn unresolved_name_reports_error() {
     let input = r#"y = x"#;
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
-    let hir = lower_program(ast);
+    let (hir, spans) = lower_program_with_spans(ast);
 
-    let mut resolver = Resolver::new();
+    let mut resolver = Resolver::new(spans);
     let shir = resolver.resolve_program(&hir);
 
     // Expect: define y (sid 0), then define x during lookup_name (sid 1)
@@ -229,8 +229,8 @@ fn unresolved_name_reports_error() {
 
     assert_eq!(resolver.report.errors.len(), 1);
     match &resolver.report.errors[0] {
-        ResolveError::UnresolvedName { hir_id, name } => {
-            assert_eq!(*hir_id, HirId(2));
+        ResolveError::UnresolvedName { span, name } => {
+            assert_eq!(*span, crate::span::Span::new(2, 2));
             assert_eq!(name, "x");
         }
     }

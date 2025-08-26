@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 
 use crate::hir::hir_types::{HirExpr, HirId, HirStmt, HirStringPart};
+use crate::span::Span;
 
 use super::sym::{FuncSig, ScopeId, SymKind, SymbolId, SymbolTable, Type};
 use super::types::{SExpr, SStmt, SStringPart};
 
 #[derive(Debug, Clone)]
 pub enum ResolveError {
-    UnresolvedName { hir_id: HirId, name: String },
+    UnresolvedName { span: Span, name: String },
 }
 
 #[derive(Debug, Default)]
@@ -20,16 +21,18 @@ pub struct Resolver {
     pub report: ResolveReport,
     scope_stack: Vec<ScopeId>,
     builtins: HashMap<String, SymbolId>,
+    spans: HashMap<HirId, Span>,
 }
 
 impl Resolver {
-    pub fn new() -> Self {
+    pub fn new(spans: HashMap<HirId, Span>) -> Self {
         let (syms, global) = SymbolTable::new();
         Self {
             syms,
             report: ResolveReport::default(),
             scope_stack: vec![global],
             builtins: HashMap::new(),
+            spans,
         }
     }
 
@@ -108,8 +111,9 @@ impl Resolver {
                             SymKind::LocalVar
                         };
                         let sid = self.syms.define(scope, name, kind);
+                        let span = self.spans.get(hir_id).cloned().unwrap_or_default();
                         self.report.errors.push(ResolveError::UnresolvedName {
-                            hir_id: *hir_id,
+                            span,
                             name: name.clone(),
                         });
                         sid
@@ -204,8 +208,9 @@ impl Resolver {
         let sid = self
             .syms
             .define(self.global_scope(), name, SymKind::GlobalVar);
+        let span = self.spans.get(&use_hir).cloned().unwrap_or_default();
         self.report.errors.push(ResolveError::UnresolvedName {
-            hir_id: use_hir,
+            span,
             name: name.to_string(),
         });
         sid
@@ -218,7 +223,14 @@ pub struct ResolvedProgram {
 }
 
 pub fn resolve_program(hir: &[HirStmt]) -> ResolvedProgram {
-    let mut resolver = Resolver::new();
+    resolve_program_with_spans(hir, HashMap::new())
+}
+
+pub fn resolve_program_with_spans(
+    hir: &[HirStmt],
+    spans: HashMap<HirId, Span>,
+) -> ResolvedProgram {
+    let mut resolver = Resolver::new(spans);
     resolver.add_builtin("print");
     let shir = resolver.resolve_program(hir);
     ResolvedProgram {
