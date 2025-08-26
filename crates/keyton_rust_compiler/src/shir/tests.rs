@@ -242,3 +242,49 @@ fn unresolved_name_reports_error() {
     assert_eq!(resolver.syms.infos[0].kind, SymKind::GlobalVar);
     assert_eq!(resolver.syms.infos[1].kind, SymKind::GlobalVar);
 }
+
+#[test]
+fn unresolved_name_in_call_reports_error() {
+    // x is used in a call but never defined; should be reported
+    let input = r#"print(x)"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+
+    let mut resolver = Resolver::new();
+    resolver.add_builtin("print");
+    let shir = resolver.resolve_program(&hir);
+
+    assert_eq!(
+        shir,
+        vec![SStmt::ExprStmt {
+            hir_id: HirId(1),
+            expr: SExpr::Call {
+                hir_id: HirId(2),
+                func: Box::new(SExpr::Name {
+                    hir_id: HirId(3),
+                    sym: SymbolId(0),
+                }),
+                args: vec![SExpr::Name {
+                    hir_id: HirId(4),
+                    sym: SymbolId(1),
+                }],
+            },
+        }]
+    );
+
+    assert_eq!(resolver.report.errors.len(), 1);
+    match &resolver.report.errors[0] {
+        ResolveError::UnresolvedName { hir_id, name } => {
+            assert_eq!(*hir_id, HirId(4));
+            assert_eq!(name, "x");
+        }
+    }
+
+    // Symbols: print (builtin) then x (global)
+    assert_eq!(resolver.syms.infos.len(), 2);
+    assert_eq!(resolver.syms.infos[0].name, "print");
+    assert_eq!(resolver.syms.infos[1].name, "x");
+    assert_eq!(resolver.syms.infos[0].kind, SymKind::BuiltinFunc);
+    assert_eq!(resolver.syms.infos[1].kind, SymKind::GlobalVar);
+}
