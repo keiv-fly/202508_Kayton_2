@@ -4,13 +4,13 @@ pub struct KaytonApi {
     /// sizeof(KaytonApi). Plugins can feature-detect by comparing this value.
     pub size: u64,
 
-    pub set_global_u64: crate::fns_int::SetGlobalU64Fn,
-    pub get_global_u64: crate::fns_int::GetGlobalU64Fn,
-    pub get_global_u64_by_handle: crate::fns_int::GetGlobalU64ByHandleFn,
+    pub set_global_u64: crate::fns_uint::SetGlobalU64Fn,
+    pub get_global_u64: crate::fns_uint::GetGlobalU64Fn,
+    pub get_global_u64_by_handle: crate::fns_uint::GetGlobalU64ByHandleFn,
 
-    pub set_global_u8: crate::fns_int::SetGlobalU8Fn,
-    pub get_global_u8: crate::fns_int::GetGlobalU8Fn,
-    pub get_global_u8_by_handle: crate::fns_int::GetGlobalU8ByHandleFn,
+    pub set_global_u8: crate::fns_uint::SetGlobalU8Fn,
+    pub get_global_u8: crate::fns_uint::GetGlobalU8Fn,
+    pub get_global_u8_by_handle: crate::fns_uint::GetGlobalU8ByHandleFn,
 
     pub set_global_f64: crate::fns_float::SetGlobalF64Fn,
     pub get_global_f64: crate::fns_float::GetGlobalF64Fn,
@@ -34,49 +34,49 @@ pub struct KaytonApi {
     pub get_global_dyn_ptr_by_handle: crate::fns_dynamic::GetGlobalDynPtrByHandleFn,
 
     // ---- Newly added integer and bool types ----
-    pub set_global_u32: crate::fns_int::SetGlobalU32Fn,
-    pub get_global_u32: crate::fns_int::GetGlobalU32Fn,
-    pub get_global_u32_by_handle: crate::fns_int::GetGlobalU32ByHandleFn,
+    pub set_global_u32: crate::fns_uint::SetGlobalU32Fn,
+    pub get_global_u32: crate::fns_uint::GetGlobalU32Fn,
+    pub get_global_u32_by_handle: crate::fns_uint::GetGlobalU32ByHandleFn,
 
-    pub set_global_u16: crate::fns_int::SetGlobalU16Fn,
-    pub get_global_u16: crate::fns_int::GetGlobalU16Fn,
-    pub get_global_u16_by_handle: crate::fns_int::GetGlobalU16ByHandleFn,
+    pub set_global_u16: crate::fns_uint::SetGlobalU16Fn,
+    pub get_global_u16: crate::fns_uint::GetGlobalU16Fn,
+    pub get_global_u16_by_handle: crate::fns_uint::GetGlobalU16ByHandleFn,
 
-    pub set_global_u128: crate::fns_int::SetGlobalU128Fn,
-    pub get_global_u128: crate::fns_int::GetGlobalU128Fn,
-    pub get_global_u128_by_handle: crate::fns_int::GetGlobalU128ByHandleFn,
+    pub set_global_u128: crate::fns_uint::SetGlobalU128Fn,
+    pub get_global_u128: crate::fns_uint::GetGlobalU128Fn,
+    pub get_global_u128_by_handle: crate::fns_uint::GetGlobalU128ByHandleFn,
 
-    pub set_global_usize: crate::fns_int::SetGlobalUsizeFn,
-    pub get_global_usize: crate::fns_int::GetGlobalUsizeFn,
-    pub get_global_usize_by_handle: crate::fns_int::GetGlobalUsizeByHandleFn,
+    pub set_global_usize: crate::fns_uint::SetGlobalUsizeFn,
+    pub get_global_usize: crate::fns_uint::GetGlobalUsizeFn,
+    pub get_global_usize_by_handle: crate::fns_uint::GetGlobalUsizeByHandleFn,
 
-    pub set_global_i8: crate::fns_int::SetGlobalI8Fn,
-    pub get_global_i8: crate::fns_int::GetGlobalI8Fn,
-    pub get_global_i8_by_handle: crate::fns_int::GetGlobalI8ByHandleFn,
+    pub set_global_i8: crate::fns_sint::SetGlobalI8Fn,
+    pub get_global_i8: crate::fns_sint::GetGlobalI8Fn,
+    pub get_global_i8_by_handle: crate::fns_sint::GetGlobalI8ByHandleFn,
 
-    pub set_global_i16: crate::fns_int::SetGlobalI16Fn,
-    pub get_global_i16: crate::fns_int::GetGlobalI16Fn,
-    pub get_global_i16_by_handle: crate::fns_int::GetGlobalI16ByHandleFn,
+    pub set_global_i16: crate::fns_sint::SetGlobalI16Fn,
+    pub get_global_i16: crate::fns_sint::GetGlobalI16Fn,
+    pub get_global_i16_by_handle: crate::fns_sint::GetGlobalI16ByHandleFn,
 
-    pub set_global_i32: crate::fns_int::SetGlobalI32Fn,
-    pub get_global_i32: crate::fns_int::GetGlobalI32Fn,
-    pub get_global_i32_by_handle: crate::fns_int::GetGlobalI32ByHandleFn,
+    pub set_global_i32: crate::fns_sint::SetGlobalI32Fn,
+    pub get_global_i32: crate::fns_sint::GetGlobalI32Fn,
+    pub get_global_i32_by_handle: crate::fns_sint::GetGlobalI32ByHandleFn,
 
-    pub set_global_i64: crate::fns_int::SetGlobalI64Fn,
-    pub get_global_i64: crate::fns_int::GetGlobalI64Fn,
-    pub get_global_i64_by_handle: crate::fns_int::GetGlobalI64ByHandleFn,
+    pub set_global_i64: crate::fns_sint::SetGlobalI64Fn,
+    pub get_global_i64: crate::fns_sint::GetGlobalI64Fn,
+    pub get_global_i64_by_handle: crate::fns_sint::GetGlobalI64ByHandleFn,
 
-    pub set_global_i128: crate::fns_int::SetGlobalI128Fn,
-    pub get_global_i128: crate::fns_int::GetGlobalI128Fn,
-    pub get_global_i128_by_handle: crate::fns_int::GetGlobalI128ByHandleFn,
+    pub set_global_i128: crate::fns_sint::SetGlobalI128Fn,
+    pub get_global_i128: crate::fns_sint::GetGlobalI128Fn,
+    pub get_global_i128_by_handle: crate::fns_sint::GetGlobalI128ByHandleFn,
 
-    pub set_global_isize: crate::fns_int::SetGlobalIsizeFn,
-    pub get_global_isize: crate::fns_int::GetGlobalIsizeFn,
-    pub get_global_isize_by_handle: crate::fns_int::GetGlobalIsizeByHandleFn,
+    pub set_global_isize: crate::fns_sint::SetGlobalIsizeFn,
+    pub get_global_isize: crate::fns_sint::GetGlobalIsizeFn,
+    pub get_global_isize_by_handle: crate::fns_sint::GetGlobalIsizeByHandleFn,
 
-    pub set_global_bool: crate::fns_int::SetGlobalBoolFn,
-    pub get_global_bool: crate::fns_int::GetGlobalBoolFn,
-    pub get_global_bool_by_handle: crate::fns_int::GetGlobalBoolByHandleFn,
+    pub set_global_bool: crate::fns_sint::SetGlobalBoolFn,
+    pub get_global_bool: crate::fns_sint::GetGlobalBoolFn,
+    pub get_global_bool_by_handle: crate::fns_sint::GetGlobalBoolByHandleFn,
 }
 
 impl crate::types::KaytonContext {
