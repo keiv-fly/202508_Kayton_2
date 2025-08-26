@@ -124,6 +124,137 @@ fn get_str_buf_by_handle(
     Ok(GlobalStrBuf::new(test_str))
 }
 
+// ---- New integer and bool dummies ----
+fn set_u32(_ctx: &mut KaytonContext, _name: &str, _value: u32) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(1))
+}
+fn get_u32(_ctx: &mut KaytonContext, _name: &str) -> Result<u32, KaytonError> {
+    Ok(32)
+}
+fn get_u32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u32, KaytonError> {
+    Ok(32)
+}
+
+fn set_u16(_ctx: &mut KaytonContext, _name: &str, _value: u16) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(2))
+}
+fn get_u16(_ctx: &mut KaytonContext, _name: &str) -> Result<u16, KaytonError> {
+    Ok(16)
+}
+fn get_u16_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u16, KaytonError> {
+    Ok(16)
+}
+
+fn set_u128(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: u128,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(3))
+}
+fn get_u128(_ctx: &mut KaytonContext, _name: &str) -> Result<u128, KaytonError> {
+    Ok(128)
+}
+fn get_u128_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u128, KaytonError> {
+    Ok(128)
+}
+
+fn set_usize(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: usize,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(4))
+}
+fn get_usize(_ctx: &mut KaytonContext, _name: &str) -> Result<usize, KaytonError> {
+    Ok(64)
+}
+fn get_usize_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<usize, KaytonError> {
+    Ok(64)
+}
+
+fn set_i8(_ctx: &mut KaytonContext, _name: &str, _value: i8) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(5))
+}
+fn get_i8(_ctx: &mut KaytonContext, _name: &str) -> Result<i8, KaytonError> {
+    Ok(-8)
+}
+fn get_i8_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i8, KaytonError> {
+    Ok(-8)
+}
+
+fn set_i16(_ctx: &mut KaytonContext, _name: &str, _value: i16) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(6))
+}
+fn get_i16(_ctx: &mut KaytonContext, _name: &str) -> Result<i16, KaytonError> {
+    Ok(-16)
+}
+fn get_i16_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i16, KaytonError> {
+    Ok(-16)
+}
+
+fn set_i32(_ctx: &mut KaytonContext, _name: &str, _value: i32) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(7))
+}
+fn get_i32(_ctx: &mut KaytonContext, _name: &str) -> Result<i32, KaytonError> {
+    Ok(-32)
+}
+fn get_i32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i32, KaytonError> {
+    Ok(-32)
+}
+
+fn set_i64(_ctx: &mut KaytonContext, _name: &str, _value: i64) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(8))
+}
+fn get_i64(_ctx: &mut KaytonContext, _name: &str) -> Result<i64, KaytonError> {
+    Ok(-64)
+}
+fn get_i64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i64, KaytonError> {
+    Ok(-64)
+}
+
+fn set_i128(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: i128,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(9))
+}
+fn get_i128(_ctx: &mut KaytonContext, _name: &str) -> Result<i128, KaytonError> {
+    Ok(-128)
+}
+fn get_i128_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i128, KaytonError> {
+    Ok(-128)
+}
+
+fn set_isize(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: isize,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(10))
+}
+fn get_isize(_ctx: &mut KaytonContext, _name: &str) -> Result<isize, KaytonError> {
+    Ok(-32)
+}
+fn get_isize_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<isize, KaytonError> {
+    Ok(-32)
+}
+
+fn set_bool(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: bool,
+) -> Result<HKayGlobal, KaytonError> {
+    Ok(HKayGlobal(11))
+}
+fn get_bool(_ctx: &mut KaytonContext, _name: &str) -> Result<bool, KaytonError> {
+    Ok(true)
+}
+fn get_bool_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<bool, KaytonError> {
+    Ok(true)
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     let api = KaytonApi {
@@ -150,6 +281,39 @@ fn context_api_accessor_and_calls() {
         set_global_dyn_ptr: set_global_dyn_ptr,
         get_global_dyn_ptr: get_global_dyn_ptr,
         get_global_dyn_ptr_by_handle: get_global_dyn_ptr_by_handle,
+        set_global_u32: set_u32,
+        get_global_u32: get_u32,
+        get_global_u32_by_handle: get_u32_by_handle,
+        set_global_u16: set_u16,
+        get_global_u16: get_u16,
+        get_global_u16_by_handle: get_u16_by_handle,
+        set_global_u128: set_u128,
+        get_global_u128: get_u128,
+        get_global_u128_by_handle: get_u128_by_handle,
+        set_global_usize: set_usize,
+        get_global_usize: get_usize,
+        get_global_usize_by_handle: get_usize_by_handle,
+        set_global_i8: set_i8,
+        get_global_i8: get_i8,
+        get_global_i8_by_handle: get_i8_by_handle,
+        set_global_i16: set_i16,
+        get_global_i16: get_i16,
+        get_global_i16_by_handle: get_i16_by_handle,
+        set_global_i32: set_i32,
+        get_global_i32: get_i32,
+        get_global_i32_by_handle: get_i32_by_handle,
+        set_global_i64: set_i64,
+        get_global_i64: get_i64,
+        get_global_i64_by_handle: get_i64_by_handle,
+        set_global_i128: set_i128,
+        get_global_i128: get_i128,
+        get_global_i128_by_handle: get_i128_by_handle,
+        set_global_isize: set_isize,
+        get_global_isize: get_isize,
+        get_global_isize_by_handle: get_isize_by_handle,
+        set_global_bool: set_bool,
+        get_global_bool: get_bool,
+        get_global_bool_by_handle: get_bool_by_handle,
     };
 
     let api_box = Box::new(api);

@@ -32,6 +32,51 @@ pub struct KaytonApi {
     pub set_global_dyn_ptr: crate::fns_dynamic::SetGlobalDynPtrFn,
     pub get_global_dyn_ptr: crate::fns_dynamic::GetGlobalDynPtrFn,
     pub get_global_dyn_ptr_by_handle: crate::fns_dynamic::GetGlobalDynPtrByHandleFn,
+
+    // ---- Newly added integer and bool types ----
+    pub set_global_u32: crate::fns_int::SetGlobalU32Fn,
+    pub get_global_u32: crate::fns_int::GetGlobalU32Fn,
+    pub get_global_u32_by_handle: crate::fns_int::GetGlobalU32ByHandleFn,
+
+    pub set_global_u16: crate::fns_int::SetGlobalU16Fn,
+    pub get_global_u16: crate::fns_int::GetGlobalU16Fn,
+    pub get_global_u16_by_handle: crate::fns_int::GetGlobalU16ByHandleFn,
+
+    pub set_global_u128: crate::fns_int::SetGlobalU128Fn,
+    pub get_global_u128: crate::fns_int::GetGlobalU128Fn,
+    pub get_global_u128_by_handle: crate::fns_int::GetGlobalU128ByHandleFn,
+
+    pub set_global_usize: crate::fns_int::SetGlobalUsizeFn,
+    pub get_global_usize: crate::fns_int::GetGlobalUsizeFn,
+    pub get_global_usize_by_handle: crate::fns_int::GetGlobalUsizeByHandleFn,
+
+    pub set_global_i8: crate::fns_int::SetGlobalI8Fn,
+    pub get_global_i8: crate::fns_int::GetGlobalI8Fn,
+    pub get_global_i8_by_handle: crate::fns_int::GetGlobalI8ByHandleFn,
+
+    pub set_global_i16: crate::fns_int::SetGlobalI16Fn,
+    pub get_global_i16: crate::fns_int::GetGlobalI16Fn,
+    pub get_global_i16_by_handle: crate::fns_int::GetGlobalI16ByHandleFn,
+
+    pub set_global_i32: crate::fns_int::SetGlobalI32Fn,
+    pub get_global_i32: crate::fns_int::GetGlobalI32Fn,
+    pub get_global_i32_by_handle: crate::fns_int::GetGlobalI32ByHandleFn,
+
+    pub set_global_i64: crate::fns_int::SetGlobalI64Fn,
+    pub get_global_i64: crate::fns_int::GetGlobalI64Fn,
+    pub get_global_i64_by_handle: crate::fns_int::GetGlobalI64ByHandleFn,
+
+    pub set_global_i128: crate::fns_int::SetGlobalI128Fn,
+    pub get_global_i128: crate::fns_int::GetGlobalI128Fn,
+    pub get_global_i128_by_handle: crate::fns_int::GetGlobalI128ByHandleFn,
+
+    pub set_global_isize: crate::fns_int::SetGlobalIsizeFn,
+    pub get_global_isize: crate::fns_int::GetGlobalIsizeFn,
+    pub get_global_isize_by_handle: crate::fns_int::GetGlobalIsizeByHandleFn,
+
+    pub set_global_bool: crate::fns_int::SetGlobalBoolFn,
+    pub get_global_bool: crate::fns_int::GetGlobalBoolFn,
+    pub get_global_bool_by_handle: crate::fns_int::GetGlobalBoolByHandleFn,
 }
 
 impl crate::types::KaytonContext {
@@ -84,5 +129,83 @@ impl crate::types::KaytonContext {
         h: crate::types::HKayGlobal,
     ) -> Result<crate::types::GlobalStrBuf, crate::types::KaytonError> {
         (self.api().get_global_str_buf_by_handle)(self, h)
+    }
+
+    #[inline]
+    pub fn get_u32_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<u32, crate::types::KaytonError> {
+        (self.api().get_global_u32_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_u16_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<u16, crate::types::KaytonError> {
+        (self.api().get_global_u16_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_u128_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<u128, crate::types::KaytonError> {
+        (self.api().get_global_u128_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_usize_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<usize, crate::types::KaytonError> {
+        (self.api().get_global_usize_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_i8_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<i8, crate::types::KaytonError> {
+        (self.api().get_global_i8_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_i16_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<i16, crate::types::KaytonError> {
+        (self.api().get_global_i16_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_i32_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<i32, crate::types::KaytonError> {
+        (self.api().get_global_i32_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_i64_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<i64, crate::types::KaytonError> {
+        (self.api().get_global_i64_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_i128_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<i128, crate::types::KaytonError> {
+        (self.api().get_global_i128_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_isize_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<isize, crate::types::KaytonError> {
+        (self.api().get_global_isize_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn get_bool_by_handle(
+        &mut self,
+        h: crate::types::HKayGlobal,
+    ) -> Result<bool, crate::types::KaytonError> {
+        (self.api().get_global_bool_by_handle)(self, h)
     }
 }
