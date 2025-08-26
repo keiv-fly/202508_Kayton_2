@@ -1,27 +1,43 @@
 pub mod hir_types;
 
+use std::collections::HashMap;
+
 use crate::parser::{BinOp, Expr, Stmt, StringPart};
+use crate::span::Span;
 use hir_types::{HirBinOp, HirExpr, HirId, HirStmt, HirStringPart};
 
 struct LoweringCtx {
     next_id: u32,
+    spans: HashMap<HirId, Span>,
 }
 
 impl LoweringCtx {
     fn new() -> Self {
-        Self { next_id: 1 }
+        Self {
+            next_id: 1,
+            spans: HashMap::new(),
+        }
     }
 
     fn new_id(&mut self) -> HirId {
         let id = self.next_id;
         self.next_id += 1;
-        HirId(id)
+        let hir_id = HirId(id);
+        // Dummy span info for now; real spans not tracked
+        let span = Span::new(id as usize, id as usize);
+        self.spans.insert(hir_id, span);
+        hir_id
     }
 }
 
 pub fn lower_program(ast: Vec<Stmt>) -> Vec<HirStmt> {
+    lower_program_with_spans(ast).0
+}
+
+pub fn lower_program_with_spans(ast: Vec<Stmt>) -> (Vec<HirStmt>, HashMap<HirId, Span>) {
     let mut ctx = LoweringCtx::new();
-    ast.into_iter().map(|s| lower_stmt(&mut ctx, s)).collect()
+    let hir = ast.into_iter().map(|s| lower_stmt(&mut ctx, s)).collect();
+    (hir, ctx.spans)
 }
 
 fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {

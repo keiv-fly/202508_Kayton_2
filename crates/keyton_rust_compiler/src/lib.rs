@@ -6,3 +6,4 @@ pub mod rhir;
 pub mod rust_codegen;
 pub mod shir;
 pub mod thir;
+pub mod span;
