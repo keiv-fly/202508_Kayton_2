@@ -312,7 +312,7 @@ impl KaytonVm {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.get_tuple_item_by_name(name, index)
             },
-            get_tuple_item_by_index: |ctx, h, index| {
+            get_global_tuple_item_by_handle: |ctx, h, index| {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.get_tuple_item_by_index(h, index)
             },

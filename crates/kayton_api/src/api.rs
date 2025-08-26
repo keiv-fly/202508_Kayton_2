@@ -92,7 +92,7 @@ pub struct KaytonApi {
     pub get_global_tuple_len: crate::fns_tuple::GetGlobalTupleLenFn,
     pub get_tuple_len_by_handle: crate::fns_tuple::GetTupleLenByHandleFn,
     pub get_global_tuple_item: crate::fns_tuple::GetGlobalTupleItemFn,
-    pub get_tuple_item_by_index: crate::fns_tuple::GetTupleItemByIndexFn,
+    pub get_global_tuple_item_by_handle: crate::fns_tuple::GetGlobalTupleItemByHandleFn,
     pub read_tuple_into_slice_by_handle: crate::fns_tuple::ReadTupleIntoSliceByHandleFn,
 }
 
@@ -235,11 +235,11 @@ impl crate::types::KaytonContext {
         (self.api().get_tuple_len_by_handle)(self, h)
     }
     #[inline]
-    pub fn tuple_item_by_index(
+    pub fn tuple_item_by_handle(
         &mut self,
         h: crate::types::HKayRef,
         index: usize,
     ) -> Result<crate::types::HKayRef, crate::types::KaytonError> {
-        (self.api().get_tuple_item_by_index)(self, h, index)
+        (self.api().get_global_tuple_item_by_handle)(self, h, index)
     }
 }

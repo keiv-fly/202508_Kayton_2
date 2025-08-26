@@ -22,7 +22,7 @@ pub type GetGlobalTupleItemFn =
     fn(ctx: &mut KaytonContext, name: &str, index: usize) -> Result<HKayRef, KaytonError>;
 
 /// Random access: get element i as a handle (fast path by handle).
-pub type GetTupleItemByIndexFn =
+pub type GetGlobalTupleItemByHandleFn =
     fn(ctx: &mut KaytonContext, h: HKayRef, index: usize) -> Result<HKayRef, KaytonError>;
 
 /// Bulk read: copy tuple elements into caller's buffer. Returns written count.

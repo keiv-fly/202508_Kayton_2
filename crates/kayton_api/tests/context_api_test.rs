@@ -303,7 +303,7 @@ fn context_api_accessor_and_calls() {
     ) -> Result<HKayRef, KaytonError> {
         Ok(HKayRef { kind: 0, index: 0 })
     }
-    fn get_tuple_item_by_index(
+    fn get_global_tuple_item_by_handle(
         _ctx: &mut KaytonContext,
         _h: HKayRef,
         _idx: usize,
@@ -387,7 +387,7 @@ fn context_api_accessor_and_calls() {
         get_global_tuple_len: get_global_tuple_len,
         get_tuple_len_by_handle: get_tuple_len_by_handle,
         get_global_tuple_item: get_global_tuple_item,
-        get_tuple_item_by_index: get_tuple_item_by_index,
+        get_global_tuple_item_by_handle: get_global_tuple_item_by_handle,
         read_tuple_into_slice_by_handle: read_tuple_into_slice_by_handle,
     };
 
