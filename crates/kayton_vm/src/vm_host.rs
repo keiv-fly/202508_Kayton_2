@@ -34,15 +34,15 @@ fn unpack_handle(h: HKayGlobal) -> (KindId, u32) {
 // ---------------- Dynamic kind store ----------------
 
 pub struct DynKindStore {
-    name: &'static str,
+    _name: &'static str,
     elems: Vec<*mut c_void>,
     drop_fn: DynDropFn,
 }
 
 impl DynKindStore {
-    fn new(name: &'static str, drop_fn: DynDropFn) -> Self {
+    fn new(_name: &'static str, drop_fn: DynDropFn) -> Self {
         Self {
-            name,
+            _name,
             elems: Vec::new(),
             drop_fn,
         }

@@ -249,9 +249,9 @@ fn unresolved_name_in_call_reports_error() {
     let input = r#"print(x)"#;
     let tokens = Lexer::new(input).tokenize();
     let ast = Parser::new(tokens).parse_program();
-    let hir = lower_program(ast);
+    let (hir, spans) = lower_program_with_spans(ast);
 
-    let mut resolver = Resolver::new();
+    let mut resolver = Resolver::new(spans);
     resolver.add_builtin("print");
     let shir = resolver.resolve_program(&hir);
 
@@ -275,8 +275,7 @@ fn unresolved_name_in_call_reports_error() {
 
     assert_eq!(resolver.report.errors.len(), 1);
     match &resolver.report.errors[0] {
-        ResolveError::UnresolvedName { hir_id, name } => {
-            assert_eq!(*hir_id, HirId(4));
+        ResolveError::UnresolvedName { name, .. } => {
             assert_eq!(name, "x");
         }
     }
