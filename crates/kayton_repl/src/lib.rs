@@ -5,6 +5,7 @@ use std::sync::{Mutex, OnceLock};
 use anyhow::{Context, Result};
 use kayton_vm::{Api, KaytonVm, VmGlobalStrBuf, VmKaytonContext};
 use keyton_rust_compiler::compile_rust::compile_generated_rust_to_dylib;
+use keyton_rust_compiler::diagnostics::format_type_error;
 use keyton_rust_compiler::hir::lower_program;
 use keyton_rust_compiler::lexer::Lexer;
 use keyton_rust_compiler::parser::Parser;
@@ -240,6 +241,7 @@ pub fn run_repl() -> Result<()> {
 
     let stdin = io::stdin();
     let mut stdout = io::stdout();
+    let mut input_counter: usize = 0;
     loop {
         write!(stdout, ">>> ")?;
         stdout.flush()?;
@@ -262,7 +264,19 @@ pub fn run_repl() -> Result<()> {
         let mut resolved = resolve_program(&hir);
         let typed = typecheck_program(&mut resolved);
         if !typed.report.errors.is_empty() {
-            eprintln!("Type errors: {:?}", typed.report.errors);
+            let mut printed = false;
+            for err in &typed.report.errors {
+                let file_label = format!("<kayton-input-{}>", input_counter);
+                if let Some(msg) = format_type_error(source, &resolved, err, &file_label) {
+                    eprintln!("{}", msg);
+                    printed = true;
+                    break;
+                }
+            }
+            if !printed {
+                eprintln!("Type errors: {:?}", typed.report.errors);
+            }
+            input_counter += 1;
             continue;
         }
         let rhir_program = convert_to_rhir(&typed, &resolved);
@@ -321,6 +335,8 @@ pub fn run_repl() -> Result<()> {
                 eprintln!("Compile error: {}", err);
             }
         }
+
+        input_counter += 1;
     }
 
     Ok(())

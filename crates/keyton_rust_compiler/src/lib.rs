@@ -1,9 +1,10 @@
 pub mod compile_rust;
+pub mod diagnostics;
 pub mod hir;
 pub mod lexer;
 pub mod parser;
 pub mod rhir;
 pub mod rust_codegen;
 pub mod shir;
-pub mod thir;
 pub mod span;
+pub mod thir;
