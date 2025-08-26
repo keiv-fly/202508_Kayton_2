@@ -17,6 +17,32 @@ pub fn typecheck_program(resolved: &mut ResolvedProgram) -> TypedProgram {
     }
 }
 
+/// Typecheck but seed the environment with predeclared variable types (e.g., REPL globals).
+/// Each tuple is (variable name, type).
+pub fn typecheck_program_with_env(
+    resolved: &mut ResolvedProgram,
+    predeclared: &[(String, Type)],
+) -> TypedProgram {
+    let mut c = Checker::new(&mut resolved.symbols);
+
+    // Seed known variables in the global scope with provided types.
+    let global_scope = ScopeId(0);
+    for (name, ty) in predeclared {
+        let sid = match c.symbols.lookup(global_scope, name) {
+            Some(sid) => sid,
+            None => c.symbols.define(global_scope, name, SymKind::GlobalVar),
+        };
+        c.var_types.insert(sid, ty.clone());
+    }
+
+    let thir = resolved.shir.iter().map(|s| c.check_stmt(s)).collect();
+    TypedProgram {
+        thir,
+        var_types: c.var_types,
+        report: TypeReport { errors: c.errors },
+    }
+}
+
 struct Checker<'a> {
     symbols: &'a mut SymbolTable,
     var_types: HashMap<SymbolId, Type>,

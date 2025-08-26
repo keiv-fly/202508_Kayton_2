@@ -16,3 +16,6 @@ kayton_api = { path = "../kayton_api" }
 [[bin]]
 name = "kayton_repl"
 path = "src/main.rs"
+
+[dev-dependencies]
+assert_cmd = "2"

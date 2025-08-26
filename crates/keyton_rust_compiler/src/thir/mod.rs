@@ -1,7 +1,7 @@
 pub mod checker;
 pub mod types;
 
-pub use checker::typecheck_program;
+pub use checker::{typecheck_program, typecheck_program_with_env};
 pub use types::*;
 
 #[cfg(test)]

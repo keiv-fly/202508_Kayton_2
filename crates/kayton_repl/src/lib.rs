@@ -12,7 +12,7 @@ use keyton_rust_compiler::parser::Parser;
 use keyton_rust_compiler::rhir::{RustProgram, convert_to_rhir};
 use keyton_rust_compiler::rust_codegen::{CodeGenerator, RustCode};
 use keyton_rust_compiler::shir::{resolve_program, sym::SymbolId};
-use keyton_rust_compiler::thir::typecheck_program;
+use keyton_rust_compiler::thir::typecheck_program_with_env;
 use libloading::Library;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -262,7 +262,23 @@ pub fn run_repl() -> Result<()> {
         let ast = Parser::new(tokens).parse_program();
         let hir = lower_program(ast);
         let mut resolved = resolve_program(&hir);
-        let typed = typecheck_program(&mut resolved);
+
+        // Seed typechecker with known REPL globals so names like `x` from previous inputs
+        // are treated as defined with their prior types rather than causing NameError.
+        let mut predeclared: Vec<(String, keyton_rust_compiler::shir::sym::Type)> = Vec::new();
+        if let Some(globals) = REPL_GLOBALS.get() {
+            if let Ok(g) = globals.lock() {
+                for (name, kind) in g.iter() {
+                    let ty = match kind {
+                        ReplVarKind::Str => keyton_rust_compiler::shir::sym::Type::Str,
+                        ReplVarKind::Int => keyton_rust_compiler::shir::sym::Type::Int,
+                    };
+                    predeclared.push((name.clone(), ty));
+                }
+            }
+        }
+
+        let typed = typecheck_program_with_env(&mut resolved, &predeclared);
         if !typed.report.errors.is_empty() {
             let mut printed = false;
             for err in &typed.report.errors {
