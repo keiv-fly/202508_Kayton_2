@@ -1,5 +1,3 @@
-use core::ffi::c_void;
-
 /// Single flat vtable (HPy-style).
 #[repr(C)]
 pub struct KaytonApi {
