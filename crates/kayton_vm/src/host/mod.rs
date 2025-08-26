@@ -3,13 +3,15 @@ use std::string::String;
 use std::vec::Vec;
 
 use kayton_api::fns_dynamic::KindId;
-use kayton_api::types::{GlobalStrBuf, HKayGlobal};
+use kayton_api::types::{GlobalStrBuf, HKayRef};
 
 mod dyn_store;
 mod vm_fns_dynamic;
 mod vm_fns_float;
+mod vm_fns_intern;
 mod vm_fns_sint;
 mod vm_fns_string;
+mod vm_fns_tuple;
 mod vm_fns_uint;
 
 use dyn_store::DynKindStore;
@@ -17,8 +19,8 @@ use dyn_store::DynKindStore;
 // ---------------- Host state ----------------
 
 pub struct HostState {
-    name_to_handle: BTreeMap<String, HKayGlobal>,
-    handle_to_name: BTreeMap<u64, String>,
+    name_to_handle: BTreeMap<String, HKayRef>,
+    handle_to_name: BTreeMap<(u32, u32), String>,
 
     u64s: Vec<u64>,
     u8s: Vec<u8>,
@@ -37,6 +39,10 @@ pub struct HostState {
     f32s: Vec<f32>,
     static_strs: Vec<&'static str>,
     str_bufs: Vec<GlobalStrBuf>,
+
+    // Tuple storage: flat items and (start,len) metadata per tuple
+    tuple_items: Vec<HKayRef>,
+    tuples: Vec<(u32, u32)>,
 
     next_kind_id: KindId,
     dyn_kinds: BTreeMap<KindId, DynKindStore>,
@@ -64,19 +70,22 @@ impl HostState {
             f32s: Vec::new(),
             static_strs: Vec::new(),
             str_bufs: Vec::new(),
+            tuple_items: Vec::new(),
+            tuples: Vec::new(),
             next_kind_id: 1000,
             dyn_kinds: BTreeMap::new(),
         }
     }
 
     #[inline]
-    pub fn bind_name(&mut self, name: &str, h: HKayGlobal) {
+    pub fn bind_name(&mut self, name: &str, h: HKayRef) {
         self.name_to_handle.insert(String::from(name), h);
-        self.handle_to_name.insert(h.0, String::from(name));
+        self.handle_to_name
+            .insert((h.kind as u32, h.index as u32), String::from(name));
     }
 
     #[inline]
-    pub fn resolve(&self, name: &str) -> Option<HKayGlobal> {
+    pub fn resolve(&self, name: &str) -> Option<HKayRef> {
         self.name_to_handle.get(name).copied()
     }
 }

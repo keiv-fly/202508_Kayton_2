@@ -2,35 +2,38 @@ use core::ptr::null_mut;
 
 use core::ffi::c_void;
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{GlobalStrBuf, HKayGlobal, KaytonContext, KaytonError};
+use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonContext, KaytonError};
 
 // Dummy implementations to populate the vtable
-fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(0xABCD))
+fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef {
+        kind: 0,
+        index: 0xABCD,
+    })
 }
 
 fn get_u64(_ctx: &mut KaytonContext, _name: &str) -> Result<u64, KaytonError> {
     Ok(42)
 }
 
-fn set_u8(_ctx: &mut KaytonContext, _name: &str, _value: u8) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(7))
+fn set_u8(_ctx: &mut KaytonContext, _name: &str, _value: u8) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 7 })
 }
 
 fn get_u8(_ctx: &mut KaytonContext, _name: &str) -> Result<u8, KaytonError> {
     Ok(7)
 }
 
-fn set_f64(_ctx: &mut KaytonContext, _name: &str, _value: f64) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(1))
+fn set_f64(_ctx: &mut KaytonContext, _name: &str, _value: f64) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 1 })
 }
 
 fn get_f64(_ctx: &mut KaytonContext, _name: &str) -> Result<f64, KaytonError> {
     Ok(3.14)
 }
 
-fn set_f32(_ctx: &mut KaytonContext, _name: &str, _value: f32) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(2))
+fn set_f32(_ctx: &mut KaytonContext, _name: &str, _value: f32) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 2 })
 }
 
 fn get_f32(_ctx: &mut KaytonContext, _name: &str) -> Result<f32, KaytonError> {
@@ -41,8 +44,11 @@ fn set_static_str(
     _ctx: &mut KaytonContext,
     _name: &str,
     _value: &'static str,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(0x1234))
+) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef {
+        kind: 0,
+        index: 0x1234,
+    })
 }
 
 fn get_static_str(_ctx: &mut KaytonContext, _name: &str) -> Result<&'static str, KaytonError> {
@@ -53,8 +59,11 @@ fn set_global_str_buf(
     _ctx: &mut KaytonContext,
     _name: &str,
     _value: GlobalStrBuf,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(0x5678))
+) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef {
+        kind: 0,
+        index: 0x5678,
+    })
 }
 
 fn get_global_str_buf(_ctx: &mut KaytonContext, _name: &str) -> Result<GlobalStrBuf, KaytonError> {
@@ -75,8 +84,11 @@ fn set_global_dyn_ptr(
     _kind: u32,
     _name: &str,
     _value: *mut c_void,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(0xDEAD_BEEF))
+) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef {
+        kind: 0,
+        index: 0xBEEF,
+    })
 }
 
 fn get_global_dyn_ptr(
@@ -88,175 +100,225 @@ fn get_global_dyn_ptr(
 
 fn get_global_dyn_ptr_by_handle(
     _ctx: &mut KaytonContext,
-    _h: HKayGlobal,
+    _h: HKayRef,
 ) -> Result<*mut c_void, KaytonError> {
     Ok(core::ptr::null_mut())
 }
 
-fn get_u64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u64, KaytonError> {
+fn get_u64_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u64, KaytonError> {
     Ok(42)
 }
 
-fn get_u8_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u8, KaytonError> {
+fn get_u8_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u8, KaytonError> {
     Ok(7)
 }
 
-fn get_f64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<f64, KaytonError> {
+fn get_f64_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<f64, KaytonError> {
     Ok(3.14)
 }
 
-fn get_f32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<f32, KaytonError> {
+fn get_f32_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<f32, KaytonError> {
     Ok(2.71)
 }
 
 fn get_static_str_by_handle(
     _ctx: &mut KaytonContext,
-    _h: HKayGlobal,
+    _h: HKayRef,
 ) -> Result<&'static str, KaytonError> {
     Ok("test_string")
 }
 
 fn get_str_buf_by_handle(
     _ctx: &mut KaytonContext,
-    _h: HKayGlobal,
+    _h: HKayRef,
 ) -> Result<GlobalStrBuf, KaytonError> {
     let test_str = "test_buffer".to_string();
     Ok(GlobalStrBuf::new(test_str))
 }
 
 // ---- New integer and bool dummies ----
-fn set_u32(_ctx: &mut KaytonContext, _name: &str, _value: u32) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(1))
+fn set_u32(_ctx: &mut KaytonContext, _name: &str, _value: u32) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 1 })
 }
 fn get_u32(_ctx: &mut KaytonContext, _name: &str) -> Result<u32, KaytonError> {
     Ok(32)
 }
-fn get_u32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u32, KaytonError> {
+fn get_u32_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u32, KaytonError> {
     Ok(32)
 }
 
-fn set_u16(_ctx: &mut KaytonContext, _name: &str, _value: u16) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(2))
+fn set_u16(_ctx: &mut KaytonContext, _name: &str, _value: u16) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 2 })
 }
 fn get_u16(_ctx: &mut KaytonContext, _name: &str) -> Result<u16, KaytonError> {
     Ok(16)
 }
-fn get_u16_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u16, KaytonError> {
+fn get_u16_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u16, KaytonError> {
     Ok(16)
 }
 
-fn set_u128(
-    _ctx: &mut KaytonContext,
-    _name: &str,
-    _value: u128,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(3))
+fn set_u128(_ctx: &mut KaytonContext, _name: &str, _value: u128) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 3 })
 }
 fn get_u128(_ctx: &mut KaytonContext, _name: &str) -> Result<u128, KaytonError> {
     Ok(128)
 }
-fn get_u128_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<u128, KaytonError> {
+fn get_u128_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u128, KaytonError> {
     Ok(128)
 }
 
-fn set_usize(
-    _ctx: &mut KaytonContext,
-    _name: &str,
-    _value: usize,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(4))
+fn set_usize(_ctx: &mut KaytonContext, _name: &str, _value: usize) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 4 })
 }
 fn get_usize(_ctx: &mut KaytonContext, _name: &str) -> Result<usize, KaytonError> {
     Ok(64)
 }
-fn get_usize_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<usize, KaytonError> {
+fn get_usize_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<usize, KaytonError> {
     Ok(64)
 }
 
-fn set_i8(_ctx: &mut KaytonContext, _name: &str, _value: i8) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(5))
+fn set_i8(_ctx: &mut KaytonContext, _name: &str, _value: i8) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 5 })
 }
 fn get_i8(_ctx: &mut KaytonContext, _name: &str) -> Result<i8, KaytonError> {
     Ok(-8)
 }
-fn get_i8_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i8, KaytonError> {
+fn get_i8_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<i8, KaytonError> {
     Ok(-8)
 }
 
-fn set_i16(_ctx: &mut KaytonContext, _name: &str, _value: i16) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(6))
+fn set_i16(_ctx: &mut KaytonContext, _name: &str, _value: i16) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 6 })
 }
 fn get_i16(_ctx: &mut KaytonContext, _name: &str) -> Result<i16, KaytonError> {
     Ok(-16)
 }
-fn get_i16_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i16, KaytonError> {
+fn get_i16_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<i16, KaytonError> {
     Ok(-16)
 }
 
-fn set_i32(_ctx: &mut KaytonContext, _name: &str, _value: i32) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(7))
+fn set_i32(_ctx: &mut KaytonContext, _name: &str, _value: i32) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 7 })
 }
 fn get_i32(_ctx: &mut KaytonContext, _name: &str) -> Result<i32, KaytonError> {
     Ok(-32)
 }
-fn get_i32_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i32, KaytonError> {
+fn get_i32_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<i32, KaytonError> {
     Ok(-32)
 }
 
-fn set_i64(_ctx: &mut KaytonContext, _name: &str, _value: i64) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(8))
+fn set_i64(_ctx: &mut KaytonContext, _name: &str, _value: i64) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 8 })
 }
 fn get_i64(_ctx: &mut KaytonContext, _name: &str) -> Result<i64, KaytonError> {
     Ok(-64)
 }
-fn get_i64_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i64, KaytonError> {
+fn get_i64_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<i64, KaytonError> {
     Ok(-64)
 }
 
-fn set_i128(
-    _ctx: &mut KaytonContext,
-    _name: &str,
-    _value: i128,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(9))
+fn set_i128(_ctx: &mut KaytonContext, _name: &str, _value: i128) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 9 })
 }
 fn get_i128(_ctx: &mut KaytonContext, _name: &str) -> Result<i128, KaytonError> {
     Ok(-128)
 }
-fn get_i128_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<i128, KaytonError> {
+fn get_i128_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<i128, KaytonError> {
     Ok(-128)
 }
 
-fn set_isize(
-    _ctx: &mut KaytonContext,
-    _name: &str,
-    _value: isize,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(10))
+fn set_isize(_ctx: &mut KaytonContext, _name: &str, _value: isize) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 10 })
 }
 fn get_isize(_ctx: &mut KaytonContext, _name: &str) -> Result<isize, KaytonError> {
     Ok(-32)
 }
-fn get_isize_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<isize, KaytonError> {
+fn get_isize_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<isize, KaytonError> {
     Ok(-32)
 }
 
-fn set_bool(
-    _ctx: &mut KaytonContext,
-    _name: &str,
-    _value: bool,
-) -> Result<HKayGlobal, KaytonError> {
-    Ok(HKayGlobal(11))
+fn set_bool(_ctx: &mut KaytonContext, _name: &str, _value: bool) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef { kind: 0, index: 11 })
 }
 fn get_bool(_ctx: &mut KaytonContext, _name: &str) -> Result<bool, KaytonError> {
     Ok(true)
 }
-fn get_bool_by_handle(_ctx: &mut KaytonContext, _h: HKayGlobal) -> Result<bool, KaytonError> {
+fn get_bool_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<bool, KaytonError> {
     Ok(true)
 }
 
 #[test]
 fn context_api_accessor_and_calls() {
+    // Dummy interners and tuples (not exercised here)
+    fn intern_u64(_ctx: &mut KaytonContext, _v: u64) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 1, index: 1 })
+    }
+    fn intern_u8(_ctx: &mut KaytonContext, _v: u8) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 2, index: 2 })
+    }
+    fn intern_f64(_ctx: &mut KaytonContext, _v: f64) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 3, index: 3 })
+    }
+    fn intern_f32(_ctx: &mut KaytonContext, _v: f32) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 4, index: 4 })
+    }
+    fn intern_static_str(
+        _ctx: &mut KaytonContext,
+        _s: &'static str,
+    ) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 5, index: 5 })
+    }
+    fn intern_str_buf(_ctx: &mut KaytonContext, _s: &str) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 6, index: 6 })
+    }
+    fn intern_dyn_ptr(
+        _ctx: &mut KaytonContext,
+        _k: u32,
+        _p: *mut c_void,
+    ) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 7, index: 7 })
+    }
+
+    fn set_tuple_from_handles(
+        _ctx: &mut KaytonContext,
+        _name: &str,
+        _items: *const HKayRef,
+        _len: usize,
+    ) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 8, index: 0 })
+    }
+    fn get_global_tuple_len(_ctx: &mut KaytonContext, _name: &str) -> Result<usize, KaytonError> {
+        Ok(0)
+    }
+    fn get_tuple_len_by_handle(
+        _ctx: &mut KaytonContext,
+        _h: HKayRef,
+    ) -> Result<usize, KaytonError> {
+        Ok(0)
+    }
+    fn get_global_tuple_item(
+        _ctx: &mut KaytonContext,
+        _name: &str,
+        _idx: usize,
+    ) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 0, index: 0 })
+    }
+    fn get_tuple_item_by_index(
+        _ctx: &mut KaytonContext,
+        _h: HKayRef,
+        _idx: usize,
+    ) -> Result<HKayRef, KaytonError> {
+        Ok(HKayRef { kind: 0, index: 0 })
+    }
+    fn read_tuple_into_slice_by_handle(
+        _ctx: &mut KaytonContext,
+        _h: HKayRef,
+        _out: *mut HKayRef,
+        _cap: usize,
+    ) -> Result<usize, KaytonError> {
+        Ok(0)
+    }
+
     let api = KaytonApi {
         size: core::mem::size_of::<KaytonApi>() as u64,
         set_global_u64: set_u64,
@@ -314,6 +376,19 @@ fn context_api_accessor_and_calls() {
         set_global_bool: set_bool,
         get_global_bool: get_bool,
         get_global_bool_by_handle: get_bool_by_handle,
+        intern_u64,
+        intern_u8,
+        intern_f64,
+        intern_f32,
+        intern_static_str,
+        intern_str_buf,
+        intern_dyn_ptr,
+        set_global_tuple_from_handles: set_tuple_from_handles,
+        get_global_tuple_len: get_global_tuple_len,
+        get_tuple_len_by_handle: get_tuple_len_by_handle,
+        get_global_tuple_item: get_global_tuple_item,
+        get_tuple_item_by_index: get_tuple_item_by_index,
+        read_tuple_into_slice_by_handle: read_tuple_into_slice_by_handle,
     };
 
     let api_box = Box::new(api);
@@ -332,7 +407,13 @@ fn context_api_accessor_and_calls() {
 
     // Exercise a few function pointers
     let handle = (api_ref.set_global_u64)(&mut ctx, "x", 123).unwrap();
-    assert_eq!(handle, HKayGlobal(0xABCD));
+    assert_eq!(
+        handle,
+        HKayRef {
+            kind: 0,
+            index: 0xABCD
+        }
+    );
 
     let out_u64 = (api_ref.get_global_u64)(&mut ctx, "x").unwrap();
     assert_eq!(out_u64, 42);

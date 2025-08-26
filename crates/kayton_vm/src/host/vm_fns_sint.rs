@@ -1,11 +1,14 @@
-use kayton_api::types::{HKayGlobal, KaytonError};
+use kayton_api::types::{HKayRef, KaytonError};
 
-use crate::kinds::{pack_handle, unpack_handle, KIND_I8, KIND_I16, KIND_I32, KIND_I64, KIND_I128, KIND_ISIZE, KIND_BOOL};
 use super::HostState;
+use crate::kinds::{
+    KIND_BOOL, KIND_I8, KIND_I16, KIND_I32, KIND_I64, KIND_I128, KIND_ISIZE, pack_handle,
+    unpack_handle,
+};
 
 impl HostState {
     // Built-in setters/getters for signed integers and bool
-    pub fn set_i8(&mut self, name: &str, value: i8) -> HKayGlobal {
+    pub fn set_i8(&mut self, name: &str, value: i8) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_I8 {
@@ -19,7 +22,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_i8(&self, name: &str) -> Result<i8, KaytonError> {
         let h = self
             .resolve(name)
@@ -33,8 +36,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_i8_by_handle(&self, h: HKayGlobal) -> Result<i8, KaytonError> {
+
+    pub fn get_i8_by_handle(&self, h: HKayRef) -> Result<i8, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_I8 {
             return Err(KaytonError::generic("wrong kind"));
@@ -45,7 +48,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_i16(&mut self, name: &str, value: i16) -> HKayGlobal {
+    pub fn set_i16(&mut self, name: &str, value: i16) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_I16 {
@@ -59,7 +62,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_i16(&self, name: &str) -> Result<i16, KaytonError> {
         let h = self
             .resolve(name)
@@ -73,8 +76,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_i16_by_handle(&self, h: HKayGlobal) -> Result<i16, KaytonError> {
+
+    pub fn get_i16_by_handle(&self, h: HKayRef) -> Result<i16, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_I16 {
             return Err(KaytonError::generic("wrong kind"));
@@ -85,7 +88,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_i32(&mut self, name: &str, value: i32) -> HKayGlobal {
+    pub fn set_i32(&mut self, name: &str, value: i32) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_I32 {
@@ -99,7 +102,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_i32(&self, name: &str) -> Result<i32, KaytonError> {
         let h = self
             .resolve(name)
@@ -113,8 +116,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_i32_by_handle(&self, h: HKayGlobal) -> Result<i32, KaytonError> {
+
+    pub fn get_i32_by_handle(&self, h: HKayRef) -> Result<i32, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_I32 {
             return Err(KaytonError::generic("wrong kind"));
@@ -125,7 +128,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_i64(&mut self, name: &str, value: i64) -> HKayGlobal {
+    pub fn set_i64(&mut self, name: &str, value: i64) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_I64 {
@@ -139,7 +142,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_i64(&self, name: &str) -> Result<i64, KaytonError> {
         let h = self
             .resolve(name)
@@ -153,8 +156,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_i64_by_handle(&self, h: HKayGlobal) -> Result<i64, KaytonError> {
+
+    pub fn get_i64_by_handle(&self, h: HKayRef) -> Result<i64, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_I64 {
             return Err(KaytonError::generic("wrong kind"));
@@ -165,7 +168,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_i128(&mut self, name: &str, value: i128) -> HKayGlobal {
+    pub fn set_i128(&mut self, name: &str, value: i128) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_I128 {
@@ -179,7 +182,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_i128(&self, name: &str) -> Result<i128, KaytonError> {
         let h = self
             .resolve(name)
@@ -193,8 +196,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_i128_by_handle(&self, h: HKayGlobal) -> Result<i128, KaytonError> {
+
+    pub fn get_i128_by_handle(&self, h: HKayRef) -> Result<i128, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_I128 {
             return Err(KaytonError::generic("wrong kind"));
@@ -205,7 +208,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_isize(&mut self, name: &str, value: isize) -> HKayGlobal {
+    pub fn set_isize(&mut self, name: &str, value: isize) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_ISIZE {
@@ -219,7 +222,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_isize(&self, name: &str) -> Result<isize, KaytonError> {
         let h = self
             .resolve(name)
@@ -233,8 +236,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_isize_by_handle(&self, h: HKayGlobal) -> Result<isize, KaytonError> {
+
+    pub fn get_isize_by_handle(&self, h: HKayRef) -> Result<isize, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_ISIZE {
             return Err(KaytonError::generic("wrong kind"));
@@ -245,7 +248,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_bool(&mut self, name: &str, value: bool) -> HKayGlobal {
+    pub fn set_bool(&mut self, name: &str, value: bool) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_BOOL {
@@ -259,7 +262,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_bool(&self, name: &str) -> Result<bool, KaytonError> {
         let h = self
             .resolve(name)
@@ -273,8 +276,8 @@ impl HostState {
             .copied()
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
-    
-    pub fn get_bool_by_handle(&self, h: HKayGlobal) -> Result<bool, KaytonError> {
+
+    pub fn get_bool_by_handle(&self, h: HKayRef) -> Result<bool, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_BOOL {
             return Err(KaytonError::generic("wrong kind"));

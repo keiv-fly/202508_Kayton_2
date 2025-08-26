@@ -1,10 +1,10 @@
 use std::ffi::c_void;
 
 use kayton_api::fns_dynamic::{DynDropFn, KindId};
-use kayton_api::types::{HKayGlobal, KaytonError};
+use kayton_api::types::{HKayRef, KaytonError};
 
+use super::{DynKindStore, HostState};
 use crate::kinds::{pack_handle, unpack_handle};
-use super::{HostState, DynKindStore};
 
 impl HostState {
     // ---- dynamic kind management ----
@@ -20,7 +20,7 @@ impl HostState {
         kind: KindId,
         name: &str,
         ptr: *mut c_void,
-    ) -> Result<HKayGlobal, KaytonError> {
+    ) -> Result<HKayRef, KaytonError> {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == kind {
@@ -65,7 +65,7 @@ impl HostState {
         }
     }
 
-    pub fn get_dyn_by_handle(&self, h: HKayGlobal) -> Result<*mut c_void, KaytonError> {
+    pub fn get_dyn_by_handle(&self, h: HKayRef) -> Result<*mut c_void, KaytonError> {
         let (kind, idx) = unpack_handle(h);
         let store = self
             .dyn_kinds

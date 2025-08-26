@@ -77,6 +77,23 @@ pub struct KaytonApi {
     pub set_global_bool: crate::fns_sint::SetGlobalBoolFn,
     pub get_global_bool: crate::fns_sint::GetGlobalBoolFn,
     pub get_global_bool_by_handle: crate::fns_sint::GetGlobalBoolByHandleFn,
+
+    // ---- Optional interners ----
+    pub intern_u64: crate::fns_intern::InternU64Fn,
+    pub intern_u8: crate::fns_intern::InternU8Fn,
+    pub intern_f64: crate::fns_intern::InternF64Fn,
+    pub intern_f32: crate::fns_intern::InternF32Fn,
+    pub intern_static_str: crate::fns_intern::InternStaticStrFn,
+    pub intern_str_buf: crate::fns_intern::InternStrBufFn,
+    pub intern_dyn_ptr: crate::fns_intern::InternDynPtrFn,
+
+    // ---- Tuples ----
+    pub set_global_tuple_from_handles: crate::fns_tuple::SetGlobalTupleFromHandlesFn,
+    pub get_global_tuple_len: crate::fns_tuple::GetGlobalTupleLenFn,
+    pub get_tuple_len_by_handle: crate::fns_tuple::GetTupleLenByHandleFn,
+    pub get_global_tuple_item: crate::fns_tuple::GetGlobalTupleItemFn,
+    pub get_tuple_item_by_index: crate::fns_tuple::GetTupleItemByIndexFn,
+    pub read_tuple_into_slice_by_handle: crate::fns_tuple::ReadTupleIntoSliceByHandleFn,
 }
 
 impl crate::types::KaytonContext {
@@ -91,42 +108,42 @@ impl crate::types::KaytonContext {
     #[inline]
     pub fn get_u64_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<u64, crate::types::KaytonError> {
         (self.api().get_global_u64_by_handle)(self, h)
     }
     #[inline]
     pub fn get_u8_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<u8, crate::types::KaytonError> {
         (self.api().get_global_u8_by_handle)(self, h)
     }
     #[inline]
     pub fn get_f64_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<f64, crate::types::KaytonError> {
         (self.api().get_global_f64_by_handle)(self, h)
     }
     #[inline]
     pub fn get_f32_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<f32, crate::types::KaytonError> {
         (self.api().get_global_f32_by_handle)(self, h)
     }
     #[inline]
     pub fn get_static_str_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<&'static str, crate::types::KaytonError> {
         (self.api().get_global_static_str_by_handle)(self, h)
     }
     #[inline]
     pub fn get_str_buf_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<crate::types::GlobalStrBuf, crate::types::KaytonError> {
         (self.api().get_global_str_buf_by_handle)(self, h)
     }
@@ -134,78 +151,95 @@ impl crate::types::KaytonContext {
     #[inline]
     pub fn get_u32_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<u32, crate::types::KaytonError> {
         (self.api().get_global_u32_by_handle)(self, h)
     }
     #[inline]
     pub fn get_u16_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<u16, crate::types::KaytonError> {
         (self.api().get_global_u16_by_handle)(self, h)
     }
     #[inline]
     pub fn get_u128_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<u128, crate::types::KaytonError> {
         (self.api().get_global_u128_by_handle)(self, h)
     }
     #[inline]
     pub fn get_usize_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<usize, crate::types::KaytonError> {
         (self.api().get_global_usize_by_handle)(self, h)
     }
     #[inline]
     pub fn get_i8_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<i8, crate::types::KaytonError> {
         (self.api().get_global_i8_by_handle)(self, h)
     }
     #[inline]
     pub fn get_i16_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<i16, crate::types::KaytonError> {
         (self.api().get_global_i16_by_handle)(self, h)
     }
     #[inline]
     pub fn get_i32_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<i32, crate::types::KaytonError> {
         (self.api().get_global_i32_by_handle)(self, h)
     }
     #[inline]
     pub fn get_i64_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<i64, crate::types::KaytonError> {
         (self.api().get_global_i64_by_handle)(self, h)
     }
     #[inline]
     pub fn get_i128_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<i128, crate::types::KaytonError> {
         (self.api().get_global_i128_by_handle)(self, h)
     }
     #[inline]
     pub fn get_isize_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<isize, crate::types::KaytonError> {
         (self.api().get_global_isize_by_handle)(self, h)
     }
     #[inline]
     pub fn get_bool_by_handle(
         &mut self,
-        h: crate::types::HKayGlobal,
+        h: crate::types::HKayRef,
     ) -> Result<bool, crate::types::KaytonError> {
         (self.api().get_global_bool_by_handle)(self, h)
+    }
+
+    // ---- Tuple convenience ----
+    #[inline]
+    pub fn tuple_len_by_handle(
+        &mut self,
+        h: crate::types::HKayRef,
+    ) -> Result<usize, crate::types::KaytonError> {
+        (self.api().get_tuple_len_by_handle)(self, h)
+    }
+    #[inline]
+    pub fn tuple_item_by_index(
+        &mut self,
+        h: crate::types::HKayRef,
+        index: usize,
+    ) -> Result<crate::types::HKayRef, crate::types::KaytonError> {
+        (self.api().get_tuple_item_by_index)(self, h, index)
     }
 }

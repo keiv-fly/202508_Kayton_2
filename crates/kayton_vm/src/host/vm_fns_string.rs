@@ -1,11 +1,11 @@
-use kayton_api::types::{GlobalStrBuf, HKayGlobal, KaytonError};
+use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonError};
 
-use crate::kinds::{pack_handle, unpack_handle, KIND_STATICSTR, KIND_STRBUF};
 use super::HostState;
+use crate::kinds::{KIND_STATICSTR, KIND_STRBUF, pack_handle, unpack_handle};
 
 impl HostState {
     // Built-in setters/getters for strings
-    pub fn set_static_str(&mut self, name: &str, value: &'static str) -> HKayGlobal {
+    pub fn set_static_str(&mut self, name: &str, value: &'static str) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_STATICSTR {
@@ -19,7 +19,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_static_str(&self, name: &str) -> Result<&'static str, KaytonError> {
         let h = self
             .resolve(name)
@@ -34,7 +34,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn get_static_str_by_handle(&self, h: HKayGlobal) -> Result<&'static str, KaytonError> {
+    pub fn get_static_str_by_handle(&self, h: HKayRef) -> Result<&'static str, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_STATICSTR {
             return Err(KaytonError::generic("wrong kind"));
@@ -45,7 +45,7 @@ impl HostState {
             .ok_or_else(|| KaytonError::generic("index out of range"))
     }
 
-    pub fn set_str_buf(&mut self, name: &str, value: GlobalStrBuf) -> HKayGlobal {
+    pub fn set_str_buf(&mut self, name: &str, value: GlobalStrBuf) -> HKayRef {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_STRBUF {
@@ -62,7 +62,7 @@ impl HostState {
         self.bind_name(name, h);
         h
     }
-    
+
     pub fn get_str_buf(&self, name: &str) -> Result<GlobalStrBuf, KaytonError> {
         let h = self
             .resolve(name)
@@ -78,7 +78,7 @@ impl HostState {
         }
     }
 
-    pub fn get_str_buf_by_handle(&self, h: HKayGlobal) -> Result<GlobalStrBuf, KaytonError> {
+    pub fn get_str_buf_by_handle(&self, h: HKayRef) -> Result<GlobalStrBuf, KaytonError> {
         let (k, idx) = unpack_handle(h);
         if k != KIND_STRBUF {
             return Err(KaytonError::generic("wrong kind"));

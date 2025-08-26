@@ -1,6 +1,6 @@
 use core::ffi::c_void;
 
-use crate::{HKayGlobal, KaytonContext, KaytonError};
+use crate::{HKayRef, KaytonContext, KaytonError};
 
 /// 32-bit kind identifier used in handles
 pub type KindId = u32;
@@ -18,7 +18,7 @@ pub type SetGlobalDynPtrFn = fn(
     kind: KindId,
     name: &str,
     value: *mut c_void,
-) -> Result<HKayGlobal, KaytonError>;
+) -> Result<HKayRef, KaytonError>;
 
 /// Resolve by name and get the raw pointer (and KindId).
 pub type GetGlobalDynPtrFn =
@@ -26,4 +26,4 @@ pub type GetGlobalDynPtrFn =
 
 /// Fast path by handle
 pub type GetGlobalDynPtrByHandleFn =
-    fn(ctx: &mut KaytonContext, h: HKayGlobal) -> Result<*mut c_void, KaytonError>;
+    fn(ctx: &mut KaytonContext, h: HKayRef) -> Result<*mut c_void, KaytonError>;

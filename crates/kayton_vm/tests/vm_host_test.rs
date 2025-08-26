@@ -1,6 +1,6 @@
 use core::sync::atomic::{AtomicUsize, Ordering};
 use kayton_api::ErrorKind;
-use kayton_vm::{Api, KaytonVm, VmGlobalStrBuf, VmHKayGlobal, VmKaytonContext};
+use kayton_vm::{Api, KaytonVm, VmGlobalStrBuf, VmHKayRef, VmKaytonContext};
 
 fn vm_and_ctx() -> (KaytonVm, VmKaytonContext) {
     let mut vm = KaytonVm::new();
@@ -14,7 +14,7 @@ fn test_set_get_primitives_by_name_and_handle() {
     let api: &Api = vm.api();
 
     // u64
-    let h_u64: VmHKayGlobal = (api.set_global_u64)(&mut ctx, "n", 42).unwrap();
+    let h_u64: VmHKayRef = (api.set_global_u64)(&mut ctx, "n", 42).unwrap();
     assert_eq!((api.get_global_u64)(&mut ctx, "n").unwrap(), 42);
     assert_eq!((api.get_global_u64_by_handle)(&mut ctx, h_u64).unwrap(), 42);
 
@@ -23,7 +23,7 @@ fn test_set_get_primitives_by_name_and_handle() {
     assert_eq!((api.get_global_u64)(&mut ctx, "n").unwrap(), 100);
 
     // u8
-    let h_u8: VmHKayGlobal = (api.set_global_u8)(&mut ctx, "b", 7).unwrap();
+    let h_u8: VmHKayRef = (api.set_global_u8)(&mut ctx, "b", 7).unwrap();
     assert_eq!((api.get_global_u8)(&mut ctx, "b").unwrap(), 7);
     assert_eq!((api.get_global_u8_by_handle)(&mut ctx, h_u8).unwrap(), 7);
 
@@ -31,7 +31,7 @@ fn test_set_get_primitives_by_name_and_handle() {
     assert_eq!((api.get_global_u8)(&mut ctx, "b").unwrap(), 9);
 
     // f64
-    let h_f64: VmHKayGlobal = (api.set_global_f64)(&mut ctx, "x", 3.5).unwrap();
+    let h_f64: VmHKayRef = (api.set_global_f64)(&mut ctx, "x", 3.5).unwrap();
     assert_eq!((api.get_global_f64)(&mut ctx, "x").unwrap(), 3.5);
     assert_eq!(
         (api.get_global_f64_by_handle)(&mut ctx, h_f64).unwrap(),
@@ -39,7 +39,7 @@ fn test_set_get_primitives_by_name_and_handle() {
     );
 
     // f32
-    let h_f32: VmHKayGlobal = (api.set_global_f32)(&mut ctx, "y", 2.25).unwrap();
+    let h_f32: VmHKayRef = (api.set_global_f32)(&mut ctx, "y", 2.25).unwrap();
     assert_eq!((api.get_global_f32)(&mut ctx, "y").unwrap(), 2.25);
     assert_eq!(
         (api.get_global_f32_by_handle)(&mut ctx, h_f32).unwrap(),

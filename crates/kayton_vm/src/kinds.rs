@@ -1,5 +1,5 @@
 use kayton_api::fns_dynamic::KindId;
-use kayton_api::types::HKayGlobal;
+use kayton_api::types::HKayRef;
 
 // ---------------- Kind IDs and handle packing ----------------
 
@@ -20,17 +20,14 @@ pub const KIND_I64: KindId = 14;
 pub const KIND_I128: KindId = 15;
 pub const KIND_ISIZE: KindId = 16;
 pub const KIND_BOOL: KindId = 17;
-
-const KIND_SHIFT: u64 = 32;
-const IDX_MASK: u64 = (1u64 << 32) - 1;
+pub const KIND_TUPLE: KindId = 18;
 
 #[inline]
-pub(crate) fn pack_handle(kind: KindId, idx: u32) -> HKayGlobal {
-    HKayGlobal(((kind as u64) << KIND_SHIFT) | (idx as u64 & IDX_MASK))
+pub(crate) fn pack_handle(kind: KindId, idx: u32) -> HKayRef {
+    HKayRef { kind, index: idx }
 }
 
 #[inline]
-pub(crate) fn unpack_handle(h: HKayGlobal) -> (KindId, u32) {
-    let raw = h.0;
-    (((raw >> KIND_SHIFT) as u32), (raw & IDX_MASK) as u32)
+pub(crate) fn unpack_handle(h: HKayRef) -> (KindId, u32) {
+    (h.kind as u32, h.index as u32)
 }

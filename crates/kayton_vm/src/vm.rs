@@ -264,6 +264,62 @@ impl KaytonVm {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.get_bool_by_handle(h)
             },
+
+            // ---- Interners ----
+            intern_u64: |ctx, v| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_u64(v)
+            },
+            intern_u8: |ctx, v| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_u8(v)
+            },
+            intern_f64: |ctx, v| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_f64(v)
+            },
+            intern_f32: |ctx, v| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_f32(v)
+            },
+            intern_static_str: |ctx, sstr| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_static_str(sstr)
+            },
+            intern_str_buf: |ctx, sref| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_str_buf(sref)
+            },
+            intern_dyn_ptr: |ctx, kind, ptr| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.intern_dyn_ptr(kind, ptr)
+            },
+
+            // ---- Tuples ----
+            set_global_tuple_from_handles: |ctx, name, items, len| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.set_tuple_from_handles(name, items, len)
+            },
+            get_global_tuple_len: |ctx, name| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_tuple_len_by_name(name)
+            },
+            get_tuple_len_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_tuple_len_by_handle(h)
+            },
+            get_global_tuple_item: |ctx, name, index| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_tuple_item_by_name(name, index)
+            },
+            get_tuple_item_by_index: |ctx, h, index| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_tuple_item_by_index(h, index)
+            },
+            read_tuple_into_slice_by_handle: |ctx, h, out, cap| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.read_tuple_into_slice_by_handle(h, out, cap)
+            },
         });
 
         KaytonVm { host, api }

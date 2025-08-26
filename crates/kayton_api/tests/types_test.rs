@@ -1,6 +1,6 @@
 use core::mem::{align_of, size_of};
 
-use kayton_api::{ErrorKind, HKayGlobal, KaytonError};
+use kayton_api::{ErrorKind, HKayRef, KaytonError};
 
 #[test]
 fn kayton_error_kinds() {
@@ -22,7 +22,8 @@ fn kayton_error_display() {
 }
 
 #[test]
-fn hkayglobal_layout() {
-    assert_eq!(size_of::<HKayGlobal>(), size_of::<u64>());
-    assert_eq!(align_of::<HKayGlobal>(), align_of::<u64>());
+fn hkayref_layout() {
+    // HKayRef is a two-field u32 struct
+    assert_eq!(size_of::<HKayRef>(), 8);
+    assert_eq!(align_of::<HKayRef>(), align_of::<u32>());
 }

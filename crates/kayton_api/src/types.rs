@@ -82,10 +82,13 @@ impl KaytonError {
     }
 }
 
-/// Opaque global handle (u64 inside)
-#[repr(transparent)]
+/// Universal handle to any VM value (kind + per-kind index)
+#[repr(C)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct HKayGlobal(pub u64);
+pub struct HKayRef {
+    pub kind: u32,
+    pub index: u32,
+}
 
 /// Opaque VM context surface passed to plugins
 #[repr(C)]
