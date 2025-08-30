@@ -29,6 +29,12 @@ pub struct KaytonApi {
     pub get_global_str_buf_by_handle: crate::fns_string::GetGlobalStrBufByHandleFn,
     pub drop_global_str_buf: crate::fns_string::DropGlobalStrBufFn,
 
+    // ---- KVec ----
+    pub set_global_kvec: crate::fns_kvec::SetGlobalKVecFn,
+    pub get_global_kvec: crate::fns_kvec::GetGlobalKVecFn,
+    pub get_global_kvec_by_handle: crate::fns_kvec::GetGlobalKVecByHandleFn,
+    pub drop_global_kvec: crate::fns_kvec::DropGlobalKVecFn,
+
     pub register_dynamic_kind: crate::fns_dynamic::RegisterDynamicKindFn,
     pub set_global_dyn_ptr: crate::fns_dynamic::SetGlobalDynPtrFn,
     pub get_global_dyn_ptr: crate::fns_dynamic::GetGlobalDynPtrFn,
@@ -148,6 +154,14 @@ impl crate::types::KaytonContext {
         h: crate::types::HKayRef,
     ) -> Result<crate::types::GlobalStrBuf, crate::types::KaytonError> {
         (self.api().get_global_str_buf_by_handle)(self, h)
+    }
+
+    #[inline]
+    pub fn get_kvec_by_handle(
+        &mut self,
+        h: crate::types::HKayRef,
+    ) -> Result<crate::KVec, crate::types::KaytonError> {
+        (self.api().get_global_kvec_by_handle)(self, h)
     }
 
     #[inline]

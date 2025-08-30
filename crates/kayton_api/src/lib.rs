@@ -5,15 +5,18 @@ pub mod api;
 pub mod fns_dynamic;
 pub mod fns_float;
 pub mod fns_intern;
+pub mod fns_kvec;
 pub mod fns_sint;
 pub mod fns_string;
 pub mod fns_tuple;
 pub mod fns_uint;
 pub mod kinds;
 pub mod types;
+pub mod vec_types;
 
 // Explicit re-exports (no globs); function typedefs are NOT re-exported.
 pub use types::{ErrorKind, GlobalStrBuf, HKayRef, KaytonContext, KaytonError};
+pub use vec_types::KVec;
 
 pub use api::KaytonApi;
 pub use kinds::*;
@@ -22,6 +25,7 @@ pub use kinds::*;
 pub use fns_dynamic::*;
 pub use fns_float::*;
 pub use fns_intern::*;
+pub use fns_kvec::*;
 pub use fns_sint::*;
 pub use fns_string::*;
 pub use fns_tuple::*;

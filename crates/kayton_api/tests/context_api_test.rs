@@ -1,6 +1,7 @@
 use core::ptr::null_mut;
 
 use core::ffi::c_void;
+use kayton_api::KVec;
 use kayton_api::api::KaytonApi;
 use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonContext, KaytonError};
 
@@ -72,6 +73,29 @@ fn get_global_str_buf(_ctx: &mut KaytonContext, _name: &str) -> Result<GlobalStr
 }
 
 fn drop_global_str_buf(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<(), KaytonError> {
+    Ok(())
+}
+
+fn set_global_kvec(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _value: KVec,
+) -> Result<HKayRef, KaytonError> {
+    Ok(HKayRef {
+        kind: 0,
+        index: 0x9999,
+    })
+}
+
+fn get_global_kvec(_ctx: &mut KaytonContext, _name: &str) -> Result<KVec, KaytonError> {
+    Ok(KVec::from_raw(core::ptr::null(), 0, 0, 0))
+}
+
+fn get_global_kvec_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<KVec, KaytonError> {
+    Ok(KVec::from_raw(core::ptr::null(), 0, 0, 0))
+}
+
+fn drop_global_kvec(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<(), KaytonError> {
     Ok(())
 }
 
@@ -348,6 +372,10 @@ fn context_api_accessor_and_calls() {
         get_global_str_buf: get_global_str_buf,
         get_global_str_buf_by_handle: get_str_buf_by_handle,
         drop_global_str_buf: drop_global_str_buf,
+        set_global_kvec: set_global_kvec,
+        get_global_kvec: get_global_kvec,
+        get_global_kvec_by_handle: get_global_kvec_by_handle,
+        drop_global_kvec: drop_global_kvec,
         register_dynamic_kind: register_dynamic_kind,
         set_global_dyn_ptr: set_global_dyn_ptr,
         get_global_dyn_ptr: get_global_dyn_ptr,

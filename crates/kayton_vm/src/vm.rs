@@ -129,6 +129,24 @@ impl KaytonVm {
                 s.drop_str_buf_by_handle(h)
             },
 
+            // ---- KVec ----
+            set_global_kvec: |ctx, name, v| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                Ok(s.set_kvec(name, v))
+            },
+            get_global_kvec: |ctx, name| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_kvec(name)
+            },
+            get_global_kvec_by_handle: |ctx, h| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_kvec_by_handle(h)
+            },
+            drop_global_kvec: |ctx, h| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.drop_kvec_by_handle(h)
+            },
+
             // ---- New integer/bool functions ----
             set_global_u32: |ctx, name, v| {
                 let s = unsafe { &mut *(ctx.host_data as *mut HostState) };

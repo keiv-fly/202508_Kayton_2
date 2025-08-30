@@ -21,3 +21,4 @@ pub const KIND_I128: KindId = 15;
 pub const KIND_ISIZE: KindId = 16;
 pub const KIND_BOOL: KindId = 17;
 pub const KIND_TUPLE: KindId = 18;
+pub const KIND_KVEC: KindId = 19;

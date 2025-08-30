@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::string::String;
 use std::vec::Vec;
 
+use kayton_api::KVec;
 use kayton_api::kinds::KindId;
 use kayton_api::types::{GlobalStrBuf, HKayRef};
 
@@ -39,6 +40,7 @@ pub struct HostState {
     f32s: Vec<f32>,
     static_strs: Vec<&'static str>,
     str_bufs: Vec<Option<GlobalStrBuf>>,
+    kvecs: Vec<Option<KVec>>,
 
     // Tuple storage: flat items and (start,len) metadata per tuple
     tuple_items: Vec<HKayRef>,
@@ -70,6 +72,7 @@ impl HostState {
             f32s: Vec::new(),
             static_strs: Vec::new(),
             str_bufs: Vec::new(),
+            kvecs: Vec::new(),
             tuple_items: Vec::new(),
             tuples: Vec::new(),
             next_kind_id: 1000,
