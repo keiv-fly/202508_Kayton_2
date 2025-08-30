@@ -1,9 +1,8 @@
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{
-    KIND_U8, KIND_U16, KIND_U32, KIND_U64, KIND_U128, KIND_USIZE, pack_handle, unpack_handle,
-};
+use crate::kinds::{pack_handle, unpack_handle};
+use kayton_api::kinds::{KIND_U8, KIND_U16, KIND_U32, KIND_U64, KIND_U128, KIND_USIZE};
 
 impl HostState {
     // Built-in setters/getters for unsigned integers

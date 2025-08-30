@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::string::String;
 use std::vec::Vec;
 
-use kayton_api::fns_dynamic::KindId;
+use kayton_api::kinds::KindId;
 use kayton_api::types::{GlobalStrBuf, HKayRef};
 
 mod dyn_store;

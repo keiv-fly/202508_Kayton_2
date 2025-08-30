@@ -1,10 +1,8 @@
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{
-    KIND_BOOL, KIND_I8, KIND_I16, KIND_I32, KIND_I64, KIND_I128, KIND_ISIZE, pack_handle,
-    unpack_handle,
-};
+use crate::kinds::{pack_handle, unpack_handle};
+use kayton_api::kinds::{KIND_BOOL, KIND_I8, KIND_I16, KIND_I32, KIND_I64, KIND_I128, KIND_ISIZE};
 
 impl HostState {
     // Built-in setters/getters for signed integers and bool

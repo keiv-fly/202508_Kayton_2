@@ -1,7 +1,8 @@
 use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{KIND_STATICSTR, KIND_STRBUF, pack_handle, unpack_handle};
+use crate::kinds::{pack_handle, unpack_handle};
+use kayton_api::kinds::{KIND_STATICSTR, KIND_STRBUF};
 
 impl HostState {
     // Built-in setters/getters for strings

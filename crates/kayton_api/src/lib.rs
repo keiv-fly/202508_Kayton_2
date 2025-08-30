@@ -9,12 +9,14 @@ pub mod fns_sint;
 pub mod fns_string;
 pub mod fns_tuple;
 pub mod fns_uint;
+pub mod kinds;
 pub mod types;
 
 // Explicit re-exports (no globs); function typedefs are NOT re-exported.
 pub use types::{ErrorKind, GlobalStrBuf, HKayRef, KaytonContext, KaytonError};
 
 pub use api::KaytonApi;
+pub use kinds::*;
 
 // Re-export function pointer typedefs for convenience within Rust-only dynamic linking
 pub use fns_dynamic::*;

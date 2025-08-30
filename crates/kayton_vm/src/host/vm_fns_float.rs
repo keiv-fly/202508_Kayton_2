@@ -1,7 +1,8 @@
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{KIND_F32, KIND_F64, pack_handle, unpack_handle};
+use crate::kinds::{pack_handle, unpack_handle};
+use kayton_api::kinds::{KIND_F32, KIND_F64};
 
 impl HostState {
     // Built-in setters/getters for floating point numbers

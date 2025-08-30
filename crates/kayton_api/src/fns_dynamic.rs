@@ -1,9 +1,7 @@
 use core::ffi::c_void;
 
+use crate::kinds::KindId;
 use crate::{HKayRef, KaytonContext, KaytonError};
-
-/// 32-bit kind identifier used in handles
-pub type KindId = u32;
 
 /// Drop fn for dynamic-kind pointers
 pub type DynDropFn = unsafe extern "C" fn(ptr: *mut c_void);

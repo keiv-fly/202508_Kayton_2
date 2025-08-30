@@ -1,7 +1,8 @@
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{KIND_TUPLE, pack_handle, unpack_handle};
+use crate::kinds::{pack_handle, unpack_handle};
+use kayton_api::kinds::KIND_TUPLE;
 
 impl HostState {
     pub fn set_tuple_from_handles(

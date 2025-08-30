@@ -1,6 +1,7 @@
 use std::ffi::c_void;
 
-use kayton_api::fns_dynamic::{DynDropFn, KindId};
+use kayton_api::fns_dynamic::DynDropFn;
+use kayton_api::kinds::KindId;
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::{DynKindStore, HostState};

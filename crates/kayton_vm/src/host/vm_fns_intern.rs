@@ -1,12 +1,11 @@
 use core::ffi::c_void;
 
-use kayton_api::fns_dynamic::KindId;
+use kayton_api::kinds::KindId;
 use kayton_api::types::{HKayRef, KaytonError};
 
 use super::HostState;
-use crate::kinds::{
-    KIND_F32, KIND_F64, KIND_STATICSTR, KIND_STRBUF, KIND_U8, KIND_U64, pack_handle,
-};
+use crate::kinds::pack_handle;
+use kayton_api::kinds::{KIND_F32, KIND_F64, KIND_STATICSTR, KIND_STRBUF, KIND_U8, KIND_U64};
 
 impl HostState {
     pub fn intern_u64(&mut self, value: u64) -> Result<HKayRef, KaytonError> {
