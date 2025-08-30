@@ -144,3 +144,65 @@ fn test_dynamic_kinds_register_set_get_and_drop() {
     // Expect two drops: one from overwrite of first value, one when VM dropped and releases p2
     assert_eq!(DROPPED.load(Ordering::SeqCst), 2);
 }
+
+#[test]
+fn test_drop_str_buf_api_clears_slot_and_calls_drop_fn() {
+    use core::sync::atomic::{AtomicUsize, Ordering};
+    static DROPPED: AtomicUsize = AtomicUsize::new(0);
+    fn drop_buf(_ptr: *const u8, _len: usize, _cap: usize) {
+        DROPPED.fetch_add(1, Ordering::SeqCst);
+    }
+
+    let (vm, mut ctx) = vm_and_ctx();
+    let api: &Api = vm.api();
+
+    // Create a buffer with a custom drop function
+    let buf = VmGlobalStrBuf {
+        ptr: core::ptr::null(),
+        len: 0,
+        capacity: 0,
+        drop_fn: Some(drop_buf),
+    };
+    let h = (api.set_global_str_buf)(&mut ctx, "buf", buf).unwrap();
+
+    // Drop via API; should invoke drop_fn and clear slot
+    (api.drop_global_str_buf)(&mut ctx, h).unwrap();
+    assert_eq!(DROPPED.load(Ordering::SeqCst), 1);
+
+    // Access by handle should now error
+    assert!((api.get_global_str_buf_by_handle)(&mut ctx, h).is_err());
+
+    // Reuse same name after drop; should succeed
+    let h2 =
+        (api.set_global_str_buf)(&mut ctx, "buf", VmGlobalStrBuf::new("ok".to_string())).unwrap();
+    let got = (api.get_global_str_buf_by_handle)(&mut ctx, h2).unwrap();
+    assert_eq!(got.as_str(), Some("ok"));
+}
+
+#[test]
+fn test_drop_dyn_ptr_api_calls_drop_fn_and_clears_slot() {
+    use core::ffi::c_void;
+    use core::sync::atomic::{AtomicUsize, Ordering};
+
+    static DROPPED: AtomicUsize = AtomicUsize::new(0);
+    unsafe extern "C" fn drop_ptr(p: *mut c_void) {
+        if !p.is_null() {
+            let _boxed: Box<i32> = unsafe { Box::from_raw(p as *mut i32) };
+            DROPPED.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+
+    let (vm, mut ctx) = vm_and_ctx();
+    let api: &Api = vm.api();
+
+    let kind = (api.register_dynamic_kind)(&mut ctx, "DropKind", drop_ptr);
+    let p: *mut c_void = Box::into_raw(Box::new(77_i32)) as *mut c_void;
+    let h = (api.set_global_dyn_ptr)(&mut ctx, kind, "ptr", p).unwrap();
+
+    // Drop via API
+    (api.drop_global_dyn_ptr)(&mut ctx, h).unwrap();
+    assert_eq!(DROPPED.load(Ordering::SeqCst), 1);
+
+    // Ensure slot is cleared
+    assert!((api.get_global_dyn_ptr_by_handle)(&mut ctx, h).is_err());
+}

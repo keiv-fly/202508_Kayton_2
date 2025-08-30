@@ -27,11 +27,13 @@ pub struct KaytonApi {
     pub set_global_str_buf: crate::fns_string::SetGlobalStrBufFn,
     pub get_global_str_buf: crate::fns_string::GetGlobalStrBufFn,
     pub get_global_str_buf_by_handle: crate::fns_string::GetGlobalStrBufByHandleFn,
+    pub drop_global_str_buf: crate::fns_string::DropGlobalStrBufFn,
 
     pub register_dynamic_kind: crate::fns_dynamic::RegisterDynamicKindFn,
     pub set_global_dyn_ptr: crate::fns_dynamic::SetGlobalDynPtrFn,
     pub get_global_dyn_ptr: crate::fns_dynamic::GetGlobalDynPtrFn,
     pub get_global_dyn_ptr_by_handle: crate::fns_dynamic::GetGlobalDynPtrByHandleFn,
+    pub drop_global_dyn_ptr: crate::fns_dynamic::DropGlobalDynPtrFn,
 
     // ---- Newly added integer and bool types ----
     pub set_global_u32: crate::fns_uint::SetGlobalU32Fn,

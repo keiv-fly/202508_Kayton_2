@@ -71,6 +71,10 @@ fn get_global_str_buf(_ctx: &mut KaytonContext, _name: &str) -> Result<GlobalStr
     Ok(GlobalStrBuf::new(test_str))
 }
 
+fn drop_global_str_buf(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<(), KaytonError> {
+    Ok(())
+}
+
 fn register_dynamic_kind(
     _ctx: &mut KaytonContext,
     _name: &'static str,
@@ -103,6 +107,10 @@ fn get_global_dyn_ptr_by_handle(
     _h: HKayRef,
 ) -> Result<*mut c_void, KaytonError> {
     Ok(core::ptr::null_mut())
+}
+
+fn drop_global_dyn_ptr(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<(), KaytonError> {
+    Ok(())
 }
 
 fn get_u64_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<u64, KaytonError> {
@@ -339,10 +347,12 @@ fn context_api_accessor_and_calls() {
         set_global_str_buf: set_global_str_buf,
         get_global_str_buf: get_global_str_buf,
         get_global_str_buf_by_handle: get_str_buf_by_handle,
+        drop_global_str_buf: drop_global_str_buf,
         register_dynamic_kind: register_dynamic_kind,
         set_global_dyn_ptr: set_global_dyn_ptr,
         get_global_dyn_ptr: get_global_dyn_ptr,
         get_global_dyn_ptr_by_handle: get_global_dyn_ptr_by_handle,
+        drop_global_dyn_ptr: drop_global_dyn_ptr,
         set_global_u32: set_u32,
         get_global_u32: get_u32,
         get_global_u32_by_handle: get_u32_by_handle,

@@ -50,15 +50,18 @@ impl HostState {
         if let Some(h) = self.resolve(name) {
             let (k, idx) = unpack_handle(h);
             if k == KIND_STRBUF {
-                // Overwrite in place; let previous value drop after move
+                // Overwrite in place with Option; drop previous value if present
                 if let Some(slot) = self.str_bufs.get_mut(idx as usize) {
-                    *slot = value;
+                    if let Some(old) = slot.take() {
+                        drop(old);
+                    }
+                    *slot = Some(value);
                 }
                 return h;
             }
         }
         let idx = self.str_bufs.len() as u32;
-        self.str_bufs.push(value);
+        self.str_bufs.push(Some(value));
         let h = pack_handle(KIND_STRBUF, idx);
         self.bind_name(name, h);
         h
@@ -72,7 +75,7 @@ impl HostState {
         if k != KIND_STRBUF {
             return Err(KaytonError::generic("wrong kind"));
         }
-        if let Some(sb) = self.str_bufs.get(idx as usize) {
+        if let Some(Some(sb)) = self.str_bufs.get(idx as usize) {
             Ok(GlobalStrBuf::from_raw(sb.ptr, sb.len, sb.capacity))
         } else {
             Err(KaytonError::generic("index out of range"))
@@ -84,8 +87,24 @@ impl HostState {
         if k != KIND_STRBUF {
             return Err(KaytonError::generic("wrong kind"));
         }
-        if let Some(sb) = self.str_bufs.get(idx as usize) {
+        if let Some(Some(sb)) = self.str_bufs.get(idx as usize) {
             Ok(GlobalStrBuf::from_raw(sb.ptr, sb.len, sb.capacity))
+        } else {
+            Err(KaytonError::generic("index out of range"))
+        }
+    }
+
+    pub fn drop_str_buf_by_handle(&mut self, h: HKayRef) -> Result<(), KaytonError> {
+        let (k, idx) = unpack_handle(h);
+        if k != KIND_STRBUF {
+            return Err(KaytonError::generic("wrong kind"));
+        }
+        let i = idx as usize;
+        if let Some(slot) = self.str_bufs.get_mut(i) {
+            if let Some(old) = slot.take() {
+                drop(old);
+            }
+            Ok(())
         } else {
             Err(KaytonError::generic("index out of range"))
         }

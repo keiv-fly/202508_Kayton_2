@@ -23,3 +23,6 @@ pub type GetGlobalStrBufFn =
 /// Fast path: read a GlobalStrBuf global by handle.
 pub type GetGlobalStrBufByHandleFn =
     fn(ctx: &mut KaytonContext, h: HKayRef) -> Result<GlobalStrBuf, KaytonError>;
+
+/// Drop a GlobalStrBuf by handle.
+pub type DropGlobalStrBufFn = fn(ctx: &mut KaytonContext, h: HKayRef) -> Result<(), KaytonError>;

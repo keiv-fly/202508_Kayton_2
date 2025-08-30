@@ -38,7 +38,7 @@ pub struct HostState {
     f64s: Vec<f64>,
     f32s: Vec<f32>,
     static_strs: Vec<&'static str>,
-    str_bufs: Vec<GlobalStrBuf>,
+    str_bufs: Vec<Option<GlobalStrBuf>>,
 
     // Tuple storage: flat items and (start,len) metadata per tuple
     tuple_items: Vec<HKayRef>,

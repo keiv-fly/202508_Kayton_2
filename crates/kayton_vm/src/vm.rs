@@ -93,6 +93,10 @@ impl KaytonVm {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.get_dyn_by_handle(h)
             },
+            drop_global_dyn_ptr: |ctx, h| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.drop_dyn_by_handle(h)
+            },
 
             get_global_u64_by_handle: |ctx, h| {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
@@ -119,6 +123,10 @@ impl KaytonVm {
             get_global_str_buf_by_handle: |ctx, h| {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.get_str_buf_by_handle(h)
+            },
+            drop_global_str_buf: |ctx, h| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.drop_str_buf_by_handle(h)
             },
 
             // ---- New integer/bool functions ----

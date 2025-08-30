@@ -25,3 +25,6 @@ pub type GetGlobalDynPtrFn =
 /// Fast path by handle
 pub type GetGlobalDynPtrByHandleFn =
     fn(ctx: &mut KaytonContext, h: HKayRef) -> Result<*mut c_void, KaytonError>;
+
+/// Drop a dynamic pointer by handle (invokes the registered kind's drop_fn)
+pub type DropGlobalDynPtrFn = fn(ctx: &mut KaytonContext, h: HKayRef) -> Result<(), KaytonError>;

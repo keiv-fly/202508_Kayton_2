@@ -41,7 +41,7 @@ impl HostState {
     pub fn intern_str_buf(&mut self, s: &str) -> Result<HKayRef, KaytonError> {
         let buf = kayton_api::types::GlobalStrBuf::new(s.to_string());
         let idx = self.str_bufs.len() as u32;
-        self.str_bufs.push(buf);
+        self.str_bufs.push(Some(buf));
         Ok(pack_handle(KIND_STRBUF, idx))
     }
 

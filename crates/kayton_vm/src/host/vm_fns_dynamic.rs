@@ -26,7 +26,7 @@ impl HostState {
             let (k, idx) = unpack_handle(h);
             if k == kind {
                 if let Some(store) = self.dyn_kinds.get_mut(&kind) {
-                    store.set(idx, ptr);
+                    store.set(idx, Some(ptr));
                     return Ok(h);
                 }
                 return Err(KaytonError::generic("unknown dynamic kind"));
@@ -75,5 +75,16 @@ impl HostState {
         store
             .get(idx)
             .ok_or_else(|| KaytonError::generic("index out of range"))
+    }
+
+    pub fn drop_dyn_by_handle(&mut self, h: HKayRef) -> Result<(), KaytonError> {
+        let (kind, idx) = unpack_handle(h);
+        let store = self
+            .dyn_kinds
+            .get_mut(&kind)
+            .ok_or_else(|| KaytonError::generic("not a dynamic kind"))?;
+        // Reuse set to invoke drop on old and store null
+        store.set(idx, None);
+        Ok(())
     }
 }
