@@ -5,7 +5,7 @@ edition = "2024"
 build = "build.rs"
 
 [features]
-default = []
+default = ["jupyter"]
 # Enable full Jupyter (ZeroMQ + HMAC) protocol
 jupyter = ["dep:zmq", "dep:hmac", "dep:sha2"]
 
@@ -19,6 +19,8 @@ dirs = "5"
 zmq = { version = "0.10", optional = true }
 hmac = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
+chrono = { version = "0.4", features = ["serde", "clock"] }
+hex = "0.4"
 
 # Workspace
 kayton_interactive_shared = { path = "../kayton_interactive_shared" }

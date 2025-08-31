@@ -33,8 +33,16 @@ def main() -> int:
     )
     parser.add_argument(
         "--use-absolute-exe",
+        dest="use_absolute_exe",
         action="store_true",
-        help="Rewrite kernel.json argv[0] to the absolute path of the built kayton_kernel executable",
+        default=True,
+        help="Rewrite kernel.json argv[0] to the absolute path of the built kayton_kernel executable (default: True)",
+    )
+    parser.add_argument(
+        "--no-absolute-exe",
+        dest="use_absolute_exe",
+        action="store_false",
+        help="Do not rewrite argv[0] to an absolute path",
     )
     parser.add_argument(
         "--user",

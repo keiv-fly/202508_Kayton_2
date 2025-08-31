@@ -11,14 +11,14 @@ mod jupyter;
 #[derive(Parser, Debug)]
 #[command(version, about = "Kayton Jupyter kernel (experimental)")]
 struct Args {
-    #[arg(short, long)]
+    #[arg(short = 'f', long = "connection-file", value_name = "FILE")]
     connection_file: Option<PathBuf>,
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
-
     // If a Jupyter connection file is provided and the feature is enabled, run protocol loop
+    #[cfg(feature = "jupyter")]
+    let args = Args::parse();
     #[cfg(feature = "jupyter")]
     if let Some(cf) = args.connection_file.as_ref() {
         return jupyter::run_kernel(cf);

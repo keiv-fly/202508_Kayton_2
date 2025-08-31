@@ -26,10 +26,21 @@ fn main() {
 
     let _ = fs::create_dir_all(&spec_dir);
 
-    // Minimal kernelspec. We rely on kayton_kernel being on PATH.
+    // Prefer absolute executable path by default so Jupyter doesn't require PATH entries
+    let exe_name = if cfg!(target_os = "windows") {
+        "kayton_kernel.exe"
+    } else {
+        "kayton_kernel"
+    };
+    let exe_path = target_dir
+        .join(&profile)
+        .join(exe_name)
+        .to_string_lossy()
+        .to_string();
+
     // Jupyter will pass the connection file at {connection_file}
     let kernel_json = serde_json::json!({
-        "argv": ["kayton_kernel", "-f", "{connection_file}"],
+        "argv": [exe_path, "-f", "{connection_file}"],
         "display_name": "Kayton",
         "language": "kayton"
     });
