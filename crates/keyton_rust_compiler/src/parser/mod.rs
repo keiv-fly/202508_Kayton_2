@@ -2,8 +2,17 @@ use crate::lexer::{FStringPart, Lexer, Token};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
-    Assign { name: String, expr: Expr },
+    Assign {
+        name: String,
+        expr: Expr,
+    },
     ExprStmt(Expr),
+    FuncDef {
+        name: String,
+        params: Vec<String>,
+        body: Vec<Stmt>,
+    },
+    Return(Expr),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -74,6 +83,16 @@ impl Parser {
         if self.is_at_end() {
             return None;
         }
+        // Function definition
+        if matches!(self.peek(), Token::FnKw) {
+            return Some(self.parse_func_def());
+        }
+        // Return statement
+        if matches!(self.peek(), Token::ReturnKw) {
+            self.advance();
+            let expr = self.parse_expr();
+            return Some(Stmt::Return(expr));
+        }
         if let Token::Ident(name) = self.peek().clone() {
             if self.peek_next_is(Token::Equal) {
                 self.advance(); // ident
@@ -84,6 +103,51 @@ impl Parser {
         }
         let expr = self.parse_expr();
         Some(Stmt::ExprStmt(expr))
+    }
+
+    fn parse_func_def(&mut self) -> Stmt {
+        self.expect(Token::FnKw);
+        let name = match self.advance() {
+            Token::Ident(s) => s,
+            other => panic!("expected function name, found {:?}", other),
+        };
+        self.expect(Token::LParen);
+        let mut params = Vec::new();
+        if !matches!(self.peek(), Token::RParen) {
+            loop {
+                match self.advance() {
+                    Token::Ident(p) => params.push(p),
+                    other => panic!("expected parameter name, found {:?}", other),
+                }
+                if matches!(self.peek(), Token::Comma) {
+                    self.advance();
+                    continue;
+                }
+                break;
+            }
+        }
+        self.expect(Token::RParen);
+        self.expect(Token::Colon);
+        self.expect(Token::Newline);
+        self.expect(Token::Indent);
+        let mut body = Vec::new();
+        self.skip_newlines();
+        while !matches!(self.peek(), Token::Dedent | Token::EOF) {
+            if let Some(stmt) = self.parse_stmt() {
+                body.push(stmt);
+            }
+            self.skip_newlines();
+        }
+        self.expect(Token::Dedent);
+
+        // If the last line is an expression statement, treat it as an implicit return
+        if let Some(last) = body.pop() {
+            match last {
+                Stmt::ExprStmt(expr) => body.push(Stmt::Return(expr)),
+                other => body.push(other),
+            }
+        }
+        Stmt::FuncDef { name, params, body }
     }
 
     fn parse_primary(&mut self) -> Expr {

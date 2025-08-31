@@ -82,6 +82,17 @@ impl Resolver {
                     };
                     self.syms.define(scope, name, kind);
                 }
+                HirStmt::FuncDef { name, .. } => {
+                    // Define function symbol in current scope
+                    let sid = self.syms.define(scope, name, SymKind::Func);
+                    // Seed unknown signature for now (Any params/ret inferred at call sites)
+                    if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                        info.sig = Some(FuncSig {
+                            params: vec![],
+                            ret: Type::Any,
+                        });
+                    }
+                }
                 HirStmt::ExprStmt { .. } => {}
             }
         }
@@ -123,6 +134,16 @@ impl Resolver {
                     hir_id: *hir_id,
                     sym,
                     expr: rexpr,
+                }
+            }
+            HirStmt::FuncDef { .. } => {
+                // Function bodies are not yet modeled in SHIR; skip to a no-op expr stmt Unit
+                SStmt::ExprStmt {
+                    hir_id: HirId(0),
+                    expr: SExpr::Int {
+                        hir_id: HirId(0),
+                        value: 0,
+                    },
                 }
             }
             HirStmt::ExprStmt { hir_id, expr } => {
@@ -226,10 +247,7 @@ pub fn resolve_program(hir: &[HirStmt]) -> ResolvedProgram {
     resolve_program_with_spans(hir, HashMap::new())
 }
 
-pub fn resolve_program_with_spans(
-    hir: &[HirStmt],
-    spans: HashMap<HirId, Span>,
-) -> ResolvedProgram {
+pub fn resolve_program_with_spans(hir: &[HirStmt], spans: HashMap<HirId, Span>) -> ResolvedProgram {
     let mut resolver = Resolver::new(spans);
     resolver.add_builtin("print");
     let shir = resolver.resolve_program(hir);

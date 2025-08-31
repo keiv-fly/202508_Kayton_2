@@ -12,6 +12,11 @@ pub enum HirStmt {
         hir_id: HirId,
         expr: HirExpr,
     },
+    FuncDef {
+        hir_id: HirId,
+        name: String,
+        params: Vec<String>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]

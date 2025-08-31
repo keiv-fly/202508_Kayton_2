@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -6,11 +7,16 @@ pub enum Token {
     Int(i64),
     Str(String),
     Ident(String),
+    FnKw,
+    ReturnKw,
     Plus,
     Equal,
     LParen,
     RParen,
     Comma,
+    Colon,
+    Indent,
+    Dedent,
     Newline,
     EOF,
     InterpolatedString(Vec<FStringPart>),
@@ -24,12 +30,18 @@ pub enum FStringPart {
 
 pub struct Lexer<'a> {
     chars: Peekable<Chars<'a>>,
+    at_line_start: bool,
+    indent_stack: Vec<usize>,
+    pending: VecDeque<Token>,
 }
 
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
         Self {
             chars: input.chars().peekable(),
+            at_line_start: true,
+            indent_stack: vec![0],
+            pending: VecDeque::new(),
         }
     }
 
@@ -48,15 +60,86 @@ impl<'a> Lexer<'a> {
     }
 
     fn next_token(&mut self) -> Token {
-        self.skip_whitespace();
+        if let Some(tok) = self.pending.pop_front() {
+            return tok;
+        }
+
+        // Handle indentation at start of line
+        if self.at_line_start {
+            // Count spaces; tabs are not allowed anywhere
+            let mut spaces = 0usize;
+            loop {
+                match self.chars.peek().copied() {
+                    Some(' ') => {
+                        self.chars.next();
+                        spaces += 1;
+                    }
+                    Some('\t') => panic!("tabs are not allowed"),
+                    _ => break,
+                }
+            }
+
+            // Blank line handling
+            if let Some('\n') = self.chars.peek().copied() {
+                self.chars.next();
+                // Stay at start of line for the next token
+                self.at_line_start = true;
+                return Token::Newline;
+            }
+
+            let current = *self.indent_stack.last().unwrap();
+            if spaces == current {
+                // No change in indent
+                self.at_line_start = false;
+            } else if spaces > current {
+                // Enforce exactly +4 spaces
+                if spaces != current + 4 {
+                    panic!("indentation must increase by exactly 4 spaces");
+                }
+                self.indent_stack.push(spaces);
+                self.at_line_start = false;
+                return Token::Indent;
+            } else {
+                // Dedent(s) to a previous level
+                while let Some(&top) = self.indent_stack.last() {
+                    if top > spaces {
+                        self.indent_stack.pop();
+                        self.pending.push_back(Token::Dedent);
+                    } else {
+                        break;
+                    }
+                }
+                // After popping, the top must match exactly
+                if *self.indent_stack.last().unwrap() != spaces {
+                    panic!("invalid dedent level; must match a previous indentation");
+                }
+                self.at_line_start = false;
+                if let Some(tok) = self.pending.pop_front() {
+                    return tok;
+                }
+            }
+        }
+
+        self.skip_inline_spaces();
         let ch = match self.chars.peek().copied() {
             Some(c) => c,
-            None => return Token::EOF,
+            None => {
+                // At EOF, emit any remaining dedents
+                if self.indent_stack.len() > 1 {
+                    while self.indent_stack.len() > 1 {
+                        self.indent_stack.pop();
+                        self.pending.push_back(Token::Dedent);
+                    }
+                    return self.pending.pop_front().unwrap();
+                }
+                return Token::EOF;
+            }
         };
 
         match ch {
             '\n' => {
                 self.chars.next();
+                self.at_line_start = true;
                 Token::Newline
             }
             '=' => {
@@ -79,6 +162,10 @@ impl<'a> Lexer<'a> {
                 self.chars.next();
                 Token::Comma
             }
+            ':' => {
+                self.chars.next();
+                Token::Colon
+            }
             '0'..='9' => self.lex_number(ch),
             'a'..='z' | 'A'..='Z' | '_' => {
                 if ch == 'f' {
@@ -89,10 +176,11 @@ impl<'a> Lexer<'a> {
                 self.lex_ident(ch)
             }
             '"' => self.lex_string(),
+            '\t' => panic!("tabs are not allowed"),
             _ => {
-                // Unknown character, skip
+                // Unknown character, skip and continue
                 self.chars.next();
-                Token::EOF
+                self.next_token()
             }
         }
     }
@@ -122,7 +210,11 @@ impl<'a> Lexer<'a> {
                 break;
             }
         }
-        Token::Ident(ident)
+        match ident.as_str() {
+            "fn" => Token::FnKw,
+            "return" => Token::ReturnKw,
+            _ => Token::Ident(ident),
+        }
     }
 
     fn lex_string(&mut self) -> Token {
@@ -169,10 +261,12 @@ impl<'a> Lexer<'a> {
         Token::InterpolatedString(parts)
     }
 
-    fn skip_whitespace(&mut self) {
+    fn skip_inline_spaces(&mut self) {
         while let Some(&c) = self.chars.peek() {
-            if c == ' ' || c == '\t' || c == '\r' {
+            if c == ' ' || c == '\r' {
                 self.chars.next();
+            } else if c == '\t' {
+                panic!("tabs are not allowed");
             } else {
                 break;
             }

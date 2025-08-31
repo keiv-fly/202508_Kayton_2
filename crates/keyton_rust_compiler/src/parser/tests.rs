@@ -98,3 +98,45 @@ print(f"{x}")
         ]
     );
 }
+
+#[test]
+fn function_with_explicit_return() {
+    let input = r#"fn my_sum(x, y):
+    return x + y
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![Stmt::FuncDef {
+            name: "my_sum".to_string(),
+            params: vec!["x".to_string(), "y".to_string()],
+            body: vec![Stmt::Return(Expr::Binary {
+                left: Box::new(Expr::Ident("x".to_string())),
+                op: BinOp::Add,
+                right: Box::new(Expr::Ident("y".to_string())),
+            })],
+        }]
+    );
+}
+
+#[test]
+fn function_with_implicit_return() {
+    let input = r#"fn my_sum(x, y):
+    x + y
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![Stmt::FuncDef {
+            name: "my_sum".to_string(),
+            params: vec!["x".to_string(), "y".to_string()],
+            body: vec![Stmt::Return(Expr::Binary {
+                left: Box::new(Expr::Ident("x".to_string())),
+                op: BinOp::Add,
+                right: Box::new(Expr::Ident("y".to_string())),
+            })],
+        }]
+    );
+}
