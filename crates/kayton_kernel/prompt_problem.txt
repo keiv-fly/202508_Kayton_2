@@ -1,0 +1,944 @@
+
+
+Solve the problem with non responsive kernel:
+
+```
+(py313) C:\Users\keivf\Documents\20250810_Kayton_2\notebooks>jupyter console --kernel kayton
+C:\Users\keivf\miniconda3\envs\py313\Lib\site-packages\jupyter_console\ptshell.py:136: UserWarning: No lexer found for language 'kayton'. Treating as plain text.
+  warn("No lexer found for language %r. Treating as plain text." % name)
+Jupyter console 6.6.3
+
+
+In [1]: x=2
+Out[1]:
+x = 2
+
+
+In [2]: print(x)
+2
+Out[2]:
+x = 2
+
+
+In [3]:
+Do you really want to exit ([y]/n)? y
+Shutting down kernel
+
+(py313) C:\Users\keivf\Documents\20250810_Kayton_2\notebooks>jupyter kernelspec list
+Available kernels:
+  python3    C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels\python3
+  kayton     C:\Users\keivf\AppData\Roaming\jupyter\kernels\kayton
+```
+
+
+part of the log of the following command: `jupyter notebook --debug`:
+
+
+
+[D 2025-08-31 23:57:32.370 ServerApp] Searching ['C:\\Users\\keivf\\miniconda3\\envs\\py313\\etc\\jupyter', 'C:\\Users\\keivf\\.jupyter', 'C:\\Users\\keivf\\AppData\\Roaming\\Python\\etc\\jupyter'] for config files
+[D 2025-08-31 23:57:32.371 ServerApp] Looking for jupyter_config in C:\Users\keivf\AppData\Roaming\Python\etc\jupyter
+[D 2025-08-31 23:57:32.371 ServerApp] Looking for jupyter_config in C:\Users\keivf\.jupyter
+[D 2025-08-31 23:57:32.372 ServerApp] Looking for jupyter_config in C:\Users\keivf\miniconda3\envs\py313\etc\jupyter
+[D 2025-08-31 23:57:32.373 ServerApp] Looking for jupyter_server_config in C:\Users\keivf\AppData\Roaming\Python\etc\jupyter
+[D 2025-08-31 23:57:32.374 ServerApp] Looking for jupyter_server_config in C:\Users\keivf\.jupyter
+[D 2025-08-31 23:57:32.374 ServerApp] Looking for jupyter_server_config in C:\Users\keivf\miniconda3\envs\py313\etc\jupyter
+[D 2025-08-31 23:57:32.381 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:32.381 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\.jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:32.382 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyter-lsp-jupyter-server.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyter_server_terminals.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyterlab.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\notebook.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\notebook_shim.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:32.391 ServerApp] Extension package notebook took 0.0000s to import
+[D 2025-08-31 23:57:32.427 ServerApp] Extension package jupyter_lsp took 0.0359s to import
+[D 2025-08-31 23:57:32.444 ServerApp] Extension package jupyter_server_terminals took 0.0163s to import
+[D 2025-08-31 23:57:32.445 ServerApp] Extension package jupyterlab took 0.0000s to import
+[D 2025-08-31 23:57:32.792 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:32.795 ServerApp] Paths used for configuration of page_config:
+
+[D 2025-08-31 23:57:32.799 ServerApp] Extension package notebook_shim took 0.0000s to import
+[I 2025-08-31 23:57:32.801 ServerApp] jupyter_lsp | extension was successfully linked.
+[D 2025-08-31 23:57:32.806 TerminalsExtensionApp] Config changed: {'ServerApp': {'log_level': 'DEBUG', 'jpserver_extensions': <LazyConfigValue {'update': {'jupyter_lsp': True, 'jupyter_server_terminals': True, 'jupyterlab': True, 'notebook_shim': True}}>}, 'ExtensionApp': {'log_level': 'DEBUG'}}
+[D 2025-08-31 23:57:32.807 ServerApp] Config changed: {'ServerApp': {'log_level': 'DEBUG', 'jpserver_extensions': <LazyConfigValue value={'notebook': True, 'jupyter_lsp': True, 'jupyter_server_terminals': True, 'jupyterlab': True, 'notebook_shim': True}>}, 'ExtensionApp': {'log_level': 'DEBUG'}}
+[I 2025-08-31 23:57:32.808 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[D 2025-08-31 23:57:32.814 LabApp] Config changed: {'NotebookApp': {}, 'ServerApp': {'log_level': 'DEBUG', 'jpserver_extensions': <LazyConfigValue value={'notebook': True, 'jupyter_lsp': True, 'jupyter_server_terminals': True, 'jupyterlab': True, 'notebook_shim': True}>}, 'ExtensionApp': {'log_level': 'DEBUG'}}
+[I 2025-08-31 23:57:32.815 ServerApp] jupyterlab | extension was successfully linked.
+[D 2025-08-31 23:57:32.820 JupyterNotebookApp] Config changed: {'NotebookApp': {}, 'ServerApp': {'log_level': 'DEBUG', 'jpserver_extensions': <LazyConfigValue value={'notebook': True, 'jupyter_lsp': True, 'jupyter_server_terminals': True, 'jupyterlab': True, 'notebook_shim': True}>}, 'ExtensionApp': {'log_level': 'DEBUG'}}
+[I 2025-08-31 23:57:32.820 ServerApp] notebook | extension was successfully linked.
+[D 2025-08-31 23:57:33.318 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\.jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.319 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.319 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\.jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.320 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_notebook_config.d\jupyterlab.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_notebook_config.json
+[I 2025-08-31 23:57:33.321 ServerApp] notebook_shim | extension was successfully linked.
+[D 2025-08-31 23:57:33.323 ServerApp] Config changed: {'ExtensionApp': {'log_level': 'DEBUG'}, 'NotebookApp': {}, 'ServerApp': {'log_level': 'DEBUG', 'jpserver_extensions': <LazyConfigValue value={'notebook': True, 'jupyter_lsp': True, 'jupyter_server_terminals': True, 'jupyterlab': True, 'notebook_shim': True}>}}
+[D 2025-08-31 23:57:33.323 ServerApp] Ignoring min_open_files_limit because the limit cannot be adjusted (for example, on Windows)
+[I 2025-08-31 23:57:33.410 ServerApp] notebook_shim | extension was successfully loaded.
+[D 2025-08-31 23:57:33.412 ServerApp] [lsp] rootUri will be file:///c:/Users/keivf/Documents/20250810_Kayton_2/notebooks
+[D 2025-08-31 23:57:33.413 ServerApp] [lsp] virtualDocumentsUri will be file:///c:/Users/keivf/Documents/20250810_Kayton_2/notebooks/.virtual_documents
+[I 2025-08-31 23:57:33.414 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2025-08-31 23:57:33.415 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[D 2025-08-31 23:57:33.421 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:33.421 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\.jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:33.422 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[I 2025-08-31 23:57:33.423 LabApp] JupyterLab extension loaded from C:\Users\keivf\miniconda3\envs\py313\Lib\site-packages\jupyterlab
+[I 2025-08-31 23:57:33.423 LabApp] JupyterLab application directory is C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab
+[I 2025-08-31 23:57:33.424 LabApp] Extension Manager is 'pypi'.
+[D 2025-08-31 23:57:33.424 LabApp] Plugins in PyPIExtensionManager will managed on the sys_prefix level
+[D 2025-08-31 23:57:33.762 LabApp] Extensions list will be fetched from https://pypi.org/pypi.
+[D 2025-08-31 23:57:33.763 LabApp] Plugins in PluginManager will managed on the sys_prefix level
+[D 2025-08-31 23:57:33.765 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:33.765 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:33.765 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[I 2025-08-31 23:57:33.767 ServerApp] jupyterlab | extension was successfully loaded.
+[D 2025-08-31 23:57:33.772 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:33.773 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:33.773 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[I 2025-08-31 23:57:33.774 ServerApp] notebook | extension was successfully loaded.
+[I 2025-08-31 23:57:33.776 ServerApp] Serving notebooks from local directory: C:\Users\keivf\Documents\20250810_Kayton_2\notebooks
+[I 2025-08-31 23:57:33.776 ServerApp] Jupyter Server 2.17.0 is running at:
+[I 2025-08-31 23:57:33.776 ServerApp] http://localhost:8888/tree?token=ffad226e97d21d5fc4d9ce63693bf94e73d83e7b4f6fe7cd
+[I 2025-08-31 23:57:33.776 ServerApp]     http://127.0.0.1:8888/tree?token=ffad226e97d21d5fc4d9ce63693bf94e73d83e7b4f6fe7cd
+[I 2025-08-31 23:57:33.777 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2025-08-31 23:57:33.827 ServerApp]
+
+    To access the server, open this file in a browser:
+        file:///C:/Users/keivf/AppData/Roaming/jupyter/runtime/jpserver-12308-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/tree?token=ffad226e97d21d5fc4d9ce63693bf94e73d83e7b4f6fe7cd
+        http://127.0.0.1:8888/tree?token=ffad226e97d21d5fc4d9ce63693bf94e73d83e7b4f6fe7cd
+[D 2025-08-31 23:57:33.832 ServerApp] notebook_shim | extension was successfully started.
+[D 2025-08-31 23:57:33.833 ServerApp] jupyter_lsp | extension was successfully started.
+[D 2025-08-31 23:57:33.833 ServerApp] jupyter_server_terminals | extension was successfully started.
+[D 2025-08-31 23:57:33.833 ServerApp] jupyterlab | extension was successfully started.
+[D 2025-08-31 23:57:33.833 ServerApp] notebook | extension was successfully started.
+[D 2025-08-31 23:57:33.834 ServerApp] Paths used for configuration of jupyter_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\jupyter_config.json
+[D 2025-08-31 23:57:33.835 ServerApp] Paths used for configuration of jupyter_config:
+        C:\Users\keivf\.jupyter\jupyter_config.json
+[D 2025-08-31 23:57:33.835 ServerApp] Paths used for configuration of jupyter_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_config.json
+[D 2025-08-31 23:57:33.836 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.836 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\.jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.837 ServerApp] Paths used for configuration of jupyter_notebook_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_notebook_config.d\jupyterlab.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_notebook_config.json
+[D 2025-08-31 23:57:33.838 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:33.839 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\.jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:33.839 ServerApp] Paths used for configuration of jupyter_server_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyter-lsp-jupyter-server.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyter_server_terminals.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\jupyterlab.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\notebook.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.d\notebook_shim.json
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\jupyter_server_config.json
+[D 2025-08-31 23:57:34.305 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.306 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.307 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.307 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.307 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.307 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.308 ServerApp] bash-language-server\out\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.308 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.308 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.308 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.309 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.309 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.309 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.310 ServerApp] bash-language-server\bin\main.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.310 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.310 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.310 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.311 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.311 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.311 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.311 ServerApp] dockerfile-language-server-nodejs\lib\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.312 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.312 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.312 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.312 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.312 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.313 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.313 ServerApp] javascript-typescript-langserver\lib\language-server-stdio.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.384 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.384 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.385 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.385 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.385 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.385 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.386 ServerApp] pyright\langserver.index.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.410 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.410 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.410 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.411 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.411 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.411 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.411 ServerApp] sql-language-server\dist\bin\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.435 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.435 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.435 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.435 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.436 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.436 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.436 ServerApp] typescript-language-server\lib\cli.mjs not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.436 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.436 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.437 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.437 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.437 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.437 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.437 ServerApp] unified-language-server\src\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.438 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.439 ServerApp] vscode-css-languageserver-bin\cssServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.439 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.439 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.439 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.439 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.439 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.440 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.440 ServerApp] vscode-html-languageserver-bin\htmlServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.440 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.440 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.440 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.440 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.441 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.441 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.441 ServerApp] vscode-json-languageserver-bin\jsonServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.441 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.442 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.442 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.442 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.442 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.442 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.443 ServerApp] yaml-language-server\bin\yaml-language-server not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[I 2025-08-31 23:57:34.443 ServerApp] Skipped non-installed server(s): basedpyright, bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyrefly, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[D 2025-08-31 23:57:34.492 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.492 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.493 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.493 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.493 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.493 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.493 ServerApp] bash-language-server\out\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.494 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.495 ServerApp] bash-language-server\bin\main.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.495 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.495 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.495 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.495 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.495 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.496 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\out\cli.js
+[D 2025-08-31 23:57:34.496 ServerApp] bash-language-server\out\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.496 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.496 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.496 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.497 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.497 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.497 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\bash-language-server\bin\main.js
+[D 2025-08-31 23:57:34.497 ServerApp] bash-language-server\bin\main.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.498 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.498 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.498 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.498 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.499 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.499 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.499 ServerApp] dockerfile-language-server-nodejs\lib\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.499 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.499 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.499 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.500 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.500 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.500 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\dockerfile-language-server-nodejs\lib\server.js
+[D 2025-08-31 23:57:34.500 ServerApp] dockerfile-language-server-nodejs\lib\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.501 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.501 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.501 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.502 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.502 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.502 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.502 ServerApp] javascript-typescript-langserver\lib\language-server-stdio.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.502 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.502 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.503 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.503 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.503 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.503 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\javascript-typescript-langserver\lib\language-server-stdio.js
+[D 2025-08-31 23:57:34.503 ServerApp] javascript-typescript-langserver\lib\language-server-stdio.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.574 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.574 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.574 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.575 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.575 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.575 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.576 ServerApp] pyright\langserver.index.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.576 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.576 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.576 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.576 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.577 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.577 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\pyright\langserver.index.js
+[D 2025-08-31 23:57:34.577 ServerApp] pyright\langserver.index.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.606 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.606 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.606 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.607 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.607 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.607 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.607 ServerApp] sql-language-server\dist\bin\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.607 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.608 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.608 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.608 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.608 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.609 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\sql-language-server\dist\bin\cli.js
+[D 2025-08-31 23:57:34.609 ServerApp] sql-language-server\dist\bin\cli.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.634 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.634 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.635 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.635 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.635 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.635 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.635 ServerApp] typescript-language-server\lib\cli.mjs not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.635 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.636 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.636 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.636 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.636 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.636 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\typescript-language-server\lib\cli.mjs
+[D 2025-08-31 23:57:34.637 ServerApp] typescript-language-server\lib\cli.mjs not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.637 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.638 ServerApp] unified-language-server\src\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.638 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\unified-language-server\src\server.js
+[D 2025-08-31 23:57:34.639 ServerApp] unified-language-server\src\server.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.640 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.640 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.640 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.640 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.640 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.641 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.641 ServerApp] vscode-css-languageserver-bin\cssServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.641 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.641 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.641 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.642 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.642 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.642 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-css-languageserver-bin\cssServerMain.js
+[D 2025-08-31 23:57:34.642 ServerApp] vscode-css-languageserver-bin\cssServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.643 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.643 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.643 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.644 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.644 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.644 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.644 ServerApp] vscode-html-languageserver-bin\htmlServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-html-languageserver-bin\htmlServerMain.js
+[D 2025-08-31 23:57:34.645 ServerApp] vscode-html-languageserver-bin\htmlServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.646 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.646 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.646 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.647 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.647 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.647 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.647 ServerApp] vscode-json-languageserver-bin\jsonServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.647 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.647 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.648 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.648 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.648 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.648 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\vscode-json-languageserver-bin\jsonServerMain.js
+[D 2025-08-31 23:57:34.648 ServerApp] vscode-json-languageserver-bin\jsonServerMain.js not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.649 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.649 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.649 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.649 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.649 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.650 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.650 ServerApp] yaml-language-server\bin\yaml-language-server not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.650 ServerApp] Checking for C:\Users\keivf\Documents\20250810_Kayton_2\notebooks\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.650 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\staging\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.650 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.650 ServerApp] Checking for C:\Users\keivf\miniconda3\envs\py313\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.651 ServerApp] Checking for C:\nvm4w\nodejs\lib\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.651 ServerApp] Checking for C:\nvm4w\nodejs\node_modules\yaml-language-server\bin\yaml-language-server
+[D 2025-08-31 23:57:34.651 ServerApp] yaml-language-server\bin\yaml-language-server not found in node_modules of [WindowsPath('C:/Users/keivf/Documents/20250810_Kayton_2/notebooks'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/share/jupyter/lab/staging'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313/lib'), WindowsPath('C:/Users/keivf/miniconda3/envs/py313'), WindowsPath('C:/nvm4w/nodejs/lib'), WindowsPath('C:/nvm4w/nodejs')]
+[D 2025-08-31 23:57:34.726 ServerApp] [lsp] None of the installed servers require virtual documents disabling shadow filesystem.
+[D 2025-08-31 23:57:34.726 ServerApp] [lsp] The following Language Servers will be available: {}
+[D 2025-08-31 23:57:35.099 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.102 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.102 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\.jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.103 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.113 JupyterNotebookApp] Using contents: services/contents
+[D 2025-08-31 23:57:35.115 JupyterNotebookApp] 200 GET /tree?token=[secret] (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 16.04ms
+[D 2025-08-31 23:57:35.135 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.136 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\.jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.136 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:35.144 JupyterNotebookApp] 304 GET /custom/custom.css (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 10.72ms
+[D 2025-08-31 23:57:35.304 ServerApp] Path jupyterlab_pygments\static\remoteEntry.5cbb9d2323598fbda535.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\jupyterlab_pygments\static\remoteEntry.5cbb9d2323598fbda535.js
+[D 2025-08-31 23:57:35.305 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/remoteEntry.5cbb9d2323598fbda535.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.61ms
+[D 2025-08-31 23:57:35.307 ServerApp] Path @jupyter-notebook\lab-extension\static\remoteEntry.7e3d7768845089ad5f5f.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-notebook\lab-extension\static\remoteEntry.7e3d7768845089ad5f5f.js
+[D 2025-08-31 23:57:35.308 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/remoteEntry.7e3d7768845089ad5f5f.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.66ms
+[D 2025-08-31 23:57:35.309 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\remoteEntry.35b6c65bd99dab37b910.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\remoteEntry.35b6c65bd99dab37b910.js
+[D 2025-08-31 23:57:35.309 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/remoteEntry.35b6c65bd99dab37b910.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.07ms
+[D 2025-08-31 23:57:35.315 ServerApp] Path jupyterlab_pygments\static\568.1e2faa2ba0bbe59c4780.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\jupyterlab_pygments\static\568.1e2faa2ba0bbe59c4780.js
+[D 2025-08-31 23:57:35.316 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/568.1e2faa2ba0bbe59c4780.js?v=1e2faa2ba0bbe59c4780 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.97ms
+[D 2025-08-31 23:57:35.317 ServerApp] Path jupyterlab_pygments\static\747.67662283a5707eeb4d4c.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\jupyterlab_pygments\static\747.67662283a5707eeb4d4c.js
+[D 2025-08-31 23:57:35.317 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/747.67662283a5707eeb4d4c.js?v=67662283a5707eeb4d4c (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.24ms
+[D 2025-08-31 23:57:35.320 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\898.db11fb1a7e18acb58b5b.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\898.db11fb1a7e18acb58b5b.js
+[D 2025-08-31 23:57:35.321 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/898.db11fb1a7e18acb58b5b.js?v=db11fb1a7e18acb58b5b (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.52ms
+[D 2025-08-31 23:57:35.322 ServerApp] Path @jupyter-notebook\lab-extension\static\93.c48a681bb3e8043bbbd7.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-notebook\lab-extension\static\93.c48a681bb3e8043bbbd7.js
+[D 2025-08-31 23:57:35.322 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/93.c48a681bb3e8043bbbd7.js?v=c48a681bb3e8043bbbd7 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.04ms
+[D 2025-08-31 23:57:35.323 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\651.fe40a967a60b543cf15c.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\651.fe40a967a60b543cf15c.js
+[D 2025-08-31 23:57:35.324 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/651.fe40a967a60b543cf15c.js?v=fe40a967a60b543cf15c (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.01ms
+[D 2025-08-31 23:57:35.324 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\420.23ab95819c045f6c36bc.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\420.23ab95819c045f6c36bc.js
+[D 2025-08-31 23:57:35.325 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/420.23ab95819c045f6c36bc.js?v=23ab95819c045f6c36bc (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.91ms
+[D 2025-08-31 23:57:35.326 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\647.8458d9c331000024a14a.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\647.8458d9c331000024a14a.js
+[D 2025-08-31 23:57:35.327 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/647.8458d9c331000024a14a.js?v=8458d9c331000024a14a (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.65ms
+[D 2025-08-31 23:57:35.327 ServerApp] Path @jupyter-notebook\lab-extension\static\568.5e057f374374b68b6acf.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-notebook\lab-extension\static\568.5e057f374374b68b6acf.js
+[D 2025-08-31 23:57:35.329 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/568.5e057f374374b68b6acf.js?v=5e057f374374b68b6acf (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.56ms
+[D 2025-08-31 23:57:35.331 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\722.53e4a64671c3c48de007.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\722.53e4a64671c3c48de007.js
+[D 2025-08-31 23:57:35.332 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/722.53e4a64671c3c48de007.js?v=53e4a64671c3c48de007 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.23ms
+[D 2025-08-31 23:57:35.332 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\439.b350310d057b43cdd50f.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\439.b350310d057b43cdd50f.js
+[D 2025-08-31 23:57:35.333 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/439.b350310d057b43cdd50f.js?v=b350310d057b43cdd50f (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.02ms
+[D 2025-08-31 23:57:35.333 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\446.f8696ce72124c78273da.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\446.f8696ce72124c78273da.js
+[D 2025-08-31 23:57:35.334 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/446.f8696ce72124c78273da.js?v=f8696ce72124c78273da (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.79ms
+[D 2025-08-31 23:57:35.334 ServerApp] Path @jupyter-widgets\jupyterlab-manager\static\327.d242f1a99504b2d5b629.js served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\labextensions\@jupyter-widgets\jupyterlab-manager\static\327.d242f1a99504b2d5b629.js
+[D 2025-08-31 23:57:35.335 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/327.d242f1a99504b2d5b629.js?v=d242f1a99504b2d5b629 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.83ms
+[D 2025-08-31 23:57:35.350 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.352 ServerApp] Found kernel python3 in C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels
+[D 2025-08-31 23:57:35.353 ServerApp] Found kernel kayton in C:\Users\keivf\AppData\Roaming\jupyter\kernels
+[D 2025-08-31 23:57:35.387 ServerApp] 200 GET /api/kernelspecs?1756673855347 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 37.99ms
+[D 2025-08-31 23:57:35.390 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.390 ServerApp] 200 GET /api/me?1756673855348 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.53ms
+[D 2025-08-31 23:57:35.391 ServerApp] 101 GET /api/events/subscribe (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.75ms
+[D 2025-08-31 23:57:35.394 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.395 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.395 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.397 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.398 ServerApp] 200 GET /api/sessions?1756673855364 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 6.54ms
+[D 2025-08-31 23:57:35.398 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.558 LabApp] 200 GET /lab/api/settings?1756673855355 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 166.16ms
+[D 2025-08-31 23:57:35.559 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.560 ServerApp] 200 GET /api/kernels?1756673855363 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 164.10ms
+[D 2025-08-31 23:57:35.560 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.561 TerminalsExtensionApp] 200 GET /api/terminals?1756673855364 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 164.62ms
+[D 2025-08-31 23:57:35.562 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.563 ServerApp] 200 GET /api/me?1756673855391 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.10ms
+[D 2025-08-31 23:57:35.564 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.565 ServerApp] Found kernel python3 in C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels
+[D 2025-08-31 23:57:35.565 ServerApp] Found kernel kayton in C:\Users\keivf\AppData\Roaming\jupyter\kernels
+[D 2025-08-31 23:57:35.567 ServerApp] 200 GET /api/kernelspecs?1756673855389 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.49ms
+[D 2025-08-31 23:57:35.628 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.628 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.629 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.629 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.682 ServerApp] 200 GET /lab/api/translations/default?1756673855624 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 55.97ms
+[D 2025-08-31 23:57:35.702 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.706 ServerApp] 200 GET /lsp/status?1756673855700 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.92ms
+[D 2025-08-31 23:57:35.735 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.735 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.736 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.736 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.756 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.769 ServerApp] 200 GET /api/contents?content=1&hash=0&1756673855753 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 13.30ms
+[D 2025-08-31 23:57:35.774 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.774 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.775 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.775 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.800 LabApp] 200 GET /lab/api/settings?ids_only=true&1756673855770 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 28.34ms
+[D 2025-08-31 23:57:35.806 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.807 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.807 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.808 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.968 LabApp] 200 GET /lab/api/settings?1756673855770 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 167.08ms
+[D 2025-08-31 23:57:35.973 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.973 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.974 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.975 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.980 LabApp] 200 GET /lab/api/settings/@jupyterlab/codemirror-extension:plugin?1756673855799 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 9.78ms
+[D 2025-08-31 23:57:35.981 ServerApp] 200 GET /lab/api/translations?1756673855731 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 248.08ms
+[D 2025-08-31 23:57:35.984 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.985 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.985 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.988 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.988 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.989 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:35.992 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:35.997 LabApp] 200 GET /lab/api/settings/@jupyterlab/tooltip-extension:notebooks?1756673855971 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 14.50ms
+[D 2025-08-31 23:57:35.999 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.000 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.000 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.000 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.006 LabApp] 200 GET /lab/api/settings/@jupyterlab/notebook-extension:panel?1756673855799 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 19.68ms
+[D 2025-08-31 23:57:36.007 ServerApp] Path @jupyterlab\theme-light-extension\index.css served from C:\Users\keivf\miniconda3\envs\py313\share\jupyter\lab\themes\@jupyterlab\theme-light-extension\index.css
+[D 2025-08-31 23:57:36.007 ServerApp] 304 GET /lab/api/themes/@jupyterlab/theme-light-extension/index.css (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 17.93ms
+[D 2025-08-31 23:57:36.010 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.011 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.011 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.011 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.017 LabApp] 200 GET /lab/api/settings/@jupyterlab/tooltip-extension:consoles?1756673855971 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 19.05ms
+[D 2025-08-31 23:57:36.017 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.018 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.024 LabApp] 200 GET /lab/api/settings/@jupyterlab/toc-extension:registry?1756673855971 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 15.56ms
+[D 2025-08-31 23:57:36.026 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.027 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.027 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.029 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.029 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.030 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.032 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.032 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.032 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.033 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.037 LabApp] 200 GET /lab/api/settings/@jupyterlab/notebook-extension:tools?1756673855971 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 12.81ms
+[D 2025-08-31 23:57:36.040 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.040 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.040 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.041 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.046 LabApp] 200 GET /lab/api/settings/@jupyterlab/notebook-extension:completer?1756673855971 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 17.92ms
+[D 2025-08-31 23:57:36.046 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.053 LabApp] 200 GET /lab/api/settings/@jupyterlab/metadataform-extension:metadataforms?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 22.74ms
+[D 2025-08-31 23:57:36.056 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.057 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.057 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.058 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.064 LabApp] 200 GET /lab/api/settings/@jupyterlab/markdownviewer-extension:plugin?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 26.00ms
+[D 2025-08-31 23:57:36.065 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.069 LabApp] 200 GET /lab/api/settings/@jupyterlab/logconsole-extension:plugin?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 14.48ms
+[D 2025-08-31 23:57:36.072 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.072 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.072 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.074 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.075 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.075 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.077 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.077 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.078 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.079 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.084 LabApp] 200 GET /lab/api/settings/@jupyterlab/fileeditor-extension:completer?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 14.27ms
+[D 2025-08-31 23:57:36.087 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.088 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.088 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:36.088 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.095 LabApp] 200 GET /lab/api/settings/@jupyterlab/debugger-extension:main?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 21.80ms
+[D 2025-08-31 23:57:36.095 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.101 LabApp] 200 GET /lab/api/settings/@jupyterlab/celltags-extension:plugin?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 25.09ms
+[D 2025-08-31 23:57:36.101 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:36.107 LabApp] 200 GET /lab/api/settings/@jupyterlab/cell-toolbar-extension:plugin?1756673855972 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 22.15ms
+[D 2025-08-31 23:57:36.110 ServerApp] 200 GET /api/contents?content=1&hash=0&1756673855875 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 102.40ms
+[D 2025-08-31 23:57:38.408 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.660 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.667 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.667 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\.jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.668 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.679 JupyterNotebookApp] Using contents: services/contents
+[D 2025-08-31 23:57:38.680 JupyterNotebookApp] 200 GET /notebooks/20250831_kayton_text.ipynb (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 20.59ms
+[D 2025-08-31 23:57:38.728 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.729 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\.jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.730 ServerApp] Paths used for configuration of page_config:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\page_config.json
+[D 2025-08-31 23:57:38.737 JupyterNotebookApp] 304 GET /custom/custom.css (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 11.70ms
+[D 2025-08-31 23:57:38.754 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb?type=notebook&content=1&hash=1&contentProviderId=undefined&1756673858427 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 94.80ms
+[D 2025-08-31 23:57:38.844 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/remoteEntry.5cbb9d2323598fbda535.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.61ms
+[D 2025-08-31 23:57:38.846 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/remoteEntry.7e3d7768845089ad5f5f.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.54ms
+[D 2025-08-31 23:57:38.849 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/remoteEntry.35b6c65bd99dab37b910.js (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.94ms
+[D 2025-08-31 23:57:38.856 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/568.1e2faa2ba0bbe59c4780.js?v=1e2faa2ba0bbe59c4780 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.55ms
+[D 2025-08-31 23:57:38.858 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/898.db11fb1a7e18acb58b5b.js?v=db11fb1a7e18acb58b5b (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.32ms
+[D 2025-08-31 23:57:38.860 ServerApp] 304 GET /lab/extensions/jupyterlab_pygments/static/747.67662283a5707eeb4d4c.js?v=67662283a5707eeb4d4c (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.32ms
+[D 2025-08-31 23:57:38.861 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/568.5e057f374374b68b6acf.js?v=5e057f374374b68b6acf (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.31ms
+[D 2025-08-31 23:57:38.863 ServerApp] 304 GET /lab/extensions/@jupyter-notebook/lab-extension/static/93.c48a681bb3e8043bbbd7.js?v=c48a681bb3e8043bbbd7 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.42ms
+[D 2025-08-31 23:57:38.865 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/651.fe40a967a60b543cf15c.js?v=fe40a967a60b543cf15c (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.20ms
+[D 2025-08-31 23:57:38.868 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/647.8458d9c331000024a14a.js?v=8458d9c331000024a14a (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.21ms
+[D 2025-08-31 23:57:38.870 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/420.23ab95819c045f6c36bc.js?v=23ab95819c045f6c36bc (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.57ms
+[D 2025-08-31 23:57:38.872 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/722.53e4a64671c3c48de007.js?v=53e4a64671c3c48de007 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.01ms
+[D 2025-08-31 23:57:38.873 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/439.b350310d057b43cdd50f.js?v=b350310d057b43cdd50f (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.54ms
+[D 2025-08-31 23:57:38.874 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/327.d242f1a99504b2d5b629.js?v=d242f1a99504b2d5b629 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.42ms
+[D 2025-08-31 23:57:38.877 ServerApp] 304 GET /lab/extensions/@jupyter-widgets/jupyterlab-manager/static/446.f8696ce72124c78273da.js?v=f8696ce72124c78273da (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.12ms
+[D 2025-08-31 23:57:38.890 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.891 ServerApp] Found kernel python3 in C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels
+[D 2025-08-31 23:57:38.891 ServerApp] Found kernel kayton in C:\Users\keivf\AppData\Roaming\jupyter\kernels
+[D 2025-08-31 23:57:38.895 ServerApp] 200 GET /api/kernelspecs?1756673858887 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.90ms
+[D 2025-08-31 23:57:38.896 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.897 ServerApp] 200 GET /api/me?1756673858887 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.28ms
+[D 2025-08-31 23:57:38.900 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.901 ServerApp] 200 GET /api/sessions?1756673858894 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.78ms
+[D 2025-08-31 23:57:38.902 ServerApp] 101 GET /api/events/subscribe (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.32ms
+[D 2025-08-31 23:57:38.904 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:38.905 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:38.905 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:38.906 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:38.907 ServerApp] Found kernel python3 in C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels
+[D 2025-08-31 23:57:38.907 ServerApp] Found kernel kayton in C:\Users\keivf\AppData\Roaming\jupyter\kernels
+[D 2025-08-31 23:57:38.910 ServerApp] 200 GET /api/kernelspecs?1756673858898 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 8.64ms
+[D 2025-08-31 23:57:38.910 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.127 LabApp] 200 GET /lab/api/settings?1756673858892 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 224.50ms
+[D 2025-08-31 23:57:39.130 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.131 ServerApp] 200 GET /api/kernels?1756673858894 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.64ms
+[D 2025-08-31 23:57:39.131 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.133 TerminalsExtensionApp] 200 GET /api/terminals?1756673858894 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.07ms
+[D 2025-08-31 23:57:39.134 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.135 ServerApp] 200 GET /api/me?1756673858899 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.70ms
+[D 2025-08-31 23:57:39.199 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.199 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.200 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.201 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.286 ServerApp] 200 GET /lab/api/translations/default?1756673859194 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 90.51ms
+[D 2025-08-31 23:57:39.294 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.297 ServerApp] 200 GET /lsp/status?1756673859292 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.36ms
+[D 2025-08-31 23:57:39.343 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.343 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.344 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.345 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.392 ServerApp] 200 GET /lab/api/translations?1756673859339 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 51.14ms
+[D 2025-08-31 23:57:39.452 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.476 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.481 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.482 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.483 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.484 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.527 LabApp] 200 GET /lab/api/settings?ids_only=true&1756673859474 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 48.75ms
+[D 2025-08-31 23:57:39.537 ServerApp] 304 GET /lab/api/themes/@jupyterlab/theme-light-extension/index.css (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 7.48ms
+[D 2025-08-31 23:57:39.540 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.540 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.541 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.542 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859473 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 66.81ms
+[D 2025-08-31 23:57:39.543 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.550 LabApp] 200 GET /lab/api/settings/@jupyterlab/codemirror-extension:plugin?1756673859520 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 12.69ms
+[D 2025-08-31 23:57:39.550 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.557 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\AppData\Roaming\Python\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.558 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\.jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.558 ServerApp] Paths used for configuration of default_setting_overrides:
+        C:\Users\keivf\miniconda3\envs\py313\etc\jupyter\labconfig\default_setting_overrides.json
+[D 2025-08-31 23:57:39.559 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.570 LabApp] 200 GET /lab/api/settings/@jupyterlab/notebook-extension:panel?1756673859520 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 15.52ms
+[D 2025-08-31 23:57:39.572 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.575 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.579 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859535 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 8.33ms
+[D 2025-08-31 23:57:39.592 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb?type=notebook&content=1&hash=1&contentProviderId=undefined&1756673859492 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 50.13ms
+[D 2025-08-31 23:57:39.599 ServerApp] 200 GET /api/contents?content=1&hash=0&1756673859522 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 39.88ms
+[D 2025-08-31 23:57:39.639 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.641 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.643 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.649 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859636 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 9.63ms
+[D 2025-08-31 23:57:39.649 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859637 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 8.34ms
+[D 2025-08-31 23:57:39.650 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.651 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859637 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 10.15ms
+[D 2025-08-31 23:57:39.656 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673859641 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 8.62ms
+[D 2025-08-31 23:57:39.700 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.702 ServerApp] 200 GET /api/sessions?1756673859697 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.01ms
+[D 2025-08-31 23:57:39.707 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:39.716 ServerApp] Instantiating kernel 'Kayton' with kernel provisioner: local-provisioner
+[D 2025-08-31 23:57:39.758 ServerApp] Starting kernel: ['C:\\Users\\keivf\\Documents\\20250810_Kayton_2\\target\\debug\\kayton_kernel.exe', '-f', 'C:\\Users\\keivf\\AppData\\Roaming\\jupyter\\runtime\\kernel-cd44481a-6b9b-4b74-a86d-06f8744ffd10.json']
+[D 2025-08-31 23:57:40.231 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[I 2025-08-31 23:57:40.252 ServerApp] Kernel started: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.252 ServerApp] Kernel args (excluding env): {'kernel_name': 'kayton', 'cwd': 'C:\\Users\\keivf\\Documents\\20250810_Kayton_2\\notebooks'}
+[D 2025-08-31 23:57:40.252 ServerApp] Kernel argument 'env' passed with: ['ALLUSERSPROFILE', 'APPDATA', 'ASL.LOG', 'COMMONPROGRAMFILES', 'COMMONPROGRAMFILES(X86)', 'COMMONPROGRAMW6432', 'COMPUTERNAME', 'COMSPEC', 'CONDA_BAT', 'CONDA_DEFAULT_ENV', 'CONDA_EXE', 'CONDA_PREFIX', 'CONDA_PROMPT_MODIFIER', 'CONDA_PYTHON_EXE', 'CONDA_SHLVL', 'DRIVERDATA', 'EFC_28564_1592913036', 'GIT_LFS_PATH', 'HOMEDRIVE', 'HOMEPATH', 'JABRA_NATIVE_BLUETOOTH', 'LIBJABRA_TRACE_LEVEL', 'LOCALAPPDATA', 'LOGONSERVER', 'NUMBER_OF_PROCESSORS', 'NVM_HOME', 'NVM_SYMLINK', 'ONEDRIVE', 'ONEDRIVECONSUMER', 'OS', 'PATH', 'PATHEXT', 'PROCESSOR_ARCHITECTURE', 'PROCESSOR_IDENTIFIER', 'PROCESSOR_LEVEL', 'PROCESSOR_REVISION', 'PROGRAMDATA', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 'PROGRAMW6432', 'PROMPT', 'PSMODULEPATH', 'PUBLIC', 'SESSIONNAME', 'SSL_CERT_FILE', 'SYSTEMDRIVE', 'SYSTEMROOT', 'TEMP', 'TMP', 'USERDOMAIN', 'USERDOMAIN_ROAMINGPROFILE', 'USERNAME', 'USERPROFILE', 'WINDIR', '__CONDA_OPENSLL_CERT_FILE_SET', 'JPY_SESSION_NAME']
+[D 2025-08-31 23:57:40.253 ServerApp] Connecting to: tcp://127.0.0.1:60771
+[D 2025-08-31 23:57:40.267 ServerApp] 201 POST /api/sessions?1756673859704 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 560.67ms
+[D 2025-08-31 23:57:40.272 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.273 ServerApp] 200 GET /api/sessions?1756673860269 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.01ms
+[D 2025-08-31 23:57:40.275 ServerApp] activity on cd44481a-6b9b-4b74-a86d-06f8744ffd10: status (starting)
+[D 2025-08-31 23:57:40.276 ServerApp] activity on cd44481a-6b9b-4b74-a86d-06f8744ffd10: status (idle)
+[D 2025-08-31 23:57:40.280 ServerApp] Requesting kernel info from cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.280 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.283 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.285 ServerApp] 200 PATCH /api/sessions/8ea8fc2d-a21c-464f-a6c9-7f1b427de76b?1756673860276 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.81ms
+[D 2025-08-31 23:57:40.286 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.287 ServerApp] 200 GET /api/kernels?1756673860277 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.43ms
+[D 2025-08-31 23:57:40.289 ServerApp] Received kernel info: {'implementation': 'kayton-kernel', 'implementation_version': '0.1.0', 'language_info': {'file_extension': '.kay', 'mimetype': 'text/plain', 'name': 'kayton', 'version': '0.1.0'}, 'protocol_version': '5.3', 'status': 'ok'}
+[D 2025-08-31 23:57:40.291 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.292 ServerApp] 200 GET /api/sessions?1756673860288 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.12ms
+[D 2025-08-31 23:57:40.293 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.294 ServerApp] 200 PATCH /api/sessions/8ea8fc2d-a21c-464f-a6c9-7f1b427de76b?1756673860287 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.85ms
+[D 2025-08-31 23:57:40.295 ServerApp] 101 GET /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels?session_id=cf0c07cc-0065-492d-ad28-465ec50ccaf6 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 16.83ms
+[D 2025-08-31 23:57:40.296 ServerApp] Opening websocket /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels
+[I 2025-08-31 23:57:40.296 ServerApp] Connecting to kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10.
+[D 2025-08-31 23:57:40.296 ServerApp] Getting buffer for cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.296 ServerApp] Connecting to: tcp://127.0.0.1:60771
+[D 2025-08-31 23:57:40.299 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.301 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:40.303 ServerApp] Connecting to: tcp://127.0.0.1:60772
+[D 2025-08-31 23:57:40.305 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.307 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[W 2025-08-31 23:57:40.310 ServerApp] The websocket_ping_timeout (90000) cannot be longer than the websocket_ping_interval (30000).
+    Setting websocket_ping_timeout=30000
+[D 2025-08-31 23:57:40.311 ServerApp] Nudge: attempt 1 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.313 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:40.314 ServerApp] Found kernel python3 in C:\Users\keivf\miniconda3\envs\py313\share\jupyter\kernels
+[D 2025-08-31 23:57:40.314 ServerApp] Found kernel kayton in C:\Users\keivf\AppData\Roaming\jupyter\kernels
+[D 2025-08-31 23:57:40.317 ServerApp] 200 GET /api/kernelspecs?1756673860295 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 5.63ms
+[D 2025-08-31 23:57:40.322 ServerApp] 101 GET /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels?session_id=20c82e4d-4417-4ec2-ad9c-f68baf772910 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.89ms
+[D 2025-08-31 23:57:40.322 ServerApp] Opening websocket /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels
+[I 2025-08-31 23:57:40.322 ServerApp] Connecting to kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10.
+[D 2025-08-31 23:57:40.322 ServerApp] Getting buffer for cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.323 ServerApp] Connecting to: tcp://127.0.0.1:60771
+[D 2025-08-31 23:57:40.325 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.326 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:40.327 ServerApp] Connecting to: tcp://127.0.0.1:60772
+[D 2025-08-31 23:57:40.329 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.330 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:40.333 ServerApp] Nudge: attempt 1 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.337 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.338 ServerApp] Nudge: resolving shell future: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.339 ServerApp] 101 GET /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels?session_id=482ca902-1c96-4c72-a033-2f164bd722a2 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.73ms
+[D 2025-08-31 23:57:40.340 ServerApp] Opening websocket /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels
+[I 2025-08-31 23:57:40.340 ServerApp] Connecting to kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10.
+[D 2025-08-31 23:57:40.340 ServerApp] Getting buffer for cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.340 ServerApp] Connecting to: tcp://127.0.0.1:60771
+[D 2025-08-31 23:57:40.343 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.344 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:40.345 ServerApp] Connecting to: tcp://127.0.0.1:60772
+[D 2025-08-31 23:57:40.347 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:40.348 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:40.365 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.365 ServerApp] Nudge: resolving shell future: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.365 ServerApp] Nudge: attempt 1 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.367 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.367 ServerApp] Nudge: resolving shell future: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.693 ServerApp] 200 GET /api/nbconvert?1756673858405 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2285.67ms
+[D 2025-08-31 23:57:40.822 ServerApp] Nudge: attempt 2 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.824 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.848 ServerApp] Nudge: attempt 2 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.849 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.880 ServerApp] Nudge: attempt 2 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:40.881 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.163 ServerApp] 200 GET /api/nbconvert?1756673859448 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1711.55ms
+[D 2025-08-31 23:57:41.331 ServerApp] Nudge: attempt 3 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.333 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.356 ServerApp] Nudge: attempt 3 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.358 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.388 ServerApp] Nudge: attempt 3 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.390 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.634 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:41.637 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673861632 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.60ms
+[D 2025-08-31 23:57:41.833 ServerApp] Nudge: attempt 4 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.836 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.866 ServerApp] Nudge: attempt 4 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.868 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.901 ServerApp] Nudge: attempt 4 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:41.903 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.336 ServerApp] Nudge: attempt 5 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.337 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.369 ServerApp] Nudge: attempt 5 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.370 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.402 ServerApp] Nudge: attempt 5 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.404 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.839 ServerApp] Nudge: attempt 6 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.842 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.872 ServerApp] Nudge: attempt 6 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.876 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.903 ServerApp] Nudge: attempt 6 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:42.905 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.353 ServerApp] Nudge: attempt 7 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.355 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.383 ServerApp] Nudge: attempt 7 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.385 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.407 ServerApp] Nudge: attempt 7 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.408 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.655 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:43.658 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673863652 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 3.94ms
+[D 2025-08-31 23:57:43.855 ServerApp] Nudge: attempt 8 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.856 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.889 ServerApp] Nudge: attempt 8 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.890 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.922 ServerApp] Nudge: attempt 8 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:43.924 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.358 ServerApp] Nudge: attempt 9 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.359 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.401 ServerApp] Nudge: attempt 9 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.403 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.437 ServerApp] Nudge: attempt 9 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.439 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[W 2025-08-31 23:57:44.866 ServerApp] Nudge: attempt 10 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.867 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[W 2025-08-31 23:57:44.918 ServerApp] Nudge: attempt 10 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.920 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[W 2025-08-31 23:57:44.949 ServerApp] Nudge: attempt 10 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:44.950 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.368 ServerApp] Nudge: attempt 11 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.370 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.421 ServerApp] Nudge: attempt 11 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.423 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.453 ServerApp] Nudge: attempt 11 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.456 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.672 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:45.675 ServerApp] 200 GET /api/contents/20250831_kayton_text.ipynb/checkpoints?1756673865668 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 4.07ms
+[D 2025-08-31 23:57:45.874 ServerApp] Nudge: attempt 12 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.876 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.937 ServerApp] Nudge: attempt 12 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.939 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.970 ServerApp] Nudge: attempt 12 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:45.973 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.208 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:46.209 ServerApp] 200 GET /api/sessions?1756673866204 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.52ms
+[D 2025-08-31 23:57:46.211 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:46.211 ServerApp] 200 GET /api/kernels?1756673866204 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.40ms
+[D 2025-08-31 23:57:46.212 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:46.213 ServerApp] Accepting token-authenticated request from 127.0.0.1
+[D 2025-08-31 23:57:46.213 TerminalsExtensionApp] 200 GET /api/terminals?1756673866205 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 2.50ms
+[D 2025-08-31 23:57:46.216 ServerApp] 101 GET /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels?session_id=1d9fd71e-fa34-4dec-9ab4-b5a00f863b6a (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 1.50ms
+[D 2025-08-31 23:57:46.216 ServerApp] Opening websocket /api/kernels/cd44481a-6b9b-4b74-a86d-06f8744ffd10/channels
+[I 2025-08-31 23:57:46.217 ServerApp] Connecting to kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10.
+[D 2025-08-31 23:57:46.217 ServerApp] Getting buffer for cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.217 ServerApp] Connecting to: tcp://127.0.0.1:60771
+[D 2025-08-31 23:57:46.219 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:46.221 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:46.223 ServerApp] Connecting to: tcp://127.0.0.1:60772
+[D 2025-08-31 23:57:46.224 ServerApp] Connecting to: tcp://127.0.0.1:60770
+[D 2025-08-31 23:57:46.226 ServerApp] Connecting to: tcp://127.0.0.1:60774
+[D 2025-08-31 23:57:46.228 ServerApp] Nudge: attempt 1 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.230 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.230 ServerApp] Nudge: resolving shell future: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.232 ServerApp] 200 GET /api/contents?content=1&hash=0&1756673866205 (fb80510b3f7e48d7ba5905351a0c58ce@127.0.0.1) 21.46ms
+[D 2025-08-31 23:57:46.386 ServerApp] Nudge: attempt 13 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.388 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.453 ServerApp] Nudge: attempt 13 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.455 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.484 ServerApp] Nudge: attempt 13 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.486 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.734 ServerApp] Nudge: attempt 2 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.738 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.889 ServerApp] Nudge: attempt 14 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.891 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.968 ServerApp] Nudge: attempt 14 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:46.969 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.000 ServerApp] Nudge: attempt 14 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.001 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.242 ServerApp] Nudge: attempt 3 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.243 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.397 ServerApp] Nudge: attempt 15 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.398 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.476 ServerApp] Nudge: attempt 15 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.478 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.508 ServerApp] Nudge: attempt 15 on kernel cd44481a-6b9b-4b74-a86d-06f8744ffd10
+[D 2025-08-31 23:57:47.509 ServerApp] Nudge: shell info reply received: cd44481a-6b9b-4b74-a86d-06f8744ffd10

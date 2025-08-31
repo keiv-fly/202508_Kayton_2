@@ -133,11 +133,36 @@ fn send_iopub(
     parent_header: &serde_json::Value,
     content: serde_json::Value,
 ) -> Result<()> {
+    // IOPub requires a topic frame before the delimiter. Use msg_type, with
+    // a more specific topic for streams (e.g., "stream.stdout").
+    let topic = if msg_type == "stream" {
+        if let Some(name) = content.get("name").and_then(|v| v.as_str()) {
+            format!("stream.{}", name)
+        } else {
+            String::from("stream")
+        }
+    } else {
+        msg_type.to_string()
+    };
+
     let h = make_header(msg_type, &parent_session(parent_header));
     let meta = serde_json::json!({});
-    // No identities for iopub (PUB)
-    let empty: [Vec<u8>; 0] = [];
-    send_msg(iopub, &empty, key, &h, parent_header, &meta, &content)
+
+    let h_bytes = serde_json::to_vec(&h)?;
+    let p_bytes = serde_json::to_vec(parent_header)?;
+    let m_bytes = serde_json::to_vec(&meta)?;
+    let c_bytes = serde_json::to_vec(&content)?;
+    let sig = sign(key, &[&h_bytes, &p_bytes, &m_bytes, &c_bytes]);
+
+    // PUB: [topic][DELIM][sig][header][parent][metadata][content]
+    iopub.send(topic.as_bytes(), zmq::SNDMORE)?;
+    iopub.send(DELIM, zmq::SNDMORE)?;
+    iopub.send(sig.as_bytes(), zmq::SNDMORE)?;
+    iopub.send(h_bytes, zmq::SNDMORE)?;
+    iopub.send(p_bytes, zmq::SNDMORE)?;
+    iopub.send(m_bytes, zmq::SNDMORE)?;
+    iopub.send(c_bytes, 0)?;
+    Ok(())
 }
 
 /// Very simple completeness heuristic for the console:
@@ -224,6 +249,23 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     let _stdin_sock = ctx.socket(zmq::ROUTER)?; // reserved for input requests
     _stdin_sock.bind(&stdin_addr)?;
     info!("stdin bound");
+
+    // Announce kernel starting/idle on IOPub so frontends know we're alive
+    let empty_parent = serde_json::json!({});
+    let _ = send_iopub(
+        &iopub,
+        &key_bytes,
+        "status",
+        &empty_parent,
+        serde_json::json!({"execution_state": "starting"}),
+    );
+    let _ = send_iopub(
+        &iopub,
+        &key_bytes,
+        "status",
+        &empty_parent,
+        serde_json::json!({"execution_state": "idle"}),
+    );
 
     // Heartbeat echo thread
     let _hb_thread = std::thread::spawn(move || {
