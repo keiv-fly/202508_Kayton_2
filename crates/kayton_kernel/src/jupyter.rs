@@ -153,15 +153,15 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     let ctx = zmq::Context::new();
 
     let hb = ctx.socket(zmq::REP)?;
-    hb.connect(&format!("{}{}", transport, cfg.hb_port))?;
-    let shell = ctx.socket(zmq::DEALER)?;
-    shell.connect(&format!("{}{}", transport, cfg.shell_port))?;
-    let control = ctx.socket(zmq::DEALER)?;
-    control.connect(&format!("{}{}", transport, cfg.control_port))?;
+    hb.bind(&format!("{}{}", transport, cfg.hb_port))?;
+    let shell = ctx.socket(zmq::ROUTER)?;
+    shell.bind(&format!("{}{}", transport, cfg.shell_port))?;
+    let control = ctx.socket(zmq::ROUTER)?;
+    control.bind(&format!("{}{}", transport, cfg.control_port))?;
     let iopub = ctx.socket(zmq::PUB)?;
-    iopub.connect(&format!("{}{}", transport, cfg.iopub_port))?;
-    let _stdin_sock = ctx.socket(zmq::DEALER)?; // reserved for input requests
-    _stdin_sock.connect(&format!("{}{}", transport, cfg.stdin_port))?;
+    iopub.bind(&format!("{}{}", transport, cfg.iopub_port))?;
+    let _stdin_sock = ctx.socket(zmq::ROUTER)?; // reserved for input requests
+    _stdin_sock.bind(&format!("{}{}", transport, cfg.stdin_port))?;
 
     // Heartbeat echo thread
     let _hb_thread = std::thread::spawn(move || {
@@ -198,9 +198,13 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 }
             }
             // Parse idents and message
+            // ROUTER receives: [idents..., DELIM, sig, header, parent, metadata, content]
             let mut idx = 0;
             while idx < frames.len() && frames[idx].as_ref() != DELIM.as_bytes() {
                 idx += 1;
+            }
+            if idx >= frames.len() {
+                continue;
             }
             let idents: Vec<Vec<u8>> = frames[..idx].iter().map(|m| m.as_ref().to_vec()).collect();
             let body = &frames[idx + 1..];
@@ -250,6 +254,9 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
             let mut idx = 0;
             while idx < frames.len() && frames[idx].as_ref() != DELIM.as_bytes() {
                 idx += 1;
+            }
+            if idx >= frames.len() {
+                continue;
             }
             let idents: Vec<Vec<u8>> = frames[..idx].iter().map(|m| m.as_ref().to_vec()).collect();
             let body = &frames[idx + 1..];
