@@ -27,3 +27,23 @@ print(x)
         func();
     }
 }
+
+#[test]
+fn compile_and_run_user_function_sum() {
+    let src = r#"x = 1
+y = 2
+
+fn my_sum(x, y):
+    x + y
+
+z = my_sum(x,y)
+print(z)
+"#;
+    let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
+    unsafe {
+        let lib = Library::new(&lib_path).expect("load dylib");
+        let func: libloading::Symbol<unsafe extern "C" fn()> =
+            lib.get(b"run").expect("find run symbol");
+        func();
+    }
+}

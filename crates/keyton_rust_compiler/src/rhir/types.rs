@@ -38,6 +38,12 @@ pub enum RExpr {
         right: Box<RExpr>,
         ty: Type,
     },
+    Call {
+        hir_id: HirId,
+        func: Box<RExpr>,
+        args: Vec<RExpr>,
+        ty: Type,
+    },
     MacroCall {
         hir_id: HirId,
         macro_name: String,
@@ -70,6 +76,7 @@ impl RExpr {
             | RExpr::Str { ty, .. }
             | RExpr::Name { ty, .. }
             | RExpr::Binary { ty, .. }
+            | RExpr::Call { ty, .. }
             | RExpr::MacroCall { ty, .. }
             | RExpr::InterpolatedString { ty, .. } => ty,
         }

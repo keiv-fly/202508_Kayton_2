@@ -131,6 +131,15 @@ impl<'a> CodeGenerator<'a> {
                 };
                 format!("({} {} {})", left_str, op_str, right_str)
             }
+            RExpr::Call { func, args, .. } => {
+                let func_str = self.convert_expr_to_string(func);
+                let args_str = args
+                    .iter()
+                    .map(|a| self.convert_expr_to_string(a))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!("{}({})", func_str, args_str)
+            }
             RExpr::MacroCall {
                 macro_name, args, ..
             } => {

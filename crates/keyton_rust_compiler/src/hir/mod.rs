@@ -51,10 +51,11 @@ fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {
             hir_id: ctx.new_id(),
             expr: lower_expr(ctx, expr),
         },
-        Stmt::FuncDef { name, params, .. } => HirStmt::FuncDef {
+        Stmt::FuncDef { name, params, body } => HirStmt::FuncDef {
             hir_id: ctx.new_id(),
             name,
             params,
+            body: body.into_iter().map(|s| lower_stmt(ctx, s)).collect(),
         },
         Stmt::Return(expr) => HirStmt::ExprStmt {
             // For now, returns are not first-class; treat as expression stmt in HIR

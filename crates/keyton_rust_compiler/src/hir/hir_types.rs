@@ -16,6 +16,7 @@ pub enum HirStmt {
         hir_id: HirId,
         name: String,
         params: Vec<String>,
+        body: Vec<HirStmt>,
     },
 }
 

@@ -120,10 +120,10 @@ impl<'a> Converter<'a> {
                     }
                 }
 
-                // If no mapping found, keep as a regular call (though this shouldn't happen in our current setup)
-                RExpr::MacroCall {
+                // If no mapping found, keep as a regular call
+                RExpr::Call {
                     hir_id: *hir_id,
-                    macro_name: "unknown_macro!".to_string(),
+                    func: Box::new(self.convert_expr(func)),
                     args: args.iter().map(|a| self.convert_expr(a)).collect(),
                     ty: ty.clone(),
                 }
