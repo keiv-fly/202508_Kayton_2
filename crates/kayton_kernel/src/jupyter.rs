@@ -1,5 +1,3 @@
-#![cfg(feature = "jupyter")]
-
 use anyhow::{Result, anyhow};
 use chrono::{SecondsFormat, Utc};
 use hmac::{Hmac, Mac};
@@ -140,6 +138,43 @@ fn send_iopub(
     // No identities for iopub (PUB)
     let empty: [Vec<u8>; 0] = [];
     send_msg(iopub, &empty, key, &h, parent_header, &meta, &content)
+}
+
+/// Very simple completeness heuristic for the console:
+/// - If code ends with ':' (block opener), report incomplete and suggest indent
+/// - If parentheses are unbalanced, report incomplete
+/// - Otherwise, assume complete
+fn compute_is_complete(code: &str) -> (&'static str, &'static str) {
+    let trimmed = code.trim_end();
+    if trimmed.is_empty() {
+        return ("complete", "");
+    }
+
+    // Track simple paren balance, ignore extremely complex cases
+    let mut depth: i32 = 0;
+    let mut in_str: bool = false;
+    let mut prev_ch: char = '\0';
+    for ch in trimmed.chars() {
+        if ch == '"' && prev_ch != '\\' {
+            in_str = !in_str;
+        }
+        if !in_str {
+            if ch == '(' {
+                depth += 1;
+            }
+            if ch == ')' {
+                depth -= 1;
+            }
+        }
+        prev_ch = ch;
+    }
+    if depth > 0 {
+        return ("incomplete", "");
+    }
+    if trimmed.ends_with(':') {
+        return ("incomplete", "    ");
+    }
+    ("complete", "")
 }
 
 pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
@@ -365,6 +400,22 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 .and_then(|v| v.as_str())
                 .unwrap_or("")
             {
+                "is_complete_request" => {
+                    // Reply whether input is complete per Jupyter protocol
+                    let code = content.get("code").and_then(|v| v.as_str()).unwrap_or("");
+                    let (status, indent) = compute_is_complete(code);
+                    let reply_h = make_header("is_complete_reply", &parent_session(&header_v));
+                    let meta = serde_json::json!({});
+                    let mut reply = serde_json::json!({
+                        "status": status
+                    });
+                    if status == "incomplete" && !indent.is_empty() {
+                        reply["indent"] = serde_json::Value::String(indent.to_string());
+                    }
+                    send_msg(
+                        &shell, &idents, &key_bytes, &reply_h, &header_v, &meta, &reply,
+                    )?;
+                }
                 "kernel_info_request" => {
                     info!("kernel_info_request received");
                     let reply_h = make_header("kernel_info_reply", &parent_session(&header_v));
