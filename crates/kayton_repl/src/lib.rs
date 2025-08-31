@@ -1,9 +1,7 @@
 use std::io::{self, Write};
 
 use anyhow::Result;
-use kayton_interactive_shared::{
-    InteractiveState, PreparedCode, VarKind, execute_prepared, prepare_input,
-};
+use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
 
 /// Run the Kayton REPL loop
 pub fn run_repl() -> Result<()> {

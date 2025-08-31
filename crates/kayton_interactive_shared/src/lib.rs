@@ -13,7 +13,6 @@ use keyton_rust_compiler::parser::Parser;
 use keyton_rust_compiler::rhir::{RustProgram, convert_to_rhir};
 use keyton_rust_compiler::rust_codegen::{CodeGenerator, RustCode};
 use keyton_rust_compiler::shir::{resolve_program, sym::SymbolId};
-use keyton_rust_compiler::thir::typecheck_program_with_env;
 use libloading::Library;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
