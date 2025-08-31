@@ -2,7 +2,7 @@ use std::boxed::Box;
 use std::ffi::c_void;
 
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{GlobalStrBuf, KaytonContext};
+use kayton_api::types::{GlobalStrBuf, KaytonContext, KaytonError};
 
 use crate::host::HostState;
 
@@ -361,5 +361,102 @@ impl KaytonVm {
 
     pub fn api(&self) -> &KaytonApi {
         &*self.api
+    }
+
+    /// Snapshot current globals (names and handles) for inspection by hosts/kernels.
+    pub fn snapshot_globals(&self) -> Vec<(String, kayton_api::types::HKayRef)> {
+        self.host.snapshot_globals()
+    }
+
+    /// Resolve a global by name to its handle, if present.
+    pub fn resolve_name(&self, name: &str) -> Option<kayton_api::types::HKayRef> {
+        self.host.resolve(name)
+    }
+
+    /// Format a VM value referenced by handle as a human-readable string.
+    pub fn format_value_by_handle(
+        &mut self,
+        h: kayton_api::types::HKayRef,
+    ) -> Result<String, KaytonError> {
+        use crate::{
+            KIND_BOOL, KIND_F32, KIND_F64, KIND_I8, KIND_I16, KIND_I32, KIND_I64, KIND_I128,
+            KIND_ISIZE, KIND_KVEC, KIND_STATICSTR, KIND_STRBUF, KIND_TUPLE, KIND_U8, KIND_U16,
+            KIND_U32, KIND_U64, KIND_U128, KIND_USIZE,
+        };
+
+        let mut ctx = self.context();
+        // Avoid borrowing `ctx` immutably while also passing &mut ctx to API calls
+        let api_ptr = ctx.api;
+        let api: &KaytonApi = unsafe { &*api_ptr };
+        let k = h.kind as u32;
+        let out = if k == KIND_U64 {
+            (api.get_global_u64_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_U32 {
+            (api.get_global_u32_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_U16 {
+            (api.get_global_u16_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_U8 {
+            (api.get_global_u8_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_U128 {
+            (api.get_global_u128_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_USIZE {
+            (api.get_global_usize_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_I64 {
+            (api.get_global_i64_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_I32 {
+            (api.get_global_i32_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_I16 {
+            (api.get_global_i16_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_I8 {
+            (api.get_global_i8_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_I128 {
+            (api.get_global_i128_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_ISIZE {
+            (api.get_global_isize_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_BOOL {
+            (api.get_global_bool_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_F64 {
+            (api.get_global_f64_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_F32 {
+            (api.get_global_f32_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_STATICSTR {
+            (api.get_global_static_str_by_handle)(&mut ctx, h).map(|v| v.to_string())?
+        } else if k == KIND_STRBUF {
+            let sb = (api.get_global_str_buf_by_handle)(&mut ctx, h)?;
+            if let Some(s) = sb.as_str() {
+                s.to_string()
+            } else {
+                "<invalid-str>".to_string()
+            }
+        } else if k == KIND_TUPLE {
+            // Recursively format tuple items
+            let len = (api.get_tuple_len_by_handle)(&mut ctx, h)?;
+            let mut items: Vec<String> = Vec::with_capacity(len);
+            for i in 0..len {
+                let ih = (api.get_global_tuple_item_by_handle)(&mut ctx, h, i)?;
+                let s = self.format_value_by_handle(ih)?;
+                items.push(s);
+            }
+            format!("({})", items.join(", "))
+        } else if k == KIND_KVEC {
+            let kv = (api.get_global_kvec_by_handle)(&mut ctx, h)?;
+            format!("<kvec kind={} len_bytes={}>", kv.kind, kv.len)
+        } else {
+            format!("<kind {} @{}>", h.kind, h.index)
+        };
+        Ok(out)
+    }
+
+    /// Convenience: snapshot and format all globals as strings.
+    pub fn read_all_globals_as_strings(&mut self) -> Vec<(String, String)> {
+        let snapshot = self.snapshot_globals();
+        let mut out: Vec<(String, String)> = Vec::with_capacity(snapshot.len());
+        for (name, h) in snapshot {
+            match self.format_value_by_handle(h) {
+                Ok(s) => out.push((name, s)),
+                Err(_) => out.push((name, String::from("<error>"))),
+            }
+        }
+        out
     }
 }

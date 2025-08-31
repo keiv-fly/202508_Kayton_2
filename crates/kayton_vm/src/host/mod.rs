@@ -91,6 +91,14 @@ impl HostState {
     pub fn resolve(&self, name: &str) -> Option<HKayRef> {
         self.name_to_handle.get(name).copied()
     }
+
+    /// Return a snapshot of current globals as name → handle pairs.
+    pub fn snapshot_globals(&self) -> Vec<(String, HKayRef)> {
+        self.name_to_handle
+            .iter()
+            .map(|(k, v)| (k.clone(), *v))
+            .collect()
+    }
 }
 
 impl Drop for HostState {

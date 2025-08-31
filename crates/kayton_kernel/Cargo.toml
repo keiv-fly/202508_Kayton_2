@@ -4,3 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+clap = { version = "4", features = ["derive"] }
+dirs = "5"
+
+# Workspace
+kayton_interactive_shared = { path = "../kayton_interactive_shared" }
+kayton_vm = { path = "../kayton_vm" }

@@ -12,6 +12,7 @@ libloading = "0.8"
 keyton_rust_compiler = { path = "../keyton_rust_compiler" }
 kayton_vm = { path = "../kayton_vm" }
 kayton_api = { path = "../kayton_api" }
+kayton_interactive_shared = { path = "../kayton_interactive_shared" }
 
 [[bin]]
 name = "kayton_repl"
