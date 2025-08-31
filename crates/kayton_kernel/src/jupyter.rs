@@ -4,6 +4,7 @@ use anyhow::{Result, anyhow};
 use chrono::{SecondsFormat, Utc};
 use hmac::{Hmac, Mac};
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use std::fs;
@@ -142,32 +143,63 @@ fn send_iopub(
 }
 
 pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
+    info!("loading connection file: {}", connection_file.display());
     let cfg: ConnectionFile = serde_json::from_str(&fs::read_to_string(connection_file)?)?;
+    info!(
+        "parsed connection: transport={} ip={} shell={} iopub={} control={} stdin={} hb={} key_len={}",
+        cfg.transport,
+        cfg.ip,
+        cfg.shell_port,
+        cfg.iopub_port,
+        cfg.control_port,
+        cfg.stdin_port,
+        cfg.hb_port,
+        cfg.key.len()
+    );
     let key_bytes = if cfg.key.is_empty() {
         vec![]
     } else {
         cfg.key.as_bytes().to_vec()
     };
     let transport = format!("{}://{}:", cfg.transport, cfg.ip);
+    let hb_addr = format!("{}{}", transport, cfg.hb_port);
+    let shell_addr = format!("{}{}", transport, cfg.shell_port);
+    let control_addr = format!("{}{}", transport, cfg.control_port);
+    let iopub_addr = format!("{}{}", transport, cfg.iopub_port);
+    let stdin_addr = format!("{}{}", transport, cfg.stdin_port);
+    info!(
+        "binding sockets: hb={} shell={} control={} iopub={} stdin={}",
+        hb_addr, shell_addr, control_addr, iopub_addr, stdin_addr
+    );
 
     let ctx = zmq::Context::new();
 
     let hb = ctx.socket(zmq::REP)?;
-    hb.bind(&format!("{}{}", transport, cfg.hb_port))?;
+    hb.bind(&hb_addr)?;
+    info!("hb bound");
     let shell = ctx.socket(zmq::ROUTER)?;
-    shell.bind(&format!("{}{}", transport, cfg.shell_port))?;
+    shell.bind(&shell_addr)?;
+    info!("shell bound");
     let control = ctx.socket(zmq::ROUTER)?;
-    control.bind(&format!("{}{}", transport, cfg.control_port))?;
+    control.bind(&control_addr)?;
+    info!("control bound");
     let iopub = ctx.socket(zmq::PUB)?;
-    iopub.bind(&format!("{}{}", transport, cfg.iopub_port))?;
+    iopub.bind(&iopub_addr)?;
+    info!("iopub bound");
     let _stdin_sock = ctx.socket(zmq::ROUTER)?; // reserved for input requests
-    _stdin_sock.bind(&format!("{}{}", transport, cfg.stdin_port))?;
+    _stdin_sock.bind(&stdin_addr)?;
+    info!("stdin bound");
 
     // Heartbeat echo thread
     let _hb_thread = std::thread::spawn(move || {
         let mut msg = zmq::Message::new();
+        let mut count: u64 = 0;
         loop {
             if hb.recv(&mut msg, 0).is_ok() {
+                count += 1;
+                if count <= 5 || count % 100 == 0 {
+                    debug!("heartbeat recv count={}", count);
+                }
                 let _ = hb.send(msg.as_ref(), 0);
             }
         }
@@ -183,7 +215,10 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     ];
 
     loop {
-        let _ = zmq::poll(&mut poll_items, 1000)?;
+        let poll_rc = zmq::poll(&mut poll_items, 1000)?;
+        if poll_rc == 0 {
+            debug!("poll timeout; alive");
+        }
 
         // Control channel (shutdown)
         if poll_items[1].is_readable() {
@@ -204,37 +239,66 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 idx += 1;
             }
             if idx >= frames.len() {
+                warn!("control missing delimiter frame");
                 continue;
             }
             let idents: Vec<Vec<u8>> = frames[..idx].iter().map(|m| m.as_ref().to_vec()).collect();
             let body = &frames[idx + 1..];
             if body.len() < 5 {
+                warn!("control body too short: {}", body.len());
                 continue;
             }
             let _sig = &body[0];
-            let (hdr_b, parent_b, meta_b, content_b) = frames_as_json(&body[1..])?;
+            let (hdr_b, parent_b, meta_b, content_b) = match frames_as_json(&body[1..]) {
+                Ok(v) => v,
+                Err(e) => {
+                    warn!("control frames_as_json error: {}", e);
+                    continue;
+                }
+            };
             let header_v: serde_json::Value = match serde_json::from_slice(hdr_b) {
                 Ok(v) => v,
                 Err(e) => {
-                    eprintln!("header parse error: {}", e);
+                    error!("control header parse error: {}", e);
                     continue;
                 }
             };
-            let parent_v: serde_json::Value = match serde_json::from_slice(parent_b) {
+            let _parent_v: serde_json::Value = match serde_json::from_slice(parent_b) {
                 Ok(v) => v,
                 Err(e) => {
-                    eprintln!("parent parse error: {}", e);
+                    error!("control parent parse error: {}", e);
                     continue;
                 }
             };
-            let _meta: serde_json::Value = serde_json::from_slice(meta_b)?;
+            let _meta: serde_json::Value = match serde_json::from_slice(meta_b) {
+                Ok(v) => v,
+                Err(e) => {
+                    warn!("control metadata parse error: {}", e);
+                    serde_json::json!({})
+                }
+            };
             let content: serde_json::Value = serde_json::from_slice(content_b)?;
-            if header_v.get("msg_type").and_then(|v| v.as_str()) == Some("shutdown_request") {
-                let reply_h = make_header("shutdown_reply", &parent_session(&parent_v));
+            let mt = header_v
+                .get("msg_type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            debug!(
+                "control msg_type={} idents={} body_frames={} session={}",
+                mt,
+                idents.len(),
+                body.len(),
+                header_v
+                    .get("session")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+            );
+            if mt == "shutdown_request" {
+                let reply_h = make_header("shutdown_reply", &parent_session(&header_v));
                 let meta = serde_json::json!({});
                 send_msg(
-                    &control, &idents, &key_bytes, &reply_h, &parent_v, &meta, &content,
+                    &control, &idents, &key_bytes, &reply_h, &header_v, &meta, &content,
                 )?;
+                info!("shutdown_request processed; exiting run_kernel loop");
                 break;
             }
         }
@@ -256,30 +320,44 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 idx += 1;
             }
             if idx >= frames.len() {
+                warn!("shell missing delimiter frame");
                 continue;
             }
             let idents: Vec<Vec<u8>> = frames[..idx].iter().map(|m| m.as_ref().to_vec()).collect();
             let body = &frames[idx + 1..];
             if body.len() < 5 {
+                warn!("shell body too short: {}", body.len());
                 continue;
             }
             let _sig = &body[0];
-            let (hdr_b, parent_b, meta_b, content_b) = frames_as_json(&body[1..])?;
+            let (hdr_b, parent_b, meta_b, content_b) = match frames_as_json(&body[1..]) {
+                Ok(v) => v,
+                Err(e) => {
+                    warn!("shell frames_as_json error: {}", e);
+                    continue;
+                }
+            };
             let header_v: serde_json::Value = match serde_json::from_slice(hdr_b) {
                 Ok(v) => v,
                 Err(e) => {
-                    eprintln!("header parse error: {}", e);
+                    error!("shell header parse error: {}", e);
                     continue;
                 }
             };
-            let parent_v: serde_json::Value = match serde_json::from_slice(parent_b) {
+            let _parent_v: serde_json::Value = match serde_json::from_slice(parent_b) {
                 Ok(v) => v,
                 Err(e) => {
-                    eprintln!("parent parse error: {}", e);
+                    error!("shell parent parse error: {}", e);
                     continue;
                 }
             };
-            let _meta: serde_json::Value = serde_json::from_slice(meta_b)?;
+            let _meta: serde_json::Value = match serde_json::from_slice(meta_b) {
+                Ok(v) => v,
+                Err(e) => {
+                    warn!("shell metadata parse error: {}", e);
+                    serde_json::json!({})
+                }
+            };
             let content: serde_json::Value = serde_json::from_slice(content_b)?;
 
             match header_v
@@ -288,7 +366,8 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 .unwrap_or("")
             {
                 "kernel_info_request" => {
-                    let reply_h = make_header("kernel_info_reply", &parent_session(&parent_v));
+                    info!("kernel_info_request received");
+                    let reply_h = make_header("kernel_info_reply", &parent_session(&header_v));
                     let lang = serde_json::json!({
                         "name": "kayton",
                         "version": "0.1.0",
@@ -304,26 +383,31 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                     });
                     let meta = serde_json::json!({});
                     send_msg(
-                        &shell, &idents, &key_bytes, &reply_h, &parent_v, &meta, &content,
+                        &shell, &idents, &key_bytes, &reply_h, &header_v, &meta, &content,
                     )?;
                 }
                 "execute_request" => {
+                    let code = content.get("code").and_then(|v| v.as_str()).unwrap_or("");
+                    info!(
+                        "execute_request received: bytes={} lines={}",
+                        code.len(),
+                        code.lines().count()
+                    );
                     exec_count += 1;
                     // Publish busy
                     let _ = send_iopub(
                         &iopub,
                         &key_bytes,
                         "status",
-                        &parent_v,
+                        &header_v,
                         serde_json::json!({"execution_state": "busy"}),
                     );
                     // Publish execute_input
-                    let code = content.get("code").and_then(|v| v.as_str()).unwrap_or("");
                     let _ = send_iopub(
                         &iopub,
                         &key_bytes,
                         "execute_input",
-                        &parent_v,
+                        &header_v,
                         serde_json::json!({
                             "code": code,
                             "execution_count": exec_count
@@ -337,11 +421,12 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                             Ok(prep) => {
                                 if let Err(e) = execute_prepared(&mut state, &prep) {
                                     reply_status = "error".to_string();
+                                    error!("execute_prepared error: {}", e);
                                     let _ = send_iopub(
                                         &iopub,
                                         &key_bytes,
                                         "stream",
-                                        &parent_v,
+                                        &header_v,
                                         serde_json::json!({
                                             "name": "stderr",
                                             "text": e.to_string()
@@ -351,11 +436,12 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                             }
                             Err(e) => {
                                 reply_status = "error".to_string();
+                                error!("prepare_input error: {}", e);
                                 let _ = send_iopub(
                                     &iopub,
                                     &key_bytes,
                                     "stream",
-                                    &parent_v,
+                                    &header_v,
                                     serde_json::json!({
                                         "name": "stderr",
                                         "text": e.to_string()
@@ -376,7 +462,7 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                             &iopub,
                             &key_bytes,
                             "execute_result",
-                            &parent_v,
+                            &header_v,
                             serde_json::json!({
                                 "execution_count": exec_count,
                                 "data": {"text/plain": lines},
@@ -386,7 +472,7 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                     }
 
                     // Reply on shell
-                    let reply_h = make_header("execute_reply", &parent_session(&parent_v));
+                    let reply_h = make_header("execute_reply", &parent_session(&header_v));
                     let meta = serde_json::json!({});
                     let reply = serde_json::json!({
                         "status": reply_status,
@@ -394,8 +480,12 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                         "user_expressions": {},
                         "payload": []
                     });
+                    debug!(
+                        "sending execute_reply status={} exec_count={}",
+                        reply_status, exec_count
+                    );
                     send_msg(
-                        &shell, &idents, &key_bytes, &reply_h, &parent_v, &meta, &reply,
+                        &shell, &idents, &key_bytes, &reply_h, &header_v, &meta, &reply,
                     )?;
 
                     // Publish idle
@@ -403,7 +493,7 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                         &iopub,
                         &key_bytes,
                         "status",
-                        &parent_v,
+                        &header_v,
                         serde_json::json!({"execution_state": "idle"}),
                     );
                 }
@@ -413,11 +503,12 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                         .get("msg_type")
                         .and_then(|v| v.as_str())
                         .unwrap_or("");
-                    let reply_h = make_header(&format!("{}_reply", mt), &parent_session(&parent_v));
+                    warn!("unhandled msg_type on shell: {}", mt);
+                    let reply_h = make_header(&format!("{}_reply", mt), &parent_session(&header_v));
                     let meta = serde_json::json!({});
                     let reply = serde_json::json!({"status": "ok"});
                     let _ = send_msg(
-                        &shell, &idents, &key_bytes, &reply_h, &parent_v, &meta, &reply,
+                        &shell, &idents, &key_bytes, &reply_h, &header_v, &meta, &reply,
                     );
                 }
             }

@@ -21,6 +21,8 @@ hmac = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
 chrono = { version = "0.4", features = ["serde", "clock"] }
 hex = "0.4"
+log = "0.4"
+env_logger = "0.11"
 
 # Workspace
 kayton_interactive_shared = { path = "../kayton_interactive_shared" }

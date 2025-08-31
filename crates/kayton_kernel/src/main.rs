@@ -4,6 +4,8 @@ use std::path::PathBuf;
 use anyhow::Result;
 use clap::Parser;
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
+#[cfg(feature = "jupyter")]
+use log::info;
 
 #[cfg(feature = "jupyter")]
 mod jupyter;
@@ -16,6 +18,12 @@ struct Args {
 }
 
 fn main() -> Result<()> {
+    // Initialize logging (no-op if already set); respects RUST_LOG
+    #[cfg(feature = "jupyter")]
+    {
+        let _ = env_logger::builder().format_timestamp_millis().try_init();
+        info!("kayton_kernel starting (jupyter feature enabled)");
+    }
     // If a Jupyter connection file is provided and the feature is enabled, run protocol loop
     #[cfg(feature = "jupyter")]
     let args = Args::parse();
