@@ -5,6 +5,9 @@ use anyhow::Result;
 use clap::Parser;
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
 
+#[cfg(feature = "jupyter")]
+mod jupyter;
+
 #[derive(Parser, Debug)]
 #[command(version, about = "Kayton Jupyter kernel (experimental)")]
 struct Args {
@@ -13,7 +16,13 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    let _args = Args::parse();
+    let args = Args::parse();
+
+    // If a Jupyter connection file is provided and the feature is enabled, run protocol loop
+    #[cfg(feature = "jupyter")]
+    if let Some(cf) = args.connection_file.as_ref() {
+        return jupyter::run_kernel(cf);
+    }
 
     // For now: accept entire cell source on stdin, execute via shared engine, then
     // print a JSON object with globals snapshot for display.
