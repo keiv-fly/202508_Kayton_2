@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use clap::Parser;
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
-use log::info;
+use log::{info, warn};
 
 mod jupyter;
 
@@ -16,19 +16,34 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    // Initialize logging (no-op if already set); respects RUST_LOG
-    {
-        let _ = env_logger::builder().format_timestamp_millis().try_init();
-        info!("kayton_kernel starting");
-    }
-    // If a Jupyter connection file is provided and the feature is enabled, run protocol loop
+    // Initialize logging with more detail
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Info)
+        .format_timestamp_millis()
+        .init();
+
+    info!("kayton_kernel starting");
+
     let args = Args::parse();
+
+    // Check if running in Jupyter mode
     if let Some(cf) = args.connection_file.as_ref() {
+        info!(
+            "Starting Jupyter protocol with connection file: {}",
+            cf.display()
+        );
+
+        // Verify connection file exists and is readable
+        if !cf.exists() {
+            warn!("Connection file does not exist: {}", cf.display());
+            return Err(anyhow::anyhow!("Connection file not found"));
+        }
+
         return jupyter::run_kernel(cf);
     }
 
-    // For now: accept entire cell source on stdin, execute via shared engine, then
-    // print a JSON object with globals snapshot for display.
+    // Fallback to stdin mode for testing
+    info!("Running in stdin mode");
     let mut input = String::new();
     std::io::stdin().read_to_string(&mut input)?;
 
@@ -54,7 +69,6 @@ fn main() -> Result<()> {
         }
     }
 
-    // Report all globals as strings for now
     let globals = state.vm_mut().read_all_globals_as_strings();
     let json = serde_json::json!({
         "status": "ok",
