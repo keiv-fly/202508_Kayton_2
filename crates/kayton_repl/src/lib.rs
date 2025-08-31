@@ -172,19 +172,33 @@ fn build_prelude_and_epilogue(
                 if let Some(kind) = g.get(name) {
                     match kind {
                         ReplVarKind::Int => {
-                            if let Ok(val) = (api.get_global_u64)(ctx, name) {
-                                prelude_lines.push(format!("let mut {} = {};", name, val));
-                                pre_assigned.insert(*sym);
-                            }
-                        }
-                        ReplVarKind::Str => {
-                            if let Ok(buf) = (api.get_global_str_buf)(ctx, name) {
-                                if let Some(s) = buf.as_str() {
-                                    let lit = escape_rust_string_literal(s);
-                                    prelude_lines.push(format!("let mut {} = \"{}\";", name, lit));
-                                    pre_assigned.insert(*sym);
+                            match (api.get_global_u64)(ctx, name) {
+                                Ok(val) => {
+                                    prelude_lines.push(format!("let mut {} = {};", name, val));
+                                }
+                                Err(_) => {
+                                    // Fallback default to ensure the name is declared
+                                    prelude_lines.push(format!("let mut {} = 0;", name));
                                 }
                             }
+                            pre_assigned.insert(*sym);
+                        }
+                        ReplVarKind::Str => {
+                            match (api.get_global_str_buf)(ctx, name) {
+                                Ok(buf) => {
+                                    if let Some(s) = buf.as_str() {
+                                        let lit = escape_rust_string_literal(s);
+                                        prelude_lines
+                                            .push(format!("let mut {} = \"{}\";", name, lit));
+                                    } else {
+                                        prelude_lines.push(format!("let mut {} = \"\";", name));
+                                    }
+                                }
+                                Err(_) => {
+                                    prelude_lines.push(format!("let mut {} = \"\";", name));
+                                }
+                            }
+                            pre_assigned.insert(*sym);
                         }
                     }
                 }
@@ -238,6 +252,7 @@ pub fn run_repl() -> Result<()> {
     init_globals_once();
 
     let mut vm = KaytonVm::new();
+    let mut stored_functions: Vec<String> = Vec::new();
 
     let stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -252,13 +267,61 @@ pub fn run_repl() -> Result<()> {
             break;
         }
 
-        let source = line.trim_end_matches(&['\n', '\r'][..]);
-        if source.is_empty() {
+        let first_line_no_crlf = line.trim_end_matches(&['\n', '\r'][..]).to_string();
+        let first_line_trimmed = first_line_no_crlf.trim();
+
+        // Multiline function entry like Python: if first line starts with `fn` and ends with ':'
+        if first_line_trimmed.starts_with("fn ") && first_line_trimmed.ends_with(':') {
+            let mut block = String::new();
+            block.push_str(&first_line_no_crlf);
+            block.push('\n');
+
+            // Read subsequent indented lines until a blank line is entered
+            loop {
+                write!(stdout, "...     ")?; // Python-style continuation prompt with 4-space visual indent
+                stdout.flush()?;
+
+                let mut cont = String::new();
+                let m = stdin.read_line(&mut cont)?;
+                if m == 0 {
+                    break;
+                }
+                let cont_no_crlf = cont.trim_end_matches(&['\n', '\r'][..]);
+                if cont_no_crlf.is_empty() {
+                    break; // blank line terminates the block
+                }
+                // Ensure body lines are indented by 4 spaces
+                block.push_str("    ");
+                block.push_str(cont_no_crlf);
+                block.push('\n');
+            }
+
+            // Persist function definition across entries
+            stored_functions.push(block);
+            // Do not compile/run immediately; continue to next prompt
             continue;
         }
 
+        // Skip empty input
+        if first_line_trimmed.is_empty() {
+            continue;
+        }
+
+        // Prepend stored function definitions to current source
+        let mut full_source = String::new();
+        if !stored_functions.is_empty() {
+            for def in &stored_functions {
+                full_source.push_str(def);
+                if !def.ends_with('\n') {
+                    full_source.push('\n');
+                }
+                full_source.push('\n');
+            }
+        }
+        full_source.push_str(&first_line_no_crlf);
+
         // Parse / typecheck
-        let tokens = Lexer::new(source).tokenize();
+        let tokens = Lexer::new(&full_source).tokenize();
         let ast = Parser::new(tokens).parse_program();
         let hir = lower_program(ast);
         let mut resolved = resolve_program(&hir);
@@ -283,7 +346,7 @@ pub fn run_repl() -> Result<()> {
             let mut printed = false;
             for err in &typed.report.errors {
                 let file_label = format!("<kayton-input-{}>", input_counter);
-                if let Some(msg) = format_type_error(source, &resolved, err, &file_label) {
+                if let Some(msg) = format_type_error(&full_source, &resolved, err, &file_label) {
                     eprintln!("{}", msg);
                     printed = true;
                     break;
