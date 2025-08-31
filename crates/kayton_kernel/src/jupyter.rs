@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 use chrono::{SecondsFormat, Utc};
 use hmac::{Hmac, Mac};
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
-use log::{info, warn};
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use std::fs;
@@ -239,19 +239,26 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
 
     let ctx = zmq::Context::new();
 
-    // Create sockets
+    // Create sockets with better configuration
     let hb = ctx.socket(zmq::REP)?;
     let shell = ctx.socket(zmq::ROUTER)?;
     let control = ctx.socket(zmq::ROUTER)?;
     let iopub = ctx.socket(zmq::PUB)?;
     let stdin_sock = ctx.socket(zmq::ROUTER)?;
 
-    // Set socket options for better performance
-    hb.set_linger(1000)?;
-    shell.set_linger(1000)?;
-    control.set_linger(1000)?;
-    iopub.set_linger(1000)?;
-    stdin_sock.set_linger(1000)?;
+    // Set socket options for better reliability
+    hb.set_linger(0)?; // Don't wait on close
+    shell.set_linger(0)?;
+    control.set_linger(0)?;
+    iopub.set_linger(0)?;
+    stdin_sock.set_linger(0)?;
+
+    // Set high water marks to prevent message buildup
+    shell.set_sndhwm(1000)?;
+    shell.set_rcvhwm(1000)?;
+    iopub.set_sndhwm(1000)?;
+    control.set_sndhwm(1000)?;
+    control.set_rcvhwm(1000)?;
 
     // Bind sockets
     hb.bind(&format!("{}{}", transport, cfg.hb_port))?;
@@ -262,15 +269,18 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
 
     info!("All sockets bound successfully");
 
-    // Give ZeroMQ time to establish connections
-    std::thread::sleep(Duration::from_millis(100));
+    // Give sockets more time to bind properly
+    std::thread::sleep(Duration::from_millis(200));
 
     // Heartbeat thread
     let _hb_thread = std::thread::spawn(move || {
         let mut msg = zmq::Message::new();
         loop {
-            if hb.recv(&mut msg, 0).is_ok() {
-                let _ = hb.send(msg.as_ref(), 0);
+            match hb.recv(&mut msg, 0) {
+                Ok(_) => {
+                    let _ = hb.send(msg.as_ref(), 0);
+                }
+                Err(_) => break,
             }
         }
     });
@@ -278,7 +288,10 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     let mut state = InteractiveState::new();
     let mut exec_count: i32 = 0;
 
-    // Main event loop
+    // Track kernel ready state to avoid duplicate responses
+    let mut kernel_ready = false;
+
+    // Main event loop with better polling
     let mut poll_items = [
         shell.as_poll_item(zmq::POLLIN),
         control.as_poll_item(zmq::POLLIN),
@@ -287,34 +300,49 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     info!("Kernel ready, starting event loop");
 
     loop {
-        // Poll with shorter timeout for better responsiveness
-        let poll_result = zmq::poll(&mut poll_items, 100)?;
-
-        // Handle control messages (shutdown, etc.)
-        if poll_items[1].is_readable() {
-            match handle_control_message(&control, &key_bytes) {
-                Ok(should_shutdown) => {
-                    if should_shutdown {
-                        info!("Shutdown requested, exiting");
-                        break;
+        // Use shorter poll timeout for better responsiveness
+        match zmq::poll(&mut poll_items, 50) {
+            Ok(_) => {
+                // Handle control messages first (higher priority)
+                if poll_items[1].is_readable() {
+                    match handle_control_message(&control, &key_bytes) {
+                        Ok(should_shutdown) => {
+                            if should_shutdown {
+                                info!("Shutdown requested, exiting");
+                                break;
+                            }
+                        }
+                        Err(e) => warn!("Control message error: {}", e),
                     }
                 }
-                Err(e) => warn!("Control message error: {}", e),
+
+                // Handle shell messages
+                if poll_items[0].is_readable() {
+                    match handle_shell_message(
+                        &shell,
+                        &iopub,
+                        &key_bytes,
+                        &mut state,
+                        &mut exec_count,
+                        &mut kernel_ready,
+                    ) {
+                        Ok(_) => {}
+                        Err(e) => warn!("Shell message error: {}", e),
+                    }
+                }
+            }
+            Err(e) => {
+                if e == zmq::Error::EAGAIN {
+                    // No messages, continue
+                    continue;
+                } else {
+                    warn!("Poll error: {}", e);
+                }
             }
         }
 
-        // Handle shell messages (execute, kernel_info, etc.)
-        if poll_items[0].is_readable() {
-            match handle_shell_message(&shell, &iopub, &key_bytes, &mut state, &mut exec_count) {
-                Ok(_) => {}
-                Err(e) => warn!("Shell message error: {}", e),
-            }
-        }
-
-        if poll_result == 0 {
-            // No messages, small sleep to prevent busy waiting
-            std::thread::sleep(Duration::from_millis(10));
-        }
+        // Small yield to prevent busy waiting
+        std::thread::sleep(Duration::from_millis(1));
     }
 
     Ok(())
@@ -367,15 +395,28 @@ fn handle_shell_message(
     key: &[u8],
     state: &mut InteractiveState,
     exec_count: &mut i32,
+    kernel_ready: &mut bool,
 ) -> Result<()> {
+    // Use non-blocking receive to prevent hanging
     let mut frames = Vec::new();
     loop {
         let mut frame = zmq::Message::new();
-        shell.recv(&mut frame, 0)?;
-        let more = shell.get_rcvmore()?;
-        frames.push(frame);
-        if !more {
-            break;
+        match shell.recv(&mut frame, zmq::DONTWAIT) {
+            Ok(_) => {
+                let more = shell.get_rcvmore()?;
+                frames.push(frame);
+                if !more {
+                    break;
+                }
+            }
+            Err(zmq::Error::EAGAIN) => {
+                // No more messages
+                if frames.is_empty() {
+                    return Ok(());
+                }
+                break;
+            }
+            Err(e) => return Err(anyhow!("Shell receive error: {}", e)),
         }
     }
 
@@ -389,7 +430,18 @@ fn handle_shell_message(
 
     match msg_type {
         "kernel_info_request" => {
-            info!("Handling kernel_info_request");
+            // Prevent duplicate responses that cause nudging
+            if *kernel_ready {
+                debug!("Ignoring duplicate kernel_info_request (kernel already ready)");
+                return Ok(());
+            }
+
+            info!(
+                "Handling initial kernel_info_request from session: {}",
+                session
+            );
+            *kernel_ready = true;
+
             let reply_header = make_header("kernel_info_reply", session);
             let metadata = serde_json::json!({});
             let content = serde_json::json!({
@@ -400,12 +452,16 @@ fn handle_shell_message(
                     "name": "kayton",
                     "version": "0.1.0",
                     "mimetype": "text/plain",
-                    "file_extension": ".kay"
+                    "file_extension": ".kay",
+                    "pygments_lexer": "text",
+                    "codemirror_mode": "text"
                 },
-                "banner": "Kayton 0.1.0",
-                "status": "ok"
+                "banner": "Kayton Programming Language Kernel 0.1.0\n",
+                "status": "ok",
+                "help_links": []
             });
-            send_msg(
+
+            match send_msg(
                 shell,
                 &idents,
                 key,
@@ -413,7 +469,14 @@ fn handle_shell_message(
                 &header,
                 &metadata,
                 &content,
-            )?;
+            ) {
+                Ok(_) => info!("kernel_info_reply sent successfully"),
+                Err(e) => {
+                    warn!("Failed to send kernel_info_reply: {}", e);
+                    *kernel_ready = false; // Allow retry
+                    return Err(e);
+                }
+            }
         }
 
         "is_complete_request" => {
@@ -478,6 +541,8 @@ fn handle_shell_message(
                     Ok(prep) => {
                         if let Err(e) = execute_prepared(state, &prep) {
                             reply_status = "error";
+                            let error_msg = e.to_string();
+                            warn!("Execution error: {}", error_msg);
                             send_iopub(
                                 iopub,
                                 key,
@@ -485,14 +550,16 @@ fn handle_shell_message(
                                 &header,
                                 serde_json::json!({
                                     "ename": "ExecutionError",
-                                    "evalue": e.to_string(),
-                                    "traceback": [e.to_string()]
+                                    "evalue": error_msg,
+                                    "traceback": [error_msg]
                                 }),
                             )?;
                         }
                     }
                     Err(e) => {
                         reply_status = "error";
+                        let error_msg = e.to_string();
+                        warn!("Parse error: {}", error_msg);
                         send_iopub(
                             iopub,
                             key,
@@ -500,8 +567,8 @@ fn handle_shell_message(
                             &header,
                             serde_json::json!({
                                 "ename": "ParseError",
-                                "evalue": e.to_string(),
-                                "traceback": [e.to_string()]
+                                "evalue": error_msg,
+                                "traceback": [error_msg]
                             }),
                         )?;
                     }
