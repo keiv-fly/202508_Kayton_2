@@ -6,5 +6,6 @@ members = [
     "crates/keyton_rust_compiler",
     "crates/kayton_repl",
     "crates/kayton_vm",
+    "crates/kayton_kernel",
 ]
 resolver = "2"
