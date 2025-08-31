@@ -31,6 +31,9 @@ impl<'a> CodeGenerator<'a> {
 
         // Generate statements
         for stmt in &rhir_program.rhir {
+            if self.should_skip_stmt(stmt) {
+                continue;
+            }
             source_code.push_str("    ");
             source_code.push_str(&self.convert_stmt_to_string(stmt));
             source_code.push_str("\n");
@@ -71,6 +74,9 @@ impl<'a> CodeGenerator<'a> {
 
         // Generate statements
         for stmt in &rhir_program.rhir {
+            if self.should_skip_stmt(stmt) {
+                continue;
+            }
             source_code.push_str("    ");
             source_code.push_str(&self.convert_stmt_to_string(stmt));
             source_code.push_str("\n");
@@ -113,6 +119,16 @@ impl<'a> CodeGenerator<'a> {
                 let expr_str = self.convert_expr_to_string(expr);
                 format!("{};", expr_str)
             }
+        }
+    }
+
+    fn should_skip_stmt(&self, stmt: &RStmt) -> bool {
+        match stmt {
+            RStmt::ExprStmt { expr, .. } => match expr {
+                RExpr::Int { value, .. } if *value == 0 => true,
+                _ => false,
+            },
+            _ => false,
         }
     }
 

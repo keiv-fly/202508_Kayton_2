@@ -125,6 +125,38 @@ fn program2_rust_codegen() {
 }
 
 #[test]
+fn program_user_fn_inline_print_rust_codegen() {
+    let input = r#"fn my_sum(x, y):
+    x + y
+
+x = 1
+y = 2
+print(my_sum(x,y))
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
+    let rhir_program = convert_to_rhir(&typed, &resolved);
+    let rust_code = generate_rust_code(&rhir_program, &resolved);
+
+    assert!(
+        typed.report.errors.is_empty(),
+        "type errors: {:?}",
+        typed.report.errors
+    );
+
+    let expected_code = r#"fn main() {
+    let mut x = 1;
+    let mut y = 2;
+    println!((x + y));
+}
+"#;
+    assert_eq!(rust_code.source_code, expected_code);
+}
+
+#[test]
 fn program3_rust_codegen() {
     let input = r#"x = 12
 print(f"{x}")
