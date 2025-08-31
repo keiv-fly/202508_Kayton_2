@@ -224,6 +224,20 @@ fn parse_message(
     Ok((idents, header, parent_header, metadata, content))
 }
 
+fn receive_all_frames(sock: &zmq::Socket) -> Result<Vec<zmq::Message>> {
+    let mut frames = Vec::new();
+    loop {
+        let mut frame = zmq::Message::new();
+        sock.recv(&mut frame, 0)?; // Use blocking receive
+        let more = sock.get_rcvmore()?;
+        frames.push(frame);
+        if !more {
+            break;
+        }
+    }
+    Ok(frames)
+}
+
 pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     info!("Loading connection file: {}", connection_file.display());
     let cfg: ConnectionFile = serde_json::from_str(&fs::read_to_string(connection_file)?)?;
@@ -288,9 +302,6 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     let mut state = InteractiveState::new();
     let mut exec_count: i32 = 0;
 
-    // Track kernel ready state to avoid duplicate responses
-    let mut kernel_ready = false;
-
     // Main event loop with better polling
     let mut poll_items = [
         shell.as_poll_item(zmq::POLLIN),
@@ -300,9 +311,9 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     info!("Kernel ready, starting event loop");
 
     loop {
-        // Use shorter poll timeout for better responsiveness
-        match zmq::poll(&mut poll_items, 50) {
-            Ok(_) => {
+        // Use longer poll timeout for better reliability
+        match zmq::poll(&mut poll_items, 100) {
+            Ok(n) if n > 0 => {
                 // Handle control messages first (higher priority)
                 if poll_items[1].is_readable() {
                     match handle_control_message(&control, &key_bytes) {
@@ -312,7 +323,7 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                                 break;
                             }
                         }
-                        Err(e) => warn!("Control message error: {}", e),
+                        Err(e) => error!("Control message error: {}", e),
                     }
                 }
 
@@ -324,48 +335,34 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                         &key_bytes,
                         &mut state,
                         &mut exec_count,
-                        &mut kernel_ready,
                     ) {
                         Ok(_) => {}
-                        Err(e) => warn!("Shell message error: {}", e),
+                        Err(e) => error!("Shell message error: {}", e),
                     }
                 }
             }
+            Ok(_) => {
+                // No messages ready, continue
+            }
             Err(e) => {
-                if e == zmq::Error::EAGAIN {
-                    // No messages, continue
-                    continue;
-                } else {
-                    warn!("Poll error: {}", e);
-                }
+                error!("Poll error: {}", e);
             }
         }
-
-        // Small yield to prevent busy waiting
-        std::thread::sleep(Duration::from_millis(1));
     }
 
     Ok(())
 }
 
 fn handle_control_message(control: &zmq::Socket, key: &[u8]) -> Result<bool> {
-    let mut frames = Vec::new();
-    loop {
-        let mut frame = zmq::Message::new();
-        control.recv(&mut frame, 0)?;
-        let more = control.get_rcvmore()?;
-        frames.push(frame);
-        if !more {
-            break;
-        }
-    }
-
+    let frames = receive_all_frames(control)?;
     let (idents, header, _parent_header, _metadata, content) = parse_message(&frames, key)?;
 
     let msg_type = header
         .get("msg_type")
         .and_then(|v| v.as_str())
         .unwrap_or("");
+
+    debug!("Control message: {}", msg_type);
 
     if msg_type == "shutdown_request" {
         let reply_header = make_header(
@@ -395,31 +392,9 @@ fn handle_shell_message(
     key: &[u8],
     state: &mut InteractiveState,
     exec_count: &mut i32,
-    kernel_ready: &mut bool,
 ) -> Result<()> {
-    // Use non-blocking receive to prevent hanging
-    let mut frames = Vec::new();
-    loop {
-        let mut frame = zmq::Message::new();
-        match shell.recv(&mut frame, zmq::DONTWAIT) {
-            Ok(_) => {
-                let more = shell.get_rcvmore()?;
-                frames.push(frame);
-                if !more {
-                    break;
-                }
-            }
-            Err(zmq::Error::EAGAIN) => {
-                // No more messages
-                if frames.is_empty() {
-                    return Ok(());
-                }
-                break;
-            }
-            Err(e) => return Err(anyhow!("Shell receive error: {}", e)),
-        }
-    }
-
+    // Receive all frames for the message (blocking)
+    let frames = receive_all_frames(shell)?;
     let (idents, header, _parent_header, _metadata, content) = parse_message(&frames, key)?;
 
     let msg_type = header
@@ -428,19 +403,11 @@ fn handle_shell_message(
         .unwrap_or("");
     let session = header.get("session").and_then(|v| v.as_str()).unwrap_or("");
 
+    debug!("Shell message: {} from session: {}", msg_type, session);
+
     match msg_type {
         "kernel_info_request" => {
-            // Prevent duplicate responses that cause nudging
-            if *kernel_ready {
-                debug!("Ignoring duplicate kernel_info_request (kernel already ready)");
-                return Ok(());
-            }
-
-            info!(
-                "Handling initial kernel_info_request from session: {}",
-                session
-            );
-            *kernel_ready = true;
+            info!("Handling kernel_info_request from session: {}", session);
 
             let reply_header = make_header("kernel_info_reply", session);
             let metadata = serde_json::json!({});
@@ -456,12 +423,12 @@ fn handle_shell_message(
                     "pygments_lexer": "text",
                     "codemirror_mode": "text"
                 },
-                "banner": "Kayton Programming Language Kernel 0.1.0\n",
+                "banner": "Kayton 0.1.0",
                 "status": "ok",
                 "help_links": []
             });
 
-            match send_msg(
+            send_msg(
                 shell,
                 &idents,
                 key,
@@ -469,14 +436,9 @@ fn handle_shell_message(
                 &header,
                 &metadata,
                 &content,
-            ) {
-                Ok(_) => info!("kernel_info_reply sent successfully"),
-                Err(e) => {
-                    warn!("Failed to send kernel_info_reply: {}", e);
-                    *kernel_ready = false; // Allow retry
-                    return Err(e);
-                }
-            }
+            )?;
+
+            debug!("kernel_info_reply sent to session: {}", session);
         }
 
         "is_complete_request" => {
@@ -504,11 +466,17 @@ fn handle_shell_message(
 
         "execute_request" => {
             let code = content.get("code").and_then(|v| v.as_str()).unwrap_or("");
+            let silent = content
+                .get("silent")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+
             *exec_count += 1;
 
             info!(
-                "Executing code (exec_count={}): {} chars",
+                "Executing code (exec_count={}, silent={}): {} chars",
                 *exec_count,
+                silent,
                 code.len()
             );
 
@@ -521,19 +489,24 @@ fn handle_shell_message(
                 serde_json::json!({"execution_state": "busy"}),
             )?;
 
-            // Send execute_input
-            send_iopub(
-                iopub,
-                key,
-                "execute_input",
-                &header,
-                serde_json::json!({
-                    "code": code,
-                    "execution_count": *exec_count
-                }),
-            )?;
+            // Send execute_input (unless silent)
+            if !silent {
+                send_iopub(
+                    iopub,
+                    key,
+                    "execute_input",
+                    &header,
+                    serde_json::json!({
+                        "code": code,
+                        "execution_count": *exec_count
+                    }),
+                )?;
+            }
 
             let mut reply_status = "ok";
+            let mut error_name = String::new();
+            let mut error_value = String::new();
+            let mut error_traceback = Vec::new();
 
             // Execute the code
             if !code.trim().is_empty() {
@@ -541,42 +514,52 @@ fn handle_shell_message(
                     Ok(prep) => {
                         if let Err(e) = execute_prepared(state, &prep) {
                             reply_status = "error";
-                            let error_msg = e.to_string();
-                            warn!("Execution error: {}", error_msg);
+                            error_name = "ExecutionError".to_string();
+                            error_value = e.to_string();
+                            error_traceback = vec![error_value.clone()];
+                            warn!("Execution error: {}", error_value);
+
+                            if !silent {
+                                send_iopub(
+                                    iopub,
+                                    key,
+                                    "error",
+                                    &header,
+                                    serde_json::json!({
+                                        "ename": &error_name,
+                                        "evalue": &error_value,
+                                        "traceback": &error_traceback
+                                    }),
+                                )?;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        reply_status = "error";
+                        error_name = "ParseError".to_string();
+                        error_value = e.to_string();
+                        error_traceback = vec![error_value.clone()];
+                        warn!("Parse error: {}", error_value);
+
+                        if !silent {
                             send_iopub(
                                 iopub,
                                 key,
                                 "error",
                                 &header,
                                 serde_json::json!({
-                                    "ename": "ExecutionError",
-                                    "evalue": error_msg,
-                                    "traceback": [error_msg]
+                                    "ename": &error_name,
+                                    "evalue": &error_value,
+                                    "traceback": &error_traceback
                                 }),
                             )?;
                         }
                     }
-                    Err(e) => {
-                        reply_status = "error";
-                        let error_msg = e.to_string();
-                        warn!("Parse error: {}", error_msg);
-                        send_iopub(
-                            iopub,
-                            key,
-                            "error",
-                            &header,
-                            serde_json::json!({
-                                "ename": "ParseError",
-                                "evalue": error_msg,
-                                "traceback": [error_msg]
-                            }),
-                        )?;
-                    }
                 }
             }
 
-            // Send results if successful
-            if reply_status == "ok" {
+            // Send results if successful and not silent
+            if reply_status == "ok" && !silent {
                 let globals = state.vm_mut().read_all_globals_as_strings();
                 if !globals.is_empty() {
                     let mut output = String::new();
@@ -601,12 +584,19 @@ fn handle_shell_message(
             // Send execute_reply
             let reply_header = make_header("execute_reply", session);
             let metadata = serde_json::json!({});
-            let reply_content = serde_json::json!({
+
+            let mut reply_content = serde_json::json!({
                 "status": reply_status,
                 "execution_count": *exec_count,
                 "user_expressions": {},
                 "payload": []
             });
+
+            if reply_status == "error" {
+                reply_content["ename"] = serde_json::Value::String(error_name);
+                reply_content["evalue"] = serde_json::Value::String(error_value);
+                reply_content["traceback"] = serde_json::json!(error_traceback);
+            }
 
             send_msg(
                 shell,
@@ -626,11 +616,98 @@ fn handle_shell_message(
                 &header,
                 serde_json::json!({"execution_state": "idle"}),
             )?;
+
+            debug!("Execute request completed for session: {}", session);
+        }
+
+        "history_request" => {
+            // Jupyter notebooks often request history - just return empty history
+            debug!("Handling history_request");
+            let reply_header = make_header("history_reply", session);
+            let metadata = serde_json::json!({});
+            let reply_content = serde_json::json!({
+                "status": "ok",
+                "history": []
+            });
+            send_msg(
+                shell,
+                &idents,
+                key,
+                &reply_header,
+                &header,
+                &metadata,
+                &reply_content,
+            )?;
+        }
+
+        "comm_info_request" => {
+            // Return empty comm info
+            debug!("Handling comm_info_request");
+            let reply_header = make_header("comm_info_reply", session);
+            let metadata = serde_json::json!({});
+            let reply_content = serde_json::json!({
+                "status": "ok",
+                "comms": {}
+            });
+            send_msg(
+                shell,
+                &idents,
+                key,
+                &reply_header,
+                &header,
+                &metadata,
+                &reply_content,
+            )?;
+        }
+
+        "complete_request" => {
+            // Basic completion support - return no completions for now
+            debug!("Handling complete_request");
+            let reply_header = make_header("complete_reply", session);
+            let metadata = serde_json::json!({});
+            let reply_content = serde_json::json!({
+                "status": "ok",
+                "matches": [],
+                "cursor_start": 0,
+                "cursor_end": 0,
+                "metadata": {}
+            });
+            send_msg(
+                shell,
+                &idents,
+                key,
+                &reply_header,
+                &header,
+                &metadata,
+                &reply_content,
+            )?;
+        }
+
+        "inspect_request" => {
+            // Basic inspection support - return no info for now
+            debug!("Handling inspect_request");
+            let reply_header = make_header("inspect_reply", session);
+            let metadata = serde_json::json!({});
+            let reply_content = serde_json::json!({
+                "status": "ok",
+                "found": false,
+                "data": {},
+                "metadata": {}
+            });
+            send_msg(
+                shell,
+                &idents,
+                key,
+                &reply_header,
+                &header,
+                &metadata,
+                &reply_content,
+            )?;
         }
 
         _ => {
             warn!("Unhandled message type: {}", msg_type);
-            // Send a generic reply
+            // Send a generic reply for unknown message types
             let reply_header = make_header(&format!("{}_reply", msg_type), session);
             let metadata = serde_json::json!({});
             let reply_content = serde_json::json!({"status": "ok"});
