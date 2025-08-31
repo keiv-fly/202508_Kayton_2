@@ -225,6 +225,16 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
     _stdin_sock.bind(&stdin_addr)?;
     info!("stdin bound");
 
+    // Broadcast initial starting status so clients know the kernel is up
+    let empty_parent = serde_json::json!({});
+    let _ = send_iopub(
+        &iopub,
+        &key_bytes,
+        "status",
+        &empty_parent,
+        serde_json::json!({"execution_state": "starting"}),
+    );
+
     // Heartbeat echo thread
     let _hb_thread = std::thread::spawn(move || {
         let mut msg = zmq::Message::new();
@@ -418,6 +428,14 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                 }
                 "kernel_info_request" => {
                     info!("kernel_info_request received");
+                    // Notify clients that we are handling the request
+                    let _ = send_iopub(
+                        &iopub,
+                        &key_bytes,
+                        "status",
+                        &header_v,
+                        serde_json::json!({"execution_state": "busy"}),
+                    );
                     let reply_h = make_header("kernel_info_reply", &parent_session(&header_v));
                     let lang = serde_json::json!({
                         "name": "kayton",
@@ -436,6 +454,14 @@ pub fn run_kernel(connection_file: &std::path::Path) -> Result<()> {
                     send_msg(
                         &shell, &idents, &key_bytes, &reply_h, &header_v, &meta, &content,
                     )?;
+                    // Signal completion to unblock clients waiting for kernel readiness
+                    let _ = send_iopub(
+                        &iopub,
+                        &key_bytes,
+                        "status",
+                        &header_v,
+                        serde_json::json!({"execution_state": "idle"}),
+                    );
                 }
                 "execute_request" => {
                     let code = content.get("code").and_then(|v| v.as_str()).unwrap_or("");
