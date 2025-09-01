@@ -10,6 +10,7 @@ use chrono::{SecondsFormat, Utc};
 use clap::Parser;
 use hex;
 use hmac::{Hmac, Mac};
+use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
 use log::warn;
 use serde::Deserialize;
 use serde::Serialize;
@@ -385,8 +386,8 @@ fn install_kernelspec() -> Result<()> {
 
     let kernel_json = json!({
         "argv": argv,
-        "display_name": "Kayton Echo",
-        "language": "echo",
+        "display_name": "Kayton",
+        "language": "kayton",
         "interrupt_mode": "message",
         "env": {"RUST_LOG": "info"}
     });
@@ -478,6 +479,7 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
     let use_hmac = !key_bytes.is_empty() && cfg.signature_scheme.as_str() == "hmac-sha256";
 
     let mut execution_count: i32 = 1;
+    let mut state = InteractiveState::new();
     let mut running = true;
 
     let mut poll_items = [
@@ -529,6 +531,8 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
                                 .get("code")
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
+
+                            // Jupyter requires we echo the input first
                             publish_execute_input(
                                 &iopub,
                                 &key_bytes,
@@ -536,29 +540,148 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
                                 code,
                                 execution_count,
                             )?;
-                            publish_stream(&iopub, &key_bytes, &pm.header, "stdout", code)?;
-                            publish_execute_result(
-                                &iopub,
-                                &key_bytes,
-                                &pm.header,
-                                execution_count,
-                                code,
-                            )?;
-                            let reply = serde_json::json!({
-                                "status": "ok",
-                                "execution_count": execution_count,
-                                "payload": [],
-                                "user_expressions": {}
-                            });
-                            send_reply(
-                                &shell,
-                                &pm.idents,
-                                &key_bytes,
-                                &pm.header,
-                                "execute_reply",
-                                reply,
-                            )?;
-                            execution_count += 1;
+
+                            // Prepare + execute using shared interactive engine
+                            let first_line_no_crlf =
+                                code.trim_end_matches(&['\n', '\r'][..]).to_string();
+                            let first_line_trimmed = first_line_no_crlf.trim();
+
+                            // Handle multiline function entry: if cell starts with `fn ` and ends with ':' we store definitions
+                            if first_line_trimmed.starts_with("fn ")
+                                && first_line_trimmed.ends_with(':')
+                            {
+                                state.stored_functions.push(first_line_no_crlf);
+                                // Do not execute immediately; acknowledge success
+                                let reply = serde_json::json!({
+                                    "status": "ok",
+                                    "execution_count": execution_count,
+                                    "payload": [],
+                                    "user_expressions": {}
+                                });
+                                send_reply(
+                                    &shell,
+                                    &pm.idents,
+                                    &key_bytes,
+                                    &pm.header,
+                                    "execute_reply",
+                                    reply,
+                                )?;
+                                publish_status(&iopub, &key_bytes, &pm.header, "idle")?;
+                                continue;
+                            }
+
+                            if first_line_trimmed.is_empty() {
+                                let reply = serde_json::json!({
+                                    "status": "ok",
+                                    "execution_count": execution_count,
+                                    "payload": [],
+                                    "user_expressions": {}
+                                });
+                                send_reply(
+                                    &shell,
+                                    &pm.idents,
+                                    &key_bytes,
+                                    &pm.header,
+                                    "execute_reply",
+                                    reply,
+                                )?;
+                                execution_count += 1;
+                            } else {
+                                match prepare_input(&mut state, &first_line_no_crlf) {
+                                    Ok(prep) => {
+                                        if let Err(e) = execute_prepared(&mut state, &prep) {
+                                            // Send stderr stream and error reply
+                                            let err_s = e.to_string();
+                                            let _ = publish_stream(
+                                                &iopub, &key_bytes, &pm.header, "stderr", &err_s,
+                                            );
+                                            let reply = serde_json::json!({
+                                                "status": "error",
+                                                "ename": "ExecutionError",
+                                                "evalue": err_s,
+                                                "traceback": [],
+                                            });
+                                            send_reply(
+                                                &shell,
+                                                &pm.idents,
+                                                &key_bytes,
+                                                &pm.header,
+                                                "execute_reply",
+                                                reply,
+                                            )?;
+                                        } else {
+                                            // Format current globals and show as display data
+                                            let mut output_lines: Vec<String> = Vec::new();
+                                            for (name, handle) in state.vm().snapshot_globals() {
+                                                let mut vm_ref = state.vm_mut();
+                                                match vm_ref.format_value_by_handle(handle) {
+                                                    Ok(s) => output_lines
+                                                        .push(format!("{} = {}", name, s)),
+                                                    Err(_) => output_lines
+                                                        .push(format!("{} = <error>", name)),
+                                                }
+                                            }
+                                            let text = if output_lines.is_empty() {
+                                                String::new()
+                                            } else {
+                                                output_lines.join("\n")
+                                            };
+                                            if !text.is_empty() {
+                                                let content = serde_json::json!({
+                                                    "execution_count": execution_count,
+                                                    "data": {"text/plain": text},
+                                                    "metadata": {}
+                                                });
+                                                let _ = publish_on_iopub(
+                                                    &iopub,
+                                                    &key_bytes,
+                                                    &pm.header,
+                                                    "execute_result",
+                                                    content,
+                                                );
+                                            }
+                                            let reply = serde_json::json!({
+                                                "status": "ok",
+                                                "execution_count": execution_count,
+                                                "payload": [],
+                                                "user_expressions": {}
+                                            });
+                                            send_reply(
+                                                &shell,
+                                                &pm.idents,
+                                                &key_bytes,
+                                                &pm.header,
+                                                "execute_reply",
+                                                reply,
+                                            )?;
+                                        }
+                                        state.input_counter += 1;
+                                        execution_count += 1;
+                                    }
+                                    Err(e) => {
+                                        let err_s = e.to_string();
+                                        let _ = publish_stream(
+                                            &iopub, &key_bytes, &pm.header, "stderr", &err_s,
+                                        );
+                                        let reply = serde_json::json!({
+                                            "status": "error",
+                                            "ename": "TypeError",
+                                            "evalue": err_s,
+                                            "traceback": [],
+                                        });
+                                        send_reply(
+                                            &shell,
+                                            &pm.idents,
+                                            &key_bytes,
+                                            &pm.header,
+                                            "execute_reply",
+                                            reply,
+                                        )?;
+                                        state.input_counter += 1;
+                                        execution_count += 1;
+                                    }
+                                }
+                            }
                         }
                         _ => {
                             let reply = serde_json::json!({});
@@ -656,12 +779,12 @@ fn kernel_info_content() -> Value {
         "implementation": "kayton_kernel",
         "implementation_version": env!("CARGO_PKG_VERSION"),
         "language_info": {
-            "name": "echo",
+            "name": "kayton",
             "version": "0.1.0",
             "mimetype": "text/plain",
-            "file_extension": ".txt"
+            "file_extension": ".kay"
         },
-        "banner": "Kayton Echo Kernel - echoes input back as output",
+        "banner": "Kayton Kernel - interactive Kayton execution",
         "help_links": []
     })
 }
