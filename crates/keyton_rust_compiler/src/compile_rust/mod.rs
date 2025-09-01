@@ -50,12 +50,16 @@ crate-type = ["dylib"]
     // Prepend compatibility macro for println! and REPL reporting hooks
     let macro_header = r#"
 macro_rules! println {
-    ($e:expr) => {
-        ::std::println!("{}", $e);
-    };
-    ($($arg:tt)*) => {
-        ::std::println!($($arg)*);
-    };
+    ($e:expr) => {{
+        let s = ::std::format!("{}", $e);
+        unsafe { report_str("__stdout", &s); }
+        ::std::println!("{}", s);
+    }};
+    ($($arg:tt)*) => {{
+        let s = ::std::format!($($arg)*);
+        unsafe { report_str("__stdout", &s); }
+        ::std::println!("{}", s);
+    }};
 }
 
 // ----- REPL host reporting hooks (set by host via kayton_set_reporters) -----

@@ -23,7 +23,9 @@ pub extern "C" fn host_report_int(name_ptr: *const u8, name_len: usize, value: i
                     host_data: host_data as *mut core::ffi::c_void,
                     api: api_ptr as *const Api,
                 };
-                let api: &Api = ctx.api();
+                // Avoid borrowing ctx immutably while also passing &mut ctx to API calls
+                let api_ptr = ctx.api;
+                let api: &Api = &*api_ptr;
                 let _ = (api.set_global_u64)(&mut ctx, name, value as u64);
             }
         }
@@ -49,9 +51,23 @@ pub extern "C" fn host_report_str(
                     host_data: host_data as *mut core::ffi::c_void,
                     api: api_ptr as *const Api,
                 };
-                let api: &Api = ctx.api();
-                let buf = VmGlobalStrBuf::new(val.to_string());
-                let _ = (api.set_global_str_buf)(&mut ctx, name, buf);
+                // Avoid borrowing ctx immutably while also passing &mut ctx to API calls
+                let api_ptr = ctx.api;
+                let api: &Api = &*api_ptr;
+                if name == "__stdout" {
+                    // Read existing buffer if present, append, then write back
+                    let existing = (api.get_global_str_buf)(&mut ctx, name)
+                        .ok()
+                        .and_then(|sb| sb.as_str().map(|s| s.to_string()))
+                        .unwrap_or_else(String::new);
+                    let mut combined = existing;
+                    combined.push_str(val);
+                    let buf = VmGlobalStrBuf::new(combined);
+                    let _ = (api.set_global_str_buf)(&mut ctx, name, buf);
+                } else {
+                    let buf = VmGlobalStrBuf::new(val.to_string());
+                    let _ = (api.set_global_str_buf)(&mut ctx, name, buf);
+                }
             }
         }
     }

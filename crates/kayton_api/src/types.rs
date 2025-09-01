@@ -119,20 +119,22 @@ pub struct GlobalStrBuf {
 impl GlobalStrBuf {
     /// Create a new GlobalStrBuf from a String
     pub fn new(string: String) -> Self {
-        let ptr = string.as_ptr();
-        let len = string.len();
-        let capacity = string.capacity();
+        // Convert into a boxed str first so we can capture the final, stable pointer
+        let boxed: Box<str> = string.into_boxed_str();
+        let ptr = boxed.as_ptr();
+        let len = boxed.len();
+        // Box<str> capacity equals length; we record len for capacity to keep invariants simple
+        let capacity = len;
 
-        // Leak the string to prevent it from being dropped automatically
-        // The drop function will handle cleanup
-        let _ = Box::leak(string.into_boxed_str());
+        // Leak the box; our drop_fn will reconstruct it and free later
+        let _raw: *mut str = Box::into_raw(boxed);
 
         Self {
             ptr,
             len,
             capacity,
             drop_fn: Some(|ptr, len, _capacity| {
-                // Safety: We know this pointer was created from a leaked String
+                // Safety: We know this pointer was created from a leaked Box<str>
                 unsafe {
                     let slice = core::slice::from_raw_parts_mut(ptr as *mut u8, len);
                     let _ = Box::from_raw(slice as *mut [u8] as *mut str);

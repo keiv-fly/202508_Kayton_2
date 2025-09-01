@@ -15,22 +15,15 @@ print(z)"#;
     let prepared = prepare_input(&mut state, code)?;
     execute_prepared(&mut state, &prepared)?;
 
-    // Format output exactly like the kernel's execute_result
-    let mut lines: Vec<String> = Vec::new();
-    for (name, handle) in state.vm().snapshot_globals() {
-        let vm_ref = state.vm_mut();
-        match vm_ref.format_value_by_handle(handle) {
-            Ok(s) => lines.push(format!("{} = {}", name, s)),
-            Err(_) => lines.push(format!("{} = <error>", name)),
-        }
-    }
-    let text = if lines.is_empty() {
-        String::new()
+    // Read captured printed output from __stdout and trim one trailing newline if present
+    let text = if let Some(h) = state.vm().resolve_name("__stdout") {
+        let s = state.vm_mut().format_value_by_handle(h).unwrap_or_default();
+        s.trim_end_matches('\n').to_string()
     } else {
-        lines.join("\n")
+        String::new()
     };
 
-    assert_eq!(text, "a = 1\nb = 2\nz = 3");
+    assert_eq!(text, "3");
 
     Ok(())
 }
