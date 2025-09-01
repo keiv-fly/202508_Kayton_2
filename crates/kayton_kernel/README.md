@@ -1,10 +1,10 @@
-# Kayton Jupyter Kernel
+# Kayton Echo Jupyter Kernel
 
-This crate provides a Jupyter kernel for the Kayton language. It uses the shared interactive engine to execute code and persists globals across cells.
+This crate provides a standalone Jupyter kernel that echoes the input back as output. It is not related to, nor does it depend on, any other crates in this workspace.
 
 ## Build
 
-- From the workspace root:
+- From the workspace root or this crate directory:
 
 ```
 # Debug build
@@ -14,43 +14,60 @@ cargo build -p kayton_kernel
 cargo build -p kayton_kernel --release
 ```
 
-During build, a minimal Jupyter kernel spec is generated at:
-
-- target/<profile>/kayton_kernelspec/kayton/kernel.json
-
-The kernelspec points to an executable named `kayton_kernel` on your PATH, and uses the standard `-f {connection_file}` CLI for Jupyter connection files.
-
 ## Install the kernel into Jupyter
 
-Option A: Using Jupyter’s install command with a directory
+Use the built-in installer (writes a kernelspec with display name "Kayton Echo"):
 
 ```
-jupyter kernelspec install --user target/debug/kayton_kernelspec/kayton --name kayton
+# From this crate directory
+./target/debug/kayton_kernel.exe --install
 # Or release
-jupyter kernelspec install --user target/release/kayton_kernelspec/kayton --name kayton
+./target/release/kayton_kernel.exe --install
+
+# Verify registration
+jupyter kernelspec list
 ```
 
-Option B: Copy the spec manually (advanced)
+This installs the kernelspec under your user Jupyter data directory (on Windows typically `%APPDATA%/jupyter/kernels/kayton_kernel`). The kernel is registered with the name `kayton_kernel` and a display name of "Kayton Echo".
 
-- Find your Jupyter data dir: `jupyter --data-dir`
-- Create a directory: `<data-dir>/kernels/kayton`
-- Copy `kernel.json` there
-- Ensure `kayton_kernel` executable is on your PATH
+To uninstall later:
+
+```
+jupyter kernelspec uninstall -y kayton_kernel
+```
 
 ## Use
 
-- Launch JupyterLab or Notebook and select the “Kayton” kernel when creating a new notebook.
-
-### Optional: Full Jupyter protocol
-
-- Build with the `jupyter` feature to enable ZeroMQ/HMAC protocol wiring (placeholder module included; extend as needed):
+- Jupyter console:
 
 ```
-cargo build -p kayton_kernel --features jupyter
+jupyter console --kernel kayton_kernel
 ```
 
-- The generated `kernel.json` already uses the `-f {connection_file}` argument that Jupyter provides.
+- JupyterLab/Notebook: create a new notebook and select the "Kayton Echo" kernel.
 
-## Notes
+### What to expect
 
-- The current kernel is a minimal implementation that executes cell source via the Kayton interactive engine and returns a JSON summary of globals. Full ZeroMQ-based Jupyter message handling can be added next.
+- The kernel does not execute code; it simply echoes the cell's input.
+- For an `execute_request`, it publishes the input on stdout and as an `execute_result`, and returns an `execute_reply` with status `ok`.
+
+## How it works (protocol)
+
+- Uses the standard Jupyter kernel messaging protocol over ZeroMQ.
+- Channels and socket types:
+  - Shell, Control, Stdin: ROUTER
+  - IOPub: PUB
+  - Heartbeat: REP (echoes frames)
+- Message signing: HMAC-SHA256 when a non-empty key is provided by the connection file.
+- WebSockets: Browsers talk WebSockets to Jupyter Server, which bridges to the kernel's ZeroMQ sockets. No WebSocket code is required in the kernel; it works seamlessly in both cases.
+
+## Kernelspec details
+
+- The installer writes `kernel.json` with `argv` like:
+  - `["<path-to-exe>", "-f", "{connection_file}"]`
+- Environment: sets `RUST_LOG=info` for basic logging.
+
+## Troubleshooting
+
+- Kernel not listed: run `jupyter kernelspec list` and ensure `kayton_kernel` appears. Re-run `--install` if needed.
+- Kernel fails to start: check the installed `kernel.json` path and that the executable exists. Increase logging by setting `RUST_LOG=debug` and restart the kernel.

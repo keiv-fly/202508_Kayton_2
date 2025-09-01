@@ -610,8 +610,6 @@ dependencies = [
  "env_logger",
  "hex",
  "hmac",
- "kayton_interactive_shared",
- "kayton_vm",
  "log",
  "serde",
  "serde_json",
