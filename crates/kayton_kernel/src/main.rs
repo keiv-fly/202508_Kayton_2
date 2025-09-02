@@ -10,7 +10,9 @@ use chrono::{SecondsFormat, Utc};
 use clap::Parser;
 use hex;
 use hmac::{Hmac, Mac};
-use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
+use kayton_interactive_shared::{
+    InteractiveState, execute_prepared, prepare_input, set_stdout_callback_thunk,
+};
 use log::warn;
 use serde::Deserialize;
 use serde::Serialize;
@@ -344,6 +346,33 @@ fn now_rfc3339() -> String {
     Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true)
 }
 
+// Thread-local context to stream stdout directly from compiled code callbacks
+thread_local! {
+    static TLS_IOPUB: std::cell::RefCell<Option<usize>> = std::cell::RefCell::new(None);
+    static TLS_KEY: std::cell::RefCell<Vec<u8>> = std::cell::RefCell::new(Vec::new());
+    static TLS_PARENT: std::cell::RefCell<Option<Value>> = std::cell::RefCell::new(None);
+}
+
+extern "C" fn stdout_stream_cb(text_ptr: *const u8, text_len: usize) {
+    unsafe {
+        let slice = core::slice::from_raw_parts(text_ptr, text_len);
+        if let Ok(text) = core::str::from_utf8(slice) {
+            TLS_IOPUB.with(|sock| {
+                if let Some(sock_usize) = *sock.borrow() {
+                    let iopub: &zmq::Socket = &*(sock_usize as *const zmq::Socket);
+                    TLS_KEY.with(|k| {
+                        TLS_PARENT.with(|p| {
+                            if let Some(parent) = p.borrow().as_ref() {
+                                let _ = publish_stream(iopub, &k.borrow(), parent, "stdout", text);
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    }
+}
+
 fn main() -> Result<()> {
     env_logger::init();
     let args = Args::parse();
@@ -589,7 +618,35 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
                             } else {
                                 match prepare_input(&mut state, &first_line_no_crlf) {
                                     Ok(prep) => {
-                                        if let Err(e) = execute_prepared(&mut state, &prep) {
+                                        // Install TLS context so callback can publish on this thread
+                                        let iopub_ptr = (&iopub as *const zmq::Socket) as usize;
+                                        TLS_IOPUB.with(|slot| {
+                                            *slot.borrow_mut() = Some(iopub_ptr);
+                                        });
+                                        TLS_KEY.with(|slot| {
+                                            *slot.borrow_mut() = key_bytes.clone();
+                                        });
+                                        TLS_PARENT.with(|slot| {
+                                            *slot.borrow_mut() = Some(pm.header.clone());
+                                        });
+                                        set_stdout_callback_thunk(Some(stdout_stream_cb));
+
+                                        // Execute synchronously (prints stream immediately via callback)
+                                        let exec_result = execute_prepared(&mut state, &prep);
+
+                                        // Clear callback and TLS after execution
+                                        set_stdout_callback_thunk(None);
+                                        TLS_IOPUB.with(|slot| {
+                                            *slot.borrow_mut() = None;
+                                        });
+                                        TLS_KEY.with(|slot| {
+                                            slot.borrow_mut().clear();
+                                        });
+                                        TLS_PARENT.with(|slot| {
+                                            *slot.borrow_mut() = None;
+                                        });
+
+                                        if let Err(e) = exec_result {
                                             // Send stderr stream and error reply
                                             let err_s = e.to_string();
                                             let _ = publish_stream(
@@ -610,9 +667,14 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
                                                 reply,
                                             )?;
                                         } else {
-                                            // Format current globals and show as display data
+                                            // Stdout already streamed live by callback
+
+                                            // Format current globals (excluding __stdout) and show as display data
                                             let mut output_lines: Vec<String> = Vec::new();
                                             for (name, handle) in state.vm().snapshot_globals() {
+                                                if name == "__stdout" {
+                                                    continue;
+                                                }
                                                 let mut vm_ref = state.vm_mut();
                                                 match vm_ref.format_value_by_handle(handle) {
                                                     Ok(s) => output_lines

@@ -6,6 +6,18 @@ pub type ReportStrFn =
 
 static mut HOST_PTRS: Option<(usize, usize)> = None; // (host_data, api_ptr)
 
+// Optional callback invoked whenever client code reports to "__stdout".
+// The kernel can set this to stream output immediately (e.g., Jupyter stream).
+pub type OnStdoutFn = extern "C" fn(text_ptr: *const u8, text_len: usize);
+static mut ON_STDOUT: Option<OnStdoutFn> = None;
+
+#[inline]
+pub fn set_stdout_callback(cb: Option<OnStdoutFn>) {
+    unsafe {
+        ON_STDOUT = cb;
+    }
+}
+
 #[inline]
 pub fn set_report_host_from_ctx(ctx: &mut VmKaytonContext) {
     unsafe {
@@ -64,6 +76,11 @@ pub extern "C" fn host_report_str(
                     combined.push_str(val);
                     let buf = VmGlobalStrBuf::new(combined);
                     let _ = (api.set_global_str_buf)(&mut ctx, name, buf);
+
+                    // Also invoke streaming callback if configured
+                    if let Some(cb) = ON_STDOUT {
+                        cb(str_slice.as_ptr(), str_slice.len());
+                    }
                 } else {
                     let buf = VmGlobalStrBuf::new(val.to_string());
                     let _ = (api.set_global_str_buf)(&mut ctx, name, buf);

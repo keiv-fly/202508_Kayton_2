@@ -20,5 +20,6 @@ pub use kayton_api::{
 
 // Reporter helpers used by dynamically compiled code epilogues
 pub use reporters::{
-    ReportIntFn, ReportStrFn, host_report_int, host_report_str, set_report_host_from_ctx,
+    OnStdoutFn, ReportIntFn, ReportStrFn, host_report_int, host_report_str,
+    set_report_host_from_ctx, set_stdout_callback,
 };

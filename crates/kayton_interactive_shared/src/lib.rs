@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use anyhow::{Context, Result};
 use kayton_vm::{
     Api, KaytonVm, ReportIntFn, ReportStrFn, VmKaytonContext, host_report_int, host_report_str,
-    set_report_host_from_ctx,
+    set_report_host_from_ctx, set_stdout_callback,
 };
 use keyton_rust_compiler::compile_rust::compile_generated_rust_to_dylib;
 use keyton_rust_compiler::diagnostics::format_type_error;
@@ -289,4 +289,96 @@ pub fn execute_prepared(state: &mut InteractiveState, prepared: &PreparedCode) -
         }
     }
     Ok(())
+}
+
+/// Execute prepared code and stream stdout in real time via provided callback.
+/// The callback is invoked with text chunks exactly as reported by `println!` (including newlines).
+pub fn execute_prepared_streaming<F>(
+    state: &mut InteractiveState,
+    prepared: &PreparedCode,
+    mut on_stdout: F,
+) -> Result<()>
+where
+    F: FnMut(&str) + 'static,
+{
+    thread_local! {
+        static STDOUT_SINK: std::cell::RefCell<Option<Box<dyn FnMut(&str)>>> =
+            std::cell::RefCell::new(None);
+    }
+
+    extern "C" fn forward_stdout(text_ptr: *const u8, text_len: usize) {
+        unsafe {
+            let slice = core::slice::from_raw_parts(text_ptr, text_len);
+            if let Ok(s) = core::str::from_utf8(slice) {
+                STDOUT_SINK.with(|slot| {
+                    if let Some(cb) = &mut *slot.borrow_mut() {
+                        cb(s);
+                    }
+                });
+            }
+        }
+    }
+
+    match compile_generated_rust_to_dylib(&prepared.rust.source_code) {
+        Ok(path) => unsafe {
+            let lib = Library::new(&path).with_context(|| format!("load dylib: {:?}", path))?;
+
+            // Set reporter hooks from VM context
+            type SetReportersFn = unsafe extern "C" fn(ReportIntFn, ReportStrFn);
+            if let Ok(setters) = lib.get::<SetReportersFn>(b"kayton_set_reporters") {
+                let mut ctx = state.vm_mut().context();
+                set_report_host_from_ctx(&mut ctx);
+                setters(
+                    host_report_int as ReportIntFn,
+                    host_report_str as ReportStrFn,
+                );
+            }
+
+            // Install stdout streaming callback
+            STDOUT_SINK.with(|slot| {
+                *slot.borrow_mut() = Some(Box::new(move |s: &str| on_stdout(s)));
+            });
+            set_stdout_callback(Some(forward_stdout));
+
+            let func: libloading::Symbol<unsafe extern "C" fn()> =
+                lib.get(b"run").context("find run symbol")?;
+            func();
+
+            // Clear callback after execution
+            set_stdout_callback(None);
+            STDOUT_SINK.with(|slot| {
+                *slot.borrow_mut() = None;
+            });
+        },
+        Err(err) => {
+            return Err(anyhow::anyhow!(format!("Compile error: {}", err)));
+        }
+    }
+    Ok(())
+}
+
+/// Kernel helper: set or clear the VM stdout streaming callback.
+/// Exposed to avoid the kernel depending directly on `kayton_vm`.
+pub type OnStdoutFn = extern "C" fn(text_ptr: *const u8, text_len: usize);
+pub fn set_stdout_callback_thunk(cb: Option<OnStdoutFn>) {
+    set_stdout_callback(cb);
+}
+
+/// Retrieve and clear the captured program stdout accumulated in `__stdout`.
+/// Returns the string that was captured since the last drain.
+pub fn take_stdout(state: &mut InteractiveState) -> String {
+    // Access VM context and API
+    let mut ctx = state.vm_mut().context();
+    let api: &Api = state.vm().api();
+
+    // Read current buffer
+    let s = (api.get_global_str_buf)(&mut ctx, "__stdout")
+        .ok()
+        .and_then(|sb| sb.as_str().map(|t| t.to_string()))
+        .unwrap_or_default();
+
+    // Clear buffer for subsequent cells
+    let _ = (api.set_global_static_str)(&mut ctx, "__stdout", "");
+
+    s
 }

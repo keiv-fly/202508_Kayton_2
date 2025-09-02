@@ -51,14 +51,15 @@ crate-type = ["dylib"]
     let macro_header = r#"
 macro_rules! println {
     ($e:expr) => {{
-        let s = ::std::format!("{}", $e);
+        let s = ::std::format!("{}\n", $e);
         unsafe { report_str("__stdout", &s); }
-        ::std::println!("{}", s);
+        // Also write to process stdout for local runs
+        ::std::print!("{}", s);
     }};
-    ($($arg:tt)*) => {{
-        let s = ::std::format!($($arg)*);
+    ($fmt:expr, $($arg:tt)*) => {{
+        let s = ::std::format!(concat!($fmt, "\n"), $($arg)*);
         unsafe { report_str("__stdout", &s); }
-        ::std::println!("{}", s);
+        ::std::print!("{}", s);
     }};
 }
 
