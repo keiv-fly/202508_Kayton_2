@@ -669,38 +669,25 @@ fn run_kernel(cfg: &ConnectionConfig) -> Result<()> {
                                         } else {
                                             // Stdout already streamed live by callback
 
-                                            // Format current globals (excluding __stdout) and show as display data
-                                            let mut output_lines: Vec<String> = Vec::new();
-                                            for (name, handle) in state.vm().snapshot_globals() {
-                                                if name == "__stdout" {
-                                                    continue;
-                                                }
+                                            // Publish only the value of the last expression (if any)
+                                            if let Some(h) = state.vm().resolve_name("__last") {
                                                 let mut vm_ref = state.vm_mut();
-                                                match vm_ref.format_value_by_handle(handle) {
-                                                    Ok(s) => output_lines
-                                                        .push(format!("{} = {}", name, s)),
-                                                    Err(_) => output_lines
-                                                        .push(format!("{} = <error>", name)),
+                                                if let Ok(text) = vm_ref.format_value_by_handle(h) {
+                                                    if !text.is_empty() {
+                                                        let content = serde_json::json!({
+                                                            "execution_count": execution_count,
+                                                            "data": {"text/plain": text},
+                                                            "metadata": {}
+                                                        });
+                                                        let _ = publish_on_iopub(
+                                                            &iopub,
+                                                            &key_bytes,
+                                                            &pm.header,
+                                                            "execute_result",
+                                                            content,
+                                                        );
+                                                    }
                                                 }
-                                            }
-                                            let text = if output_lines.is_empty() {
-                                                String::new()
-                                            } else {
-                                                output_lines.join("\n")
-                                            };
-                                            if !text.is_empty() {
-                                                let content = serde_json::json!({
-                                                    "execution_count": execution_count,
-                                                    "data": {"text/plain": text},
-                                                    "metadata": {}
-                                                });
-                                                let _ = publish_on_iopub(
-                                                    &iopub,
-                                                    &key_bytes,
-                                                    &pm.header,
-                                                    "execute_result",
-                                                    content,
-                                                );
                                             }
                                             let reply = serde_json::json!({
                                                 "status": "ok",

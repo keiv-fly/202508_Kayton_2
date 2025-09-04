@@ -2,7 +2,7 @@ use anyhow::Result;
 use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
 
 #[test]
-fn program_output_matches_expected() -> Result<()> {
+fn program_prints_and_last_expr_matches_expected() -> Result<()> {
     let mut state = InteractiveState::new();
 
     // Execute the entire program in one block, mirroring a single Jupyter cell
@@ -11,7 +11,9 @@ fn program_output_matches_expected() -> Result<()> {
 a=1
 b=2
 z = my(a,b)
-print(z)"#;
+print(z)
+print(a)
+z"#;
     let prepared = prepare_input(&mut state, code)?;
     execute_prepared(&mut state, &prepared)?;
 
@@ -23,7 +25,15 @@ print(z)"#;
         String::new()
     };
 
-    assert_eq!(text, "3");
+    assert_eq!(text, "3\n1");
+
+    // Verify that the last expression value is captured into __last
+    let last_text = if let Some(h) = state.vm().resolve_name("__last") {
+        state.vm_mut().format_value_by_handle(h).unwrap_or_default()
+    } else {
+        String::new()
+    };
+    assert_eq!(last_text, "3");
 
     Ok(())
 }

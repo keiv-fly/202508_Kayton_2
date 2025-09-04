@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::rhir::types::{RExpr, RStmt, RStringPart, RustProgram};
 use crate::shir::resolver::ResolvedProgram;
-use crate::shir::sym::SymbolId;
+use crate::shir::sym::{SymbolId, Type};
 
 use super::types::RustCode;
 
@@ -72,14 +72,41 @@ impl<'a> CodeGenerator<'a> {
             }
         }
 
-        // Generate statements
-        for stmt in &rhir_program.rhir {
+        // Determine the last non-skipped expression statement with non-Unit type
+        let mut last_expr_idx: Option<(usize, Type)> = None;
+        for (idx, stmt) in rhir_program.rhir.iter().enumerate() {
+            if self.should_skip_stmt(stmt) {
+                continue;
+            }
+            if let RStmt::ExprStmt { expr, .. } = stmt {
+                let ty = expr.ty().clone();
+                if ty != Type::Unit {
+                    last_expr_idx = Some((idx, ty));
+                }
+            }
+        }
+
+        // Generate statements, capturing last expression value if present
+        for (idx, stmt) in rhir_program.rhir.iter().enumerate() {
             if self.should_skip_stmt(stmt) {
                 continue;
             }
             source_code.push_str("    ");
-            source_code.push_str(&self.convert_stmt_to_string(stmt));
-            source_code.push_str("\n");
+            match (idx, stmt) {
+                (i, RStmt::ExprStmt { expr, .. })
+                    if last_expr_idx.as_ref().map(|(j, _)| *j) == Some(i) =>
+                {
+                    // Capture last expression value into a temp so we can report it later without re-evaluating
+                    let expr_str = self.convert_expr_to_string(expr);
+                    source_code.push_str("let __kayton_last = ");
+                    source_code.push_str(&expr_str);
+                    source_code.push_str(";\n");
+                }
+                _ => {
+                    source_code.push_str(&self.convert_stmt_to_string(stmt));
+                    source_code.push_str("\n");
+                }
+            }
         }
 
         // Insert epilogue lines at end of main
@@ -88,6 +115,21 @@ impl<'a> CodeGenerator<'a> {
             source_code.push_str(line);
             if !line.ends_with('\n') {
                 source_code.push('\n');
+            }
+        }
+
+        // Also report the captured last expression value if any
+        if let Some((_, ty)) = last_expr_idx {
+            match ty {
+                Type::Int => {
+                    source_code
+                        .push_str("    unsafe { report_int(\"__last\", __kayton_last as i64); }\n");
+                }
+                Type::Str => {
+                    source_code
+                        .push_str("    unsafe { report_str(\"__last\", &__kayton_last); }\n");
+                }
+                _ => {}
             }
         }
 
