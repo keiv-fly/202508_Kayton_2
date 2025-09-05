@@ -63,6 +63,19 @@ impl<'a> Converter<'a> {
                 hir_id: *hir_id,
                 expr: self.convert_expr(expr),
             },
+            TStmt::ForRange {
+                hir_id,
+                sym,
+                start,
+                end,
+                body,
+            } => RStmt::ForRange {
+                hir_id: *hir_id,
+                sym: *sym,
+                start: self.convert_expr(start),
+                end: self.convert_expr(end),
+                body: body.iter().map(|st| self.convert_stmt(st)).collect(),
+            },
         }
     }
 

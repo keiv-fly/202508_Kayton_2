@@ -12,6 +12,13 @@ pub enum HirStmt {
         hir_id: HirId,
         expr: HirExpr,
     },
+    ForRange {
+        hir_id: HirId,
+        var: String,
+        start: HirExpr,
+        end: HirExpr,
+        body: Vec<HirStmt>,
+    },
     FuncDef {
         hir_id: HirId,
         name: String,

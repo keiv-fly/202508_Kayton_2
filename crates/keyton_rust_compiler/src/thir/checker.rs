@@ -106,6 +106,33 @@ impl<'a> Checker<'a> {
                     expr: texpr,
                 }
             }
+            SStmt::ForRange {
+                hir_id,
+                sym,
+                start,
+                end,
+                body,
+            } => {
+                // start and end must be Int
+                let tstart = self.check_expr(start);
+                let tend = self.check_expr(end);
+                self.require(*hir_id, Type::Int, tstart.ty().clone());
+                self.require(*hir_id, Type::Int, tend.ty().clone());
+
+                // Loop variable is Int in the loop body scope; for simplicity, set its type
+                self.var_types.insert(*sym, Type::Int);
+
+                // Typecheck body statements
+                let body_t: Vec<TStmt> = body.iter().map(|st| self.check_stmt(st)).collect();
+
+                TStmt::ForRange {
+                    hir_id: *hir_id,
+                    sym: *sym,
+                    start: tstart,
+                    end: tend,
+                    body: body_t,
+                }
+            }
         }
     }
 

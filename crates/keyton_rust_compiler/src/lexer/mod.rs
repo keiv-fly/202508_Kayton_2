@@ -20,6 +20,10 @@ pub enum Token {
     Newline,
     EOF,
     InterpolatedString(Vec<FStringPart>),
+    ForKw,
+    InKw,
+    DotDot,
+    PlusEqual,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -148,7 +152,12 @@ impl<'a> Lexer<'a> {
             }
             '+' => {
                 self.chars.next();
-                Token::Plus
+                if let Some('=') = self.chars.peek().copied() {
+                    self.chars.next();
+                    Token::PlusEqual
+                } else {
+                    Token::Plus
+                }
             }
             '(' => {
                 self.chars.next();
@@ -165,6 +174,17 @@ impl<'a> Lexer<'a> {
             ':' => {
                 self.chars.next();
                 Token::Colon
+            }
+            '.' => {
+                // Possibly DotDot
+                self.chars.next();
+                if let Some('.') = self.chars.peek().copied() {
+                    self.chars.next();
+                    Token::DotDot
+                } else {
+                    // Unknown single '.' -> skip and continue
+                    self.next_token()
+                }
             }
             '0'..='9' => self.lex_number(ch),
             'a'..='z' | 'A'..='Z' | '_' => {
@@ -213,6 +233,8 @@ impl<'a> Lexer<'a> {
         match ident.as_str() {
             "fn" => Token::FnKw,
             "return" => Token::ReturnKw,
+            "for" => Token::ForKw,
+            "in" => Token::InKw,
             _ => Token::Ident(ident),
         }
     }

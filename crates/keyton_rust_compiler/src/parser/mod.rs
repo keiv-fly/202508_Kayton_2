@@ -6,6 +6,12 @@ pub enum Stmt {
         name: String,
         expr: Expr,
     },
+    ForRange {
+        var: String,
+        start: Expr,
+        end: Expr,
+        body: Vec<Stmt>,
+    },
     ExprStmt(Expr),
     FuncDef {
         name: String,
@@ -83,6 +89,10 @@ impl Parser {
         if self.is_at_end() {
             return None;
         }
+        // For loop
+        if matches!(self.peek(), Token::ForKw) {
+            return Some(self.parse_for_range());
+        }
         // Function definition
         if matches!(self.peek(), Token::FnKw) {
             return Some(self.parse_func_def());
@@ -98,6 +108,18 @@ impl Parser {
                 self.advance(); // ident
                 self.advance(); // '='
                 let expr = self.parse_expr();
+                return Some(Stmt::Assign { name, expr });
+            } else if self.peek_next_is(Token::PlusEqual) {
+                // Desugar: x += y  =>  x = x + y
+                self.advance(); // ident
+                self.advance(); // '+='
+                let rhs = self.parse_expr();
+                let lhs = Expr::Ident(name.clone());
+                let expr = Expr::Binary {
+                    left: Box::new(lhs),
+                    op: BinOp::Add,
+                    right: Box::new(rhs),
+                };
                 return Some(Stmt::Assign { name, expr });
             }
         }
@@ -148,6 +170,31 @@ impl Parser {
             }
         }
         Stmt::FuncDef { name, params, body }
+    }
+
+    fn parse_for_range(&mut self) -> Stmt {
+        self.expect(Token::ForKw);
+        let var = match self.advance() {
+            Token::Ident(s) => s,
+            other => panic!("expected loop variable name, found {:?}", other),
+        };
+        self.expect(Token::InKw);
+        let start = self.parse_expr();
+        self.expect(Token::DotDot);
+        let end = self.parse_expr();
+        self.expect(Token::Colon);
+        self.expect(Token::Newline);
+        self.expect(Token::Indent);
+        let mut body = Vec::new();
+        self.skip_newlines();
+        while !matches!(self.peek(), Token::Dedent | Token::EOF) {
+            if let Some(stmt) = self.parse_stmt() {
+                body.push(stmt);
+            }
+            self.skip_newlines();
+        }
+        self.expect(Token::Dedent);
+        Stmt::ForRange { var, start, end, body }
     }
 
     fn parse_primary(&mut self) -> Expr {
