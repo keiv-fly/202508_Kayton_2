@@ -161,6 +161,24 @@ impl<'a> CodeGenerator<'a> {
                 let expr_str = self.convert_expr_to_string(expr);
                 format!("{};", expr_str)
             }
+            RStmt::ForRange { sym, start, end, body, .. } => {
+                let var_name = self.get_or_create_var_name(*sym);
+                let start_str = self.convert_expr_to_string(start);
+                let end_str = self.convert_expr_to_string(end);
+                // Emit body statements with relative indentation (4 spaces). The caller adds the base indent.
+                let mut out = String::new();
+                out.push_str(&format!("for {} in {}..{} {{\n", var_name, start_str, end_str));
+                for inner in body {
+                    if self.should_skip_stmt(inner) {
+                        continue;
+                    }
+                    out.push_str("    "); // 4 spaces relative to the block
+                    out.push_str(&self.convert_stmt_to_string(inner));
+                    out.push_str("\n");
+                }
+                out.push_str("}");
+                out
+            }
         }
     }
 

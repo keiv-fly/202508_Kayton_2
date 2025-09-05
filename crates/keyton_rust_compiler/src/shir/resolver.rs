@@ -105,6 +105,40 @@ impl Resolver {
                     );
                 }
                 HirStmt::ExprStmt { .. } => {}
+                HirStmt::ForRange { var, body, .. } => {
+                    // Define loop variable in current scope as LocalVar
+                    self.syms.define(scope, var, SymKind::LocalVar);
+                    // Collect inner defs from the body in the same scope for simplicity
+                    for s in body {
+                        match s {
+                            HirStmt::Assign { name, .. } => {
+                                let kind = if scope == self.global_scope() {
+                                    SymKind::GlobalVar
+                                } else {
+                                    SymKind::LocalVar
+                                };
+                                self.syms.define(scope, name, kind);
+                            }
+                            HirStmt::FuncDef { name, params, body, .. } => {
+                                let sid = self.syms.define(scope, name, SymKind::Func);
+                                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                                    info.sig = Some(FuncSig {
+                                        params: vec![Type::Any; params.len()],
+                                        ret: Type::Any,
+                                    });
+                                }
+                                self.user_funcs.insert(
+                                    sid,
+                                    UserFuncDef { params: params.clone(), body: body.clone() },
+                                );
+                            }
+                            HirStmt::ExprStmt { .. } => {}
+                            HirStmt::ForRange { .. } => {
+                                // Nested loops: we won't pre-collect recursively; they resolve during resolve_stmt
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -155,6 +189,24 @@ impl Resolver {
                         hir_id: HirId(0),
                         value: 0,
                     },
+                }
+            }
+            HirStmt::ForRange { hir_id, var, start, end, body } => {
+                let scope = self.current_scope();
+                let sym = self
+                    .syms
+                    .lookup(scope, var)
+                    .unwrap_or_else(|| self.syms.define(scope, var, SymKind::LocalVar));
+                let s = self.resolve_expr(start);
+                let e = self.resolve_expr(end);
+                // Resolve body statements
+                let body_resolved = body.iter().map(|st| self.resolve_stmt(st)).collect();
+                SStmt::ForRange {
+                    hir_id: *hir_id,
+                    sym,
+                    start: s,
+                    end: e,
+                    body: body_resolved,
                 }
             }
             HirStmt::ExprStmt { hir_id, expr } => {

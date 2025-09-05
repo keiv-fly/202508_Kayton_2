@@ -104,14 +104,25 @@ fn build_prelude_and_epilogue(
 
     let mut used_syms: HashSet<SymbolId> = HashSet::new();
     let mut assigned_syms: HashSet<SymbolId> = HashSet::new();
-    for stmt in &program.rhir {
+    fn walk_stmt(stmt: &RStmt, used_syms: &mut HashSet<SymbolId>, assigned_syms: &mut HashSet<SymbolId>) {
         match stmt {
             RStmt::Assign { sym, expr, .. } => {
                 assigned_syms.insert(*sym);
-                collect_expr_syms(expr, &mut used_syms);
+                collect_expr_syms(expr, used_syms);
             }
-            RStmt::ExprStmt { expr, .. } => collect_expr_syms(expr, &mut used_syms),
+            RStmt::ExprStmt { expr, .. } => collect_expr_syms(expr, used_syms),
+            RStmt::ForRange { start, end, body, .. } => {
+                collect_expr_syms(start, used_syms);
+                collect_expr_syms(end, used_syms);
+                for s in body {
+                    walk_stmt(s, used_syms, assigned_syms);
+                }
+            }
         }
+    }
+
+    for stmt in &program.rhir {
+        walk_stmt(stmt, &mut used_syms, &mut assigned_syms);
     }
 
     let sym_infos = &resolved.symbols.infos;

@@ -12,6 +12,13 @@ pub enum TStmt {
         hir_id: HirId,
         expr: TExpr,
     },
+    ForRange {
+        hir_id: HirId,
+        sym: SymbolId,
+        start: TExpr,
+        end: TExpr,
+        body: Vec<TStmt>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]

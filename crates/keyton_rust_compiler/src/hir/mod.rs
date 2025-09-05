@@ -47,6 +47,13 @@ fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {
             name,
             expr: lower_expr(ctx, expr),
         },
+        Stmt::ForRange { var, start, end, body } => HirStmt::ForRange {
+            hir_id: ctx.new_id(),
+            var,
+            start: lower_expr(ctx, start),
+            end: lower_expr(ctx, end),
+            body: body.into_iter().map(|s| lower_stmt(ctx, s)).collect(),
+        },
         Stmt::ExprStmt(expr) => HirStmt::ExprStmt {
             hir_id: ctx.new_id(),
             expr: lower_expr(ctx, expr),
