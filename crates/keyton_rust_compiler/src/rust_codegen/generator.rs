@@ -167,7 +167,7 @@ impl<'a> CodeGenerator<'a> {
                 let end_str = self.convert_expr_to_string(end);
                 // Emit body statements with relative indentation (4 spaces). The caller adds the base indent.
                 let mut out = String::new();
-                out.push_str(&format!("for {} in {}..{} {{\n", var_name, start_str, end_str));
+                out.push_str(&format!("for {} in {}..={} {{\n", var_name, start_str, end_str));
                 for inner in body {
                     if self.should_skip_stmt(inner) {
                         continue;
