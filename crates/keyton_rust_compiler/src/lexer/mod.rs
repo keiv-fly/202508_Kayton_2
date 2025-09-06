@@ -15,6 +15,9 @@ pub enum Token {
     RParen,
     Comma,
     Colon,
+    Dot,
+    LBracket,
+    RBracket,
     Indent,
     Dedent,
     Newline,
@@ -175,6 +178,14 @@ impl<'a> Lexer<'a> {
                 self.chars.next();
                 Token::Colon
             }
+            '[' => {
+                self.chars.next();
+                Token::LBracket
+            }
+            ']' => {
+                self.chars.next();
+                Token::RBracket
+            }
             '.' => {
                 // Possibly DotDot
                 self.chars.next();
@@ -182,8 +193,7 @@ impl<'a> Lexer<'a> {
                     self.chars.next();
                     Token::DotDot
                 } else {
-                    // Unknown single '.' -> skip and continue
-                    self.next_token()
+                    Token::Dot
                 }
             }
             '0'..='9' => self.lex_number(ch),
