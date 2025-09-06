@@ -121,7 +121,7 @@ impl<'a> CodeGenerator<'a> {
         // Also report the captured last expression value if any
         if let Some((_, ty)) = last_expr_idx {
             match ty {
-                Type::Int => {
+                Type::I64 => {
                     source_code
                         .push_str("    unsafe { report_int(\"__last\", __kayton_last as i64); }\n");
                 }
