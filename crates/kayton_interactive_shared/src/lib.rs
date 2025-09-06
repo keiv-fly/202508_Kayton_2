@@ -221,7 +221,7 @@ pub fn prepare_input(
     for (name, kind) in state.globals.iter() {
         let ty = match kind {
             VarKind::Str => keyton_rust_compiler::shir::sym::Type::Str,
-            VarKind::Int => keyton_rust_compiler::shir::sym::Type::Int,
+            VarKind::Int => keyton_rust_compiler::shir::sym::Type::I64,
         };
         predeclared.push((name.clone(), ty));
     }

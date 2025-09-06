@@ -140,3 +140,25 @@ fn function_with_implicit_return() {
         }]
     );
 }
+
+#[test]
+fn let_syntax_ast() {
+    let input = r#"let x: i64 = 12
+print(x)
+"#;
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![
+            Stmt::Assign {
+                name: "x".to_string(),
+                expr: Expr::Int(12),
+            },
+            Stmt::ExprStmt(Expr::Call {
+                func: Box::new(Expr::Ident("print".to_string())),
+                args: vec![Expr::Ident("x".to_string())],
+            }),
+        ]
+    );
+}

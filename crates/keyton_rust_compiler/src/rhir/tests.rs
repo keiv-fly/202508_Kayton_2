@@ -43,7 +43,7 @@ print(x)
                 expr: RExpr::Int {
                     hir_id: HirId(2),
                     value: 12,
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::Assign {
@@ -54,15 +54,15 @@ print(x)
                     left: Box::new(RExpr::Name {
                         hir_id: HirId(5),
                         sym: SymbolId(1),
-                        ty: Type::Int,
+                        ty: Type::I64,
                     }),
                     op: HirBinOp::Add,
                     right: Box::new(RExpr::Int {
                         hir_id: HirId(6),
                         value: 1,
-                        ty: Type::Int,
+                        ty: Type::I64,
                     }),
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::ExprStmt {
@@ -73,7 +73,7 @@ print(x)
                     args: vec![RExpr::Name {
                         hir_id: HirId(10),
                         sym: SymbolId(1),
-                        ty: Type::Int,
+                        ty: Type::I64,
                     }],
                     ty: Type::Unit,
                 },
@@ -82,7 +82,7 @@ print(x)
     );
 
     // Var types snapshot includes x: Int
-    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::Int));
+    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::I64));
 }
 
 #[test]
@@ -123,7 +123,7 @@ print(x)
                 expr: RExpr::Int {
                     hir_id: HirId(2),
                     value: 12,
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::Assign {
@@ -152,7 +152,7 @@ print(x)
     );
 
     // Var type snapshot: x(1): Int, x(2): Str
-    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::Int));
+    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::I64));
     assert_eq!(rust_program.var_types.get(&SymbolId(2)), Some(&Type::Str));
 }
 
@@ -217,7 +217,7 @@ print(f"{x}")
                 expr: RExpr::Int {
                     hir_id: HirId(2),
                     value: 12,
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::ExprStmt {
@@ -237,7 +237,7 @@ print(f"{x}")
                                 expr: RExpr::Name {
                                     hir_id: HirId(9),
                                     sym: SymbolId(1),
-                                    ty: Type::Int,
+                                    ty: Type::I64,
                                 },
                             },
                             RStringPart::Text {
@@ -290,7 +290,7 @@ print(x)
                 expr: RExpr::Int {
                     hir_id: HirId(2),
                     value: 12,
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::Assign {
@@ -299,7 +299,7 @@ print(x)
                 expr: RExpr::Int {
                     hir_id: HirId(4),
                     value: 42,
-                    ty: Type::Int,
+                    ty: Type::I64,
                 },
             },
             RStmt::ExprStmt {
@@ -310,7 +310,7 @@ print(x)
                     args: vec![RExpr::Name {
                         hir_id: HirId(8),
                         sym: SymbolId(1), // Uses the same x (SymbolId(1))
-                        ty: Type::Int,
+                        ty: Type::I64,
                     }],
                     ty: Type::Unit,
                 },
@@ -319,7 +319,7 @@ print(x)
     );
 
     // Var type snapshot: x(1): Int (same symbol reused)
-    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::Int));
+    assert_eq!(rust_program.var_types.get(&SymbolId(1)), Some(&Type::I64));
 }
 
 #[test]

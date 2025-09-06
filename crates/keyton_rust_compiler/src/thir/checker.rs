@@ -113,14 +113,14 @@ impl<'a> Checker<'a> {
                 end,
                 body,
             } => {
-                // start and end must be Int
+                // start and end must be I64
                 let tstart = self.check_expr(start);
                 let tend = self.check_expr(end);
-                self.require(*hir_id, Type::Int, tstart.ty().clone());
-                self.require(*hir_id, Type::Int, tend.ty().clone());
+                self.require(*hir_id, Type::I64, tstart.ty().clone());
+                self.require(*hir_id, Type::I64, tend.ty().clone());
 
-                // Loop variable is Int in the loop body scope; for simplicity, set its type
-                self.var_types.insert(*sym, Type::Int);
+                // Loop variable is I64 in the loop body scope; for simplicity, set its type
+                self.var_types.insert(*sym, Type::I64);
 
                 // Typecheck body statements
                 let body_t: Vec<TStmt> = body.iter().map(|st| self.check_stmt(st)).collect();
@@ -141,7 +141,7 @@ impl<'a> Checker<'a> {
             SExpr::Int { hir_id, value } => TExpr::Int {
                 hir_id: *hir_id,
                 value: *value,
-                ty: Type::Int,
+                ty: Type::I64,
             },
             SExpr::Str { hir_id, value } => TExpr::Str {
                 hir_id: *hir_id,
@@ -182,10 +182,10 @@ impl<'a> Checker<'a> {
                 let (lhs_ty, rhs_ty) = (l.ty().clone(), r.ty().clone());
                 let out_ty = match op {
                     HirBinOp::Add => {
-                        // Keep it simple: only Int + Int => Int
-                        self.require(*hir_id, Type::Int, lhs_ty.clone());
-                        self.require(*hir_id, Type::Int, rhs_ty.clone());
-                        Type::Int
+                        // Keep it simple: only I64 + I64 => I64
+                        self.require(*hir_id, Type::I64, lhs_ty.clone());
+                        self.require(*hir_id, Type::I64, rhs_ty.clone());
+                        Type::I64
                     }
                 };
                 TExpr::Binary {

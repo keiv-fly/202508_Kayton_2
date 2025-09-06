@@ -16,7 +16,7 @@ pub enum SymKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
-    Int,
+    I64,
     Str,
     Unit,
     Any,

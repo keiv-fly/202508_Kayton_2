@@ -89,6 +89,22 @@ impl Parser {
         if self.is_at_end() {
             return None;
         }
+        // Let declaration (desugars to assignment)
+        if matches!(self.peek(), Token::LetKw) {
+            self.advance(); // 'let'
+            let name = match self.advance() {
+                Token::Ident(s) => s,
+                other => panic!("expected identifier after let, found {:?}", other),
+            };
+            self.expect(Token::Colon);
+            match self.advance() {
+                Token::Ident(s) if s == "i64" => {},
+                other => panic!("expected type 'i64' after colon in let, found {:?}", other),
+            }
+            self.expect(Token::Equal);
+            let expr = self.parse_expr();
+            return Some(Stmt::Assign { name, expr });
+        }
         // For loop
         if matches!(self.peek(), Token::ForKw) {
             return Some(self.parse_for_range());

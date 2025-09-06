@@ -7,6 +7,7 @@ pub enum Token {
     Int(i64),
     Str(String),
     Ident(String),
+    LetKw,
     FnKw,
     ReturnKw,
     Plus,
@@ -231,6 +232,7 @@ impl<'a> Lexer<'a> {
             }
         }
         match ident.as_str() {
+            "let" => Token::LetKw,
             "fn" => Token::FnKw,
             "return" => Token::ReturnKw,
             "for" => Token::ForKw,
