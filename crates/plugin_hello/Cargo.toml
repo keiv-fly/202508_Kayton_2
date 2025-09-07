@@ -8,3 +8,4 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 kayton_api = { path = "../kayton_api" }
+kayton_plugin_sdk = { path = "../kayton_plugin_sdk" }

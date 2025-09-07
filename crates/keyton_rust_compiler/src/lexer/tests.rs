@@ -31,6 +31,31 @@ print(x)
 }
 
 #[test]
+fn rimport_tokens() {
+    let input = "rimport math";
+    let tokens = Lexer::new(input).tokenize();
+    assert_eq!(tokens, vec![Token::RimportKw, Token::Ident("math".to_string()), Token::EOF]);
+}
+
+#[test]
+fn from_rimport_tokens() {
+    let input = "from math rimport add, sub";
+    let tokens = Lexer::new(input).tokenize();
+    assert_eq!(
+        tokens,
+        vec![
+            Token::FromKw,
+            Token::Ident("math".to_string()),
+            Token::RimportKw,
+            Token::Ident("add".to_string()),
+            Token::Comma,
+            Token::Ident("sub".to_string()),
+            Token::EOF,
+        ]
+    );
+}
+
+#[test]
 fn program4_tokens() {
     let input = r#"x = 12
 x = "Hello"

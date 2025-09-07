@@ -6,6 +6,10 @@ use crate::rhir::convert_to_rhir;
 use crate::shir::resolve_program;
 use crate::shir::sym::{SymKind, SymbolId};
 use crate::thir::typecheck_program;
+extern crate alloc;
+use serial_test::serial;
+use std::fs;
+use kayton_plugin_sdk::kayton_manifest;
 
 #[test]
 fn program1_rust_codegen() {
@@ -271,4 +275,47 @@ print(f"Hello {x} {y}")"#;
 }
 "#;
     assert_eq!(rust_code.source_code, expected_code);
+}
+
+#[test]
+#[serial]
+fn rimport_codegen_inserts_prelude() {
+    let tmp = tempfile::tempdir().unwrap();
+    let old_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(tmp.path()).unwrap();
+    unsafe {
+        std::env::set_var("KAYTON_ACTIVE_ENV", "local");
+    }
+
+    let kayton_dir = tmp.path().join(".kayton");
+    fs::create_dir_all(kayton_dir.join("metadata")).unwrap();
+    fs::write(kayton_dir.join("metadata").join("registry.json"), b"{}").unwrap();
+    let manifest_dir = kayton_dir.join("libs").join("math").join("0.1.0").join("x");
+    fs::create_dir_all(&manifest_dir).unwrap();
+    let mani = kayton_manifest!(
+        crate_name = "math",
+        crate_version = "0.1.0",
+        functions = [{ stable: "add", symbol: "add", params: [I64, I64], ret: I64 }],
+        types = []
+    );
+    fs::write(manifest_dir.join("manifest.json"), mani.to_json_bytes()).unwrap();
+
+    let input = "from math rimport add\nprint(add(1, 2))";
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let mut resolved = resolve_program(&hir);
+    let typed = typecheck_program(&mut resolved);
+    assert!(typed.report.errors.is_empty());
+    let rhir = convert_to_rhir(&typed, &resolved);
+    let rust_code = generate_rust_code(&rhir, &resolved);
+
+    let src = &rust_code.source_code;
+    assert!(src.contains("load_plugin(\"math\")"));
+    assert!(src.contains("get_fn_ptr(\"add\")"));
+
+    std::env::set_current_dir(old_dir).unwrap();
+    unsafe {
+        std::env::remove_var("KAYTON_ACTIVE_ENV");
+    }
 }

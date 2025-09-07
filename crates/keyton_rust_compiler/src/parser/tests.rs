@@ -33,6 +33,33 @@ print(x)
 }
 
 #[test]
+fn rimport_module_ast() {
+    let input = "rimport math";
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![Stmt::RImportModule {
+            module: "math".to_string(),
+        }]
+    );
+}
+
+#[test]
+fn rimport_items_ast() {
+    let input = "from math rimport add, sub";
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    assert_eq!(
+        ast,
+        vec![Stmt::RImportItems {
+            module: "math".to_string(),
+            items: vec!["add".to_string(), "sub".to_string()],
+        }]
+    );
+}
+
+#[test]
 fn program4_ast() {
     let input = r#"x = 12
 x = "Hello"

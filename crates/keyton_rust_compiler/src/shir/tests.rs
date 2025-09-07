@@ -4,6 +4,10 @@ use crate::hir::hir_types::{HirBinOp, HirId};
 use crate::hir::{lower_program, lower_program_with_spans};
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+extern crate alloc;
+use serial_test::serial;
+use std::fs;
+use kayton_plugin_sdk::{kayton_manifest};
 
 #[test]
 fn program1_shir() {
@@ -288,4 +292,56 @@ fn unresolved_name_in_call_reports_error() {
     assert_eq!(resolver.syms.infos[1].name, "x");
     assert_eq!(resolver.syms.infos[0].kind, SymKind::BuiltinFunc);
     assert_eq!(resolver.syms.infos[1].kind, SymKind::GlobalVar);
+}
+
+#[test]
+#[serial]
+fn rimport_items_loads_manifest_and_defines_symbols() {
+    let tmp = tempfile::tempdir().unwrap();
+    let old_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(tmp.path()).unwrap();
+    unsafe {
+        std::env::set_var("KAYTON_ACTIVE_ENV", "local");
+    }
+
+    let kayton_dir = tmp.path().join(".kayton");
+    fs::create_dir_all(kayton_dir.join("metadata")).unwrap();
+    fs::write(kayton_dir.join("metadata").join("registry.json"), b"{}").unwrap();
+    let manifest_dir = kayton_dir.join("libs").join("math").join("0.1.0").join("x");
+    fs::create_dir_all(&manifest_dir).unwrap();
+    let mani = kayton_manifest!(
+        crate_name = "math",
+        crate_version = "0.1.0",
+        functions = [{ stable: "add", symbol: "add", params: [I64, I64], ret: I64 }],
+        types = []
+    );
+    fs::write(manifest_dir.join("manifest.json"), mani.to_json_bytes()).unwrap();
+
+    let input = "from math rimport add";
+    let tokens = Lexer::new(input).tokenize();
+    let ast = Parser::new(tokens).parse_program();
+    let hir = lower_program(ast);
+    let resolved = resolve_program(&hir);
+
+    assert!(resolved.plugins.contains_key("math"));
+
+    let add_info = resolved
+        .symbols
+        .infos
+        .iter()
+        .find(|i| i.name == "add")
+        .expect("add symbol");
+    assert_eq!(add_info.kind, SymKind::BuiltinFunc);
+    assert_eq!(add_info.sig.as_ref().unwrap().params, vec![Type::I64, Type::I64]);
+    assert_eq!(add_info.sig.as_ref().unwrap().ret, Type::I64);
+
+    assert!(matches!(
+        resolved.shir.as_slice(),
+        [SStmt::RImportItems { module, items, .. }] if module == "math" && items == &vec!["add".to_string()]
+    ));
+
+    std::env::set_current_dir(old_dir).unwrap();
+    unsafe {
+        std::env::remove_var("KAYTON_ACTIVE_ENV");
+    }
 }
