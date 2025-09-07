@@ -12,10 +12,10 @@ use keyton_rust_compiler::hir::lower_program;
 use keyton_rust_compiler::lexer::Lexer;
 use keyton_rust_compiler::parser::Parser;
 use keyton_rust_compiler::rhir::{RustProgram, convert_to_rhir};
+use keyton_rust_compiler::rimport::env::discover_plugin_dll_path;
 use keyton_rust_compiler::rust_codegen::{CodeGenerator, RustCode};
 use keyton_rust_compiler::shir::{resolve_program, sym::SymbolId};
 use libloading::Library;
-use keyton_rust_compiler::rimport::env::discover_plugin_dll_path;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VarKind {
@@ -316,7 +316,8 @@ pub fn execute_prepared(state: &mut InteractiveState, prepared: &PreparedCode) -
 
             // Set VM hooks for plugin loading and function pointer lookups
             type LoadPluginFn = extern "C" fn(module_ptr: *const u8, module_len: usize) -> i32;
-            type GetFunctionPtrFn = extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
+            type GetFunctionPtrFn =
+                extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
             type SetVmHooksFn = unsafe extern "C" fn(LoadPluginFn, GetFunctionPtrFn);
             if let Ok(set_vm_hooks) = lib.get::<SetVmHooksFn>(b"kayton_set_vm_hooks") {
                 set_current_vm_ptr(state.vm_mut());
@@ -379,7 +380,8 @@ where
 
             // Set VM hooks for plugin loading and function pointer lookups
             type LoadPluginFn = extern "C" fn(module_ptr: *const u8, module_len: usize) -> i32;
-            type GetFunctionPtrFn = extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
+            type GetFunctionPtrFn =
+                extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
             type SetVmHooksFn = unsafe extern "C" fn(LoadPluginFn, GetFunctionPtrFn);
             if let Ok(set_vm_hooks) = lib.get::<SetVmHooksFn>(b"kayton_set_vm_hooks") {
                 set_current_vm_ptr(state.vm_mut());
@@ -440,7 +442,9 @@ pub fn take_stdout(state: &mut InteractiveState) -> String {
 static mut CURRENT_VM_PTR: Option<*mut KaytonVm> = None;
 
 fn set_current_vm_ptr(vm: &mut KaytonVm) {
-    unsafe { CURRENT_VM_PTR = Some(vm as *mut KaytonVm); }
+    unsafe {
+        CURRENT_VM_PTR = Some(vm as *mut KaytonVm);
+    }
 }
 
 extern "C" fn load_plugin_host(module_ptr: *const u8, module_len: usize) -> i32 {
