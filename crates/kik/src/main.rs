@@ -2,6 +2,7 @@ use anyhow::{bail, Context, Result};
 use clap::{Args, Parser, Subcommand};
 
 mod env;
+mod rinstall;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -45,14 +46,8 @@ struct ActivateArgs {
 
 #[derive(Args, Debug)]
 struct RinstallArgs {
-    /// Crate name
-    crate_name: String,
-    /// Optional crate version (semver)
-    #[arg(long)]
-    version: Option<String>,
-    /// Cargo features
-    #[arg(long)]
-    features: Option<String>,
+    /// Spec: <crate>[feature_a,feature_b][==<semver>] (literal square brackets)
+    spec: String,
 }
 
 #[derive(Args, Debug)]
@@ -111,14 +106,7 @@ fn cmd_list() -> Result<()> {
 }
 
 fn cmd_rinstall(args: RinstallArgs) -> Result<()> {
-    bail!(
-        "Not yet implemented: rinstall {}{}",
-        args.crate_name,
-        args.version
-            .as_ref()
-            .map(|v| format!(" @{}", v))
-            .unwrap_or_default()
-    );
+    rinstall::run_install_spec(&args.spec)
 }
 
 fn cmd_uninstall(args: UninstallArgs) -> Result<()> {

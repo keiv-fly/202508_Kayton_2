@@ -719,6 +719,8 @@ dependencies = [
  "assert_cmd",
  "clap",
  "dirs",
+ "kayton_plugin_sdk",
+ "pathdiff",
  "predicates",
  "serde",
  "serde_json",
@@ -822,17 +824,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+name = "pathdiff"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
+
+[[package]]
 name = "pkg-config"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
-
-[[package]]
-name = "plugin_hello"
-version = "0.1.0"
-dependencies = [
- "kayton_api",
-]
 
 [[package]]
 name = "portable-atomic"

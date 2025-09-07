@@ -195,3 +195,24 @@ pub fn describe_active_env() -> Result<String> {
 
     Ok(out)
 }
+
+pub fn load_env_metadata(env_dir: &Path) -> Result<EnvMetadata> {
+    let p = env_dir.join("metadata").join("env.json");
+    let s = fs::read_to_string(&p).with_context(|| format!("read {}", p.display()))?;
+    let m: EnvMetadata = serde_json::from_str(&s).context("parse env.json")?;
+    Ok(m)
+}
+
+pub fn load_registry(env_dir: &Path) -> Result<RegistryIndex> {
+    let p = env_dir.join("metadata").join("registry.json");
+    let s = fs::read_to_string(&p).with_context(|| format!("read {}", p.display()))?;
+    let idx: RegistryIndex = serde_json::from_str(&s).context("parse registry.json")?;
+    Ok(idx)
+}
+
+pub fn save_registry(env_dir: &Path, idx: &RegistryIndex) -> Result<()> {
+    let p = env_dir.join("metadata").join("registry.json");
+    let body = serde_json::to_string_pretty(idx)?;
+    fs::write(&p, body).with_context(|| format!("write {}", p.display()))?;
+    Ok(())
+}
