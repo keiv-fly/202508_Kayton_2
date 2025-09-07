@@ -8,5 +8,6 @@ members = [
     "crates/kayton_vm",
     "crates/kayton_kernel",
     "crates/kayton_interactive_shared",
+    "crates/kik",
 ]
 resolver = "2"
