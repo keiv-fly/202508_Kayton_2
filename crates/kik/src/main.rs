@@ -2,6 +2,7 @@ use anyhow::{bail, Context, Result};
 use clap::{Args, Parser, Subcommand};
 
 mod env;
+mod kernel;
 mod rinstall;
 
 #[derive(Parser, Debug)]
@@ -70,6 +71,12 @@ enum KernelSubcommands {
         #[arg(short = 'n', long = "name")]
         name: Option<String>,
     },
+    /// Uninstall the Jupyter kernel by name
+    Uninstall {
+        /// Kernel name (ID). Defaults to 'kayton' when omitted.
+        #[arg(short = 'n', long = "name")]
+        name: Option<String>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -115,9 +122,10 @@ fn cmd_uninstall(args: UninstallArgs) -> Result<()> {
 
 fn cmd_kernel(args: KernelArgs) -> Result<()> {
     match args.command {
-        KernelSubcommands::Install { name } => {
+        KernelSubcommands::Install { name } => kernel::install_kernel(name),
+        KernelSubcommands::Uninstall { name } => {
             let display = name.unwrap_or_else(|| "kayton".to_string());
-            bail!("Not yet implemented: kernel install (name='{}')", display)
+            kernel::uninstall_kernel(&display)
         }
     }
 }
