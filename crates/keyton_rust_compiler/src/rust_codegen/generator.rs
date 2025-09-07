@@ -496,6 +496,16 @@ impl<'a> CodeGenerator<'a> {
 }
 
 pub fn generate_rust_code(rhir_program: &RustProgram, resolved: &ResolvedProgram) -> RustCode {
+    use std::collections::HashSet;
+
     let mut generator = CodeGenerator::new(resolved);
-    generator.generate_code(rhir_program)
+    let pre_assigned: HashSet<SymbolId> = HashSet::new();
+    let prelude: Vec<String> = Vec::new();
+    let epilogue: Vec<String> = Vec::new();
+    generator.generate_code_with_preassigned_and_prelude(
+        rhir_program,
+        &pre_assigned,
+        &prelude,
+        &epilogue,
+    )
 }
