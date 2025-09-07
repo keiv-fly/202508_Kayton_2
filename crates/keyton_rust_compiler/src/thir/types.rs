@@ -19,6 +19,12 @@ pub enum TStmt {
         end: TExpr,
         body: Vec<TStmt>,
     },
+    If {
+        hir_id: HirId,
+        cond: TExpr,
+        then_branch: Vec<TStmt>,
+        else_branch: Vec<TStmt>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -31,6 +37,11 @@ pub enum TExpr {
     Str {
         hir_id: HirId,
         value: String,
+        ty: Type,
+    },
+    Bool {
+        hir_id: HirId,
+        value: bool,
         ty: Type,
     },
     Name {

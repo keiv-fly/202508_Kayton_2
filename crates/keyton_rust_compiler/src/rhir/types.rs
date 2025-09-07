@@ -19,6 +19,12 @@ pub enum RStmt {
         end: RExpr,
         body: Vec<RStmt>,
     },
+    If {
+        hir_id: HirId,
+        cond: RExpr,
+        then_branch: Vec<RStmt>,
+        else_branch: Vec<RStmt>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -31,6 +37,11 @@ pub enum RExpr {
     Str {
         hir_id: HirId,
         value: String,
+        ty: Type,
+    },
+    Bool {
+        hir_id: HirId,
+        value: bool,
         ty: Type,
     },
     Name {
@@ -81,6 +92,7 @@ impl RExpr {
         match self {
             RExpr::Int { ty, .. }
             | RExpr::Str { ty, .. }
+            | RExpr::Bool { ty, .. }
             | RExpr::Name { ty, .. }
             | RExpr::Binary { ty, .. }
             | RExpr::Call { ty, .. }

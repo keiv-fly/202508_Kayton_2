@@ -105,47 +105,22 @@ impl Resolver {
                     );
                 }
                 HirStmt::ExprStmt { .. } => {}
-                HirStmt::ForRange { var, body, .. } => {
-                    // Define loop variable in current scope as LocalVar
-                    self.syms.define(scope, var, SymKind::LocalVar);
-                    // Collect inner defs from the body in the same scope for simplicity
-                    for s in body {
-                        match s {
-                            HirStmt::Assign { name, .. } => {
-                                let kind = if scope == self.global_scope() {
-                                    SymKind::GlobalVar
-                                } else {
-                                    SymKind::LocalVar
-                                };
-                                self.syms.define(scope, name, kind);
-                            }
-                            HirStmt::FuncDef {
-                                name, params, body, ..
-                            } => {
-                                let sid = self.syms.define(scope, name, SymKind::Func);
-                                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
-                                    info.sig = Some(FuncSig {
-                                        params: vec![Type::Any; params.len()],
-                                        ret: Type::Any,
-                                    });
-                                }
-                                self.user_funcs.insert(
-                                    sid,
-                                    UserFuncDef {
-                                        params: params.clone(),
-                                        body: body.clone(),
-                                    },
-                                );
-                            }
-                            HirStmt::ExprStmt { .. } => {}
-                            HirStmt::ForRange { .. } => {
-                                // Nested loops: we won't pre-collect recursively; they resolve during resolve_stmt
-                            }
-                        }
-                    }
-                }
+            HirStmt::ForRange { var, body, .. } => {
+                // Define loop variable in current scope as LocalVar
+                self.syms.define(scope, var, SymKind::LocalVar);
+                // Collect inner defs from the body in the same scope for simplicity
+                self.collect_defs(body);
+            }
+            HirStmt::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
+                self.collect_defs(then_branch);
+                self.collect_defs(else_branch);
             }
         }
+    }
     }
 
     pub fn resolve_program(&mut self, hir: &[HirStmt]) -> Vec<SStmt> {
@@ -220,6 +195,22 @@ impl Resolver {
                     body: body_resolved,
                 }
             }
+            HirStmt::If {
+                hir_id,
+                cond,
+                then_branch,
+                else_branch,
+            } => {
+                let c = self.resolve_expr(cond);
+                let then_r: Vec<SStmt> = then_branch.iter().map(|st| self.resolve_stmt(st)).collect();
+                let else_r: Vec<SStmt> = else_branch.iter().map(|st| self.resolve_stmt(st)).collect();
+                SStmt::If {
+                    hir_id: *hir_id,
+                    cond: c,
+                    then_branch: then_r,
+                    else_branch: else_r,
+                }
+            }
             HirStmt::ExprStmt { hir_id, expr } => {
                 let rexpr = self.resolve_expr(expr);
                 SStmt::ExprStmt {
@@ -239,6 +230,10 @@ impl Resolver {
             HirExpr::Str { hir_id, value } => SExpr::Str {
                 hir_id: *hir_id,
                 value: value.clone(),
+            },
+            HirExpr::Bool { hir_id, value } => SExpr::Bool {
+                hir_id: *hir_id,
+                value: *value,
             },
             HirExpr::Ident { hir_id, name } => {
                 let sym = self.lookup_name(*hir_id, name);
@@ -412,6 +407,10 @@ impl Resolver {
                 HE::Str { hir_id, value } => HE::Str {
                     hir_id: *hir_id,
                     value: value.clone(),
+                },
+                HE::Bool { hir_id, value } => HE::Bool {
+                    hir_id: *hir_id,
+                    value: *value,
                 },
                 HE::Ident { hir_id, name } => {
                     if let Some(repl) = map.get(name.as_str()) {

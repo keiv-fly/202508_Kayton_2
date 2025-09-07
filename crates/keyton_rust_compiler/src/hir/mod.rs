@@ -54,6 +54,22 @@ fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {
             end: lower_expr(ctx, end),
             body: body.into_iter().map(|s| lower_stmt(ctx, s)).collect(),
         },
+        Stmt::If {
+            cond,
+            then_branch,
+            else_branch,
+        } => HirStmt::If {
+            hir_id: ctx.new_id(),
+            cond: lower_expr(ctx, cond),
+            then_branch: then_branch
+                .into_iter()
+                .map(|s| lower_stmt(ctx, s))
+                .collect(),
+            else_branch: else_branch
+                .into_iter()
+                .map(|s| lower_stmt(ctx, s))
+                .collect(),
+        },
         Stmt::ExprStmt(expr) => HirStmt::ExprStmt {
             hir_id: ctx.new_id(),
             expr: lower_expr(ctx, expr),
@@ -81,6 +97,10 @@ fn lower_expr(ctx: &mut LoweringCtx, expr: Expr) -> HirExpr {
         Expr::Str(s) => HirExpr::Str {
             hir_id: ctx.new_id(),
             value: s,
+        },
+        Expr::Bool(b) => HirExpr::Bool {
+            hir_id: ctx.new_id(),
+            value: b,
         },
         Expr::Ident(s) => HirExpr::Ident {
             hir_id: ctx.new_id(),

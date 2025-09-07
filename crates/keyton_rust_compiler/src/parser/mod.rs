@@ -12,6 +12,11 @@ pub enum Stmt {
         end: Expr,
         body: Vec<Stmt>,
     },
+    If {
+        cond: Expr,
+        then_branch: Vec<Stmt>,
+        else_branch: Vec<Stmt>,
+    },
     ExprStmt(Expr),
     FuncDef {
         name: String,
@@ -26,6 +31,7 @@ pub enum Expr {
     Int(i64),
     Str(String),
     Ident(String),
+    Bool(bool),
     Binary {
         left: Box<Expr>,
         op: BinOp,
@@ -108,6 +114,10 @@ impl Parser {
         // For loop
         if matches!(self.peek(), Token::ForKw) {
             return Some(self.parse_for_range());
+        }
+        // If statement
+        if matches!(self.peek(), Token::IfKw) {
+            return Some(self.parse_if());
         }
         // Function definition
         if matches!(self.peek(), Token::FnKw) {
@@ -228,10 +238,52 @@ impl Parser {
         }
     }
 
+    fn parse_if(&mut self) -> Stmt {
+        self.expect(Token::IfKw);
+        let cond = self.parse_expr();
+        self.expect(Token::Colon);
+        self.expect(Token::Newline);
+        self.expect(Token::Indent);
+        let mut then_branch = Vec::new();
+        self.skip_newlines();
+        while !matches!(self.peek(), Token::Dedent | Token::EOF) {
+            if let Some(stmt) = self.parse_stmt() {
+                then_branch.push(stmt);
+            }
+            self.skip_newlines();
+        }
+        self.expect(Token::Dedent);
+        self.skip_newlines();
+
+        let mut else_branch = Vec::new();
+        if matches!(self.peek(), Token::ElseKw) {
+            self.expect(Token::ElseKw);
+            self.expect(Token::Colon);
+            self.expect(Token::Newline);
+            self.expect(Token::Indent);
+            self.skip_newlines();
+            while !matches!(self.peek(), Token::Dedent | Token::EOF) {
+                if let Some(stmt) = self.parse_stmt() {
+                    else_branch.push(stmt);
+                }
+                self.skip_newlines();
+            }
+            self.expect(Token::Dedent);
+        }
+
+        Stmt::If {
+            cond,
+            then_branch,
+            else_branch,
+        }
+    }
+
     fn parse_primary(&mut self) -> Expr {
         match self.advance() {
             Token::Int(n) => Expr::Int(n),
             Token::Str(s) => Expr::Str(s),
+            Token::TrueKw => Expr::Bool(true),
+            Token::FalseKw => Expr::Bool(false),
             Token::Ident(s) => {
                 let expr = Expr::Ident(s);
                 self.parse_postfix(expr)

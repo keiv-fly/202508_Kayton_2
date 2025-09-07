@@ -188,6 +188,38 @@ impl<'a> CodeGenerator<'a> {
                 out.push_str("}");
                 out
             }
+            RStmt::If {
+                cond,
+                then_branch,
+                else_branch,
+                ..
+            } => {
+                let cond_str = self.convert_expr_to_string(cond);
+                let mut out = String::new();
+                out.push_str(&format!("if {} {{\n", cond_str));
+                for inner in then_branch {
+                    if self.should_skip_stmt(inner) {
+                        continue;
+                    }
+                    out.push_str("    ");
+                    out.push_str(&self.convert_stmt_to_string(inner));
+                    out.push_str("\n");
+                }
+                out.push_str("}");
+                if !else_branch.is_empty() {
+                    out.push_str(" else {\n");
+                    for inner in else_branch {
+                        if self.should_skip_stmt(inner) {
+                            continue;
+                        }
+                        out.push_str("    ");
+                        out.push_str(&self.convert_stmt_to_string(inner));
+                        out.push_str("\n");
+                    }
+                    out.push_str("}");
+                }
+                out
+            }
         }
     }
 
@@ -205,6 +237,7 @@ impl<'a> CodeGenerator<'a> {
         match expr {
             RExpr::Int { value, .. } => value.to_string(),
             RExpr::Str { value, .. } => format!("\"{}\"", value),
+            RExpr::Bool { value, .. } => value.to_string(),
             RExpr::Name { sym, .. } => self.get_or_create_var_name(*sym),
             RExpr::Binary {
                 left, op, right, ..

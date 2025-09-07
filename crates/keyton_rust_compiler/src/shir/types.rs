@@ -19,6 +19,12 @@ pub enum SStmt {
         end: SExpr,
         body: Vec<SStmt>,
     },
+    If {
+        hir_id: HirId,
+        cond: SExpr,
+        then_branch: Vec<SStmt>,
+        else_branch: Vec<SStmt>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -30,6 +36,10 @@ pub enum SExpr {
     Str {
         hir_id: HirId,
         value: String,
+    },
+    Bool {
+        hir_id: HirId,
+        value: bool,
     },
     Name {
         hir_id: HirId,
