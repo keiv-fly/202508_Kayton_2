@@ -1,0 +1,16 @@
+[package]
+name = "kayton_plugin_sdk"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+# When enabled, expose helpers that rely on alloc for manifest building
+alloc = []
+
+[dependencies]
+kayton_api = { path = "../kayton_api" }
+serde = { version = "1.0", features = ["derive"], default-features = false }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }

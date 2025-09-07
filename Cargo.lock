@@ -668,6 +668,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kayton_plugin_sdk"
+version = "0.1.0"
+dependencies = [
+ "kayton_api",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "kayton_repl"
 version = "0.1.0"
 dependencies = [

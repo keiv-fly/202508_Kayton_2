@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/kayton_api",
+    "crates/kayton_plugin_sdk",
     "crates/kayton",
     "crates/plugin_hello",
     "crates/keyton_rust_compiler",
