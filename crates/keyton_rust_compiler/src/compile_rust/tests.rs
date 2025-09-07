@@ -53,15 +53,10 @@ static CAPTURED: Mutex<Vec<u8>> = Mutex::new(Vec::new());
 
 extern "C" fn report_int(_name_ptr: *const u8, _name_len: usize, _value: i64) {}
 
-extern "C" fn report_str(
-    name_ptr: *const u8,
-    name_len: usize,
-    str_ptr: *const u8,
-    str_len: usize,
-) {
+extern "C" fn report_str(name_ptr: *const u8, name_len: usize, str_ptr: *const u8, str_len: usize) {
     unsafe {
-        let name = std::str::from_utf8(std::slice::from_raw_parts(name_ptr, name_len))
-            .unwrap_or("");
+        let name =
+            std::str::from_utf8(std::slice::from_raw_parts(name_ptr, name_len)).unwrap_or("");
         if name == "__stdout" {
             let s = std::slice::from_raw_parts(str_ptr, str_len);
             CAPTURED.lock().unwrap().extend_from_slice(s);
@@ -79,10 +74,12 @@ print(s)
     let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
     unsafe {
         let lib = Library::new(&lib_path).expect("load dylib");
-        let set_reporters: libloading::Symbol<unsafe extern "C" fn(
-            extern "C" fn(*const u8, usize, i64),
-            extern "C" fn(*const u8, usize, *const u8, usize),
-        )> = lib
+        let set_reporters: libloading::Symbol<
+            unsafe extern "C" fn(
+                extern "C" fn(*const u8, usize, i64),
+                extern "C" fn(*const u8, usize, *const u8, usize),
+            ),
+        > = lib
             .get(b"kayton_set_reporters")
             .expect("find reporters symbol");
         let run: libloading::Symbol<unsafe extern "C" fn()> =
@@ -93,4 +90,52 @@ print(s)
     }
     let output = String::from_utf8(CAPTURED.lock().unwrap().clone()).expect("utf8");
     assert_eq!(output.trim(), "3");
+}
+
+#[test]
+fn compile_and_run_vec_append_sum() {
+    let src = "a = []\na.append(2)\na.append(3)\nres = a.sum()\nprint(res)\n";
+    let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
+    unsafe {
+        let lib = Library::new(&lib_path).expect("load dylib");
+        let set_reporters: libloading::Symbol<
+            unsafe extern "C" fn(
+                extern "C" fn(*const u8, usize, i64),
+                extern "C" fn(*const u8, usize, *const u8, usize),
+            ),
+        > = lib
+            .get(b"kayton_set_reporters")
+            .expect("find reporters symbol");
+        let run: libloading::Symbol<unsafe extern "C" fn()> =
+            lib.get(b"run").expect("find run symbol");
+        CAPTURED.lock().unwrap().clear();
+        set_reporters(report_int, report_str);
+        run();
+    }
+    let output = String::from_utf8(CAPTURED.lock().unwrap().clone()).expect("utf8");
+    assert_eq!(output.trim(), "5");
+}
+
+#[test]
+fn compile_and_run_typed_vec_append_sum() {
+    let src = "a: Vec<i64> = []\na.append(2)\na.append(3)\nres = a.sum()\nprint(res)\n";
+    let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
+    unsafe {
+        let lib = Library::new(&lib_path).expect("load dylib");
+        let set_reporters: libloading::Symbol<
+            unsafe extern "C" fn(
+                extern "C" fn(*const u8, usize, i64),
+                extern "C" fn(*const u8, usize, *const u8, usize),
+            ),
+        > = lib
+            .get(b"kayton_set_reporters")
+            .expect("find reporters symbol");
+        let run: libloading::Symbol<unsafe extern "C" fn()> =
+            lib.get(b"run").expect("find run symbol");
+        CAPTURED.lock().unwrap().clear();
+        set_reporters(report_int, report_str);
+        run();
+    }
+    let output = String::from_utf8(CAPTURED.lock().unwrap().clone()).expect("utf8");
+    assert_eq!(output.trim(), "5");
 }

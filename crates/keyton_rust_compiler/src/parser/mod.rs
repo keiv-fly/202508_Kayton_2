@@ -97,9 +97,9 @@ impl Parser {
                 other => panic!("expected identifier after let, found {:?}", other),
             };
             self.expect(Token::Colon);
-            match self.advance() {
-                Token::Ident(s) if s == "i64" => {},
-                other => panic!("expected type 'i64' after colon in let, found {:?}", other),
+            // Skip type tokens until '='
+            while !matches!(self.peek(), Token::Equal) {
+                self.advance();
             }
             self.expect(Token::Equal);
             let expr = self.parse_expr();
@@ -120,7 +120,17 @@ impl Parser {
             return Some(Stmt::Return(expr));
         }
         if let Token::Ident(name) = self.peek().clone() {
-            if self.peek_next_is(Token::Equal) {
+            if self.peek_next_is(Token::Colon) {
+                // Typed assignment without let: name: Type = expr
+                self.advance(); // ident
+                self.expect(Token::Colon);
+                while !matches!(self.peek(), Token::Equal) {
+                    self.advance();
+                }
+                self.expect(Token::Equal);
+                let expr = self.parse_expr();
+                return Some(Stmt::Assign { name, expr });
+            } else if self.peek_next_is(Token::Equal) {
                 self.advance(); // ident
                 self.advance(); // '='
                 let expr = self.parse_expr();
@@ -210,7 +220,12 @@ impl Parser {
             self.skip_newlines();
         }
         self.expect(Token::Dedent);
-        Stmt::ForRange { var, start, end, body }
+        Stmt::ForRange {
+            var,
+            start,
+            end,
+            body,
+        }
     }
 
     fn parse_primary(&mut self) -> Expr {
@@ -219,7 +234,7 @@ impl Parser {
             Token::Str(s) => Expr::Str(s),
             Token::Ident(s) => {
                 let expr = Expr::Ident(s);
-                self.parse_call(expr)
+                self.parse_postfix(expr)
             }
             Token::InterpolatedString(parts) => {
                 let mut ast_parts = Vec::new();
@@ -237,13 +252,29 @@ impl Parser {
             Token::LParen => {
                 let expr = self.parse_expr();
                 self.expect(Token::RParen);
-                self.parse_call(expr)
+                self.parse_postfix(expr)
+            }
+            Token::LBracket => {
+                let mut elems = Vec::new();
+                if !matches!(self.peek(), Token::RBracket) {
+                    elems.push(self.parse_expr());
+                    while matches!(self.peek(), Token::Comma) {
+                        self.advance();
+                        elems.push(self.parse_expr());
+                    }
+                }
+                self.expect(Token::RBracket);
+                let expr = Expr::Call {
+                    func: Box::new(Expr::Ident("vec".to_string())),
+                    args: elems,
+                };
+                self.parse_postfix(expr)
             }
             other => panic!("Unexpected token {:?}", other),
         }
     }
 
-    fn parse_call(&mut self, mut expr: Expr) -> Expr {
+    fn parse_postfix(&mut self, mut expr: Expr) -> Expr {
         loop {
             match self.peek() {
                 Token::LParen => {
@@ -260,6 +291,30 @@ impl Parser {
                     expr = Expr::Call {
                         func: Box::new(expr),
                         args,
+                    };
+                }
+                Token::Dot => {
+                    self.advance(); // consume '.'
+                    let method = match self.advance() {
+                        Token::Ident(s) => s,
+                        other => panic!("expected method name after '.', found {:?}", other),
+                    };
+                    self.expect(Token::LParen);
+                    let mut args = Vec::new();
+                    if !matches!(self.peek(), Token::RParen) {
+                        args.push(self.parse_expr());
+                        while matches!(self.peek(), Token::Comma) {
+                            self.advance();
+                            args.push(self.parse_expr());
+                        }
+                    }
+                    self.expect(Token::RParen);
+                    let mut call_args = Vec::new();
+                    call_args.push(expr);
+                    call_args.extend(args);
+                    expr = Expr::Call {
+                        func: Box::new(Expr::Ident(method)),
+                        args: call_args,
                     };
                 }
                 _ => break,

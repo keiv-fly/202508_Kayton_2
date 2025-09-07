@@ -25,6 +25,11 @@ pub enum Token {
     InKw,
     DotDot,
     PlusEqual,
+    Dot,
+    LBracket,
+    RBracket,
+    LAngle,
+    RAngle,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -177,15 +182,30 @@ impl<'a> Lexer<'a> {
                 Token::Colon
             }
             '.' => {
-                // Possibly DotDot
+                // Possibly Dot or DotDot
                 self.chars.next();
                 if let Some('.') = self.chars.peek().copied() {
                     self.chars.next();
                     Token::DotDot
                 } else {
-                    // Unknown single '.' -> skip and continue
-                    self.next_token()
+                    Token::Dot
                 }
+            }
+            '[' => {
+                self.chars.next();
+                Token::LBracket
+            }
+            ']' => {
+                self.chars.next();
+                Token::RBracket
+            }
+            '<' => {
+                self.chars.next();
+                Token::LAngle
+            }
+            '>' => {
+                self.chars.next();
+                Token::RAngle
             }
             '0'..='9' => self.lex_number(ch),
             'a'..='z' | 'A'..='Z' | '_' => {

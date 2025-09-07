@@ -119,7 +119,9 @@ impl Resolver {
                                 };
                                 self.syms.define(scope, name, kind);
                             }
-                            HirStmt::FuncDef { name, params, body, .. } => {
+                            HirStmt::FuncDef {
+                                name, params, body, ..
+                            } => {
                                 let sid = self.syms.define(scope, name, SymKind::Func);
                                 if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
                                     info.sig = Some(FuncSig {
@@ -129,7 +131,10 @@ impl Resolver {
                                 }
                                 self.user_funcs.insert(
                                     sid,
-                                    UserFuncDef { params: params.clone(), body: body.clone() },
+                                    UserFuncDef {
+                                        params: params.clone(),
+                                        body: body.clone(),
+                                    },
                                 );
                             }
                             HirStmt::ExprStmt { .. } => {}
@@ -191,7 +196,13 @@ impl Resolver {
                     },
                 }
             }
-            HirStmt::ForRange { hir_id, var, start, end, body } => {
+            HirStmt::ForRange {
+                hir_id,
+                var,
+                start,
+                end,
+                body,
+            } => {
                 let scope = self.current_scope();
                 let sym = self
                     .syms
@@ -297,6 +308,39 @@ impl Resolver {
         }
         if let Some(&sid) = self.builtins.get(name) {
             return sid;
+        }
+        match name {
+            "vec" => {
+                let sid = self.add_builtin("vec");
+                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                    info.sig = Some(FuncSig {
+                        params: vec![],
+                        ret: Type::Any,
+                    });
+                }
+                return sid;
+            }
+            "append" => {
+                let sid = self.add_builtin("append");
+                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                    info.sig = Some(FuncSig {
+                        params: vec![Type::Any, Type::Any],
+                        ret: Type::Unit,
+                    });
+                }
+                return sid;
+            }
+            "sum" => {
+                let sid = self.add_builtin("sum");
+                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                    info.sig = Some(FuncSig {
+                        params: vec![Type::Any],
+                        ret: Type::I64,
+                    });
+                }
+                return sid;
+            }
+            _ => {}
         }
         let sid = self
             .syms
