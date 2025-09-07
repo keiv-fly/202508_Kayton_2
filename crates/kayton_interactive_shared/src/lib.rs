@@ -118,6 +118,20 @@ fn build_prelude_and_epilogue(
                     walk_stmt(s, used_syms, assigned_syms);
                 }
             }
+            RStmt::If {
+                cond,
+                then_branch,
+                else_branch,
+                ..
+            } => {
+                collect_expr_syms(cond, used_syms);
+                for s in then_branch {
+                    walk_stmt(s, used_syms, assigned_syms);
+                }
+                for s in else_branch {
+                    walk_stmt(s, used_syms, assigned_syms);
+                }
+            }
         }
     }
 

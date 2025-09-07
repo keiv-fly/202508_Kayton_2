@@ -19,6 +19,12 @@ pub enum HirStmt {
         end: HirExpr,
         body: Vec<HirStmt>,
     },
+    If {
+        hir_id: HirId,
+        cond: HirExpr,
+        then_branch: Vec<HirStmt>,
+        else_branch: Vec<HirStmt>,
+    },
     FuncDef {
         hir_id: HirId,
         name: String,
@@ -36,6 +42,10 @@ pub enum HirExpr {
     Str {
         hir_id: HirId,
         value: String,
+    },
+    Bool {
+        hir_id: HirId,
+        value: bool,
     },
     Ident {
         hir_id: HirId,

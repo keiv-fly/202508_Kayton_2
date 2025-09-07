@@ -117,6 +117,68 @@ fn compile_and_run_vec_append_sum() {
 }
 
 #[test]
+fn compile_and_run_if_else_true() {
+    let src = r#"x = True
+y = 0
+if x:
+    y = 1
+else:
+    y = 2
+print(y)
+"#;
+    let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
+    unsafe {
+        let lib = Library::new(&lib_path).expect("load dylib");
+        let set_reporters: libloading::Symbol<
+            unsafe extern "C" fn(
+                extern "C" fn(*const u8, usize, i64),
+                extern "C" fn(*const u8, usize, *const u8, usize),
+            ),
+        > = lib
+            .get(b"kayton_set_reporters")
+            .expect("find reporters symbol");
+        let run: libloading::Symbol<unsafe extern "C" fn()> =
+            lib.get(b"run").expect("find run symbol");
+        CAPTURED.lock().unwrap().clear();
+        set_reporters(report_int, report_str);
+        run();
+    }
+    let output = String::from_utf8(CAPTURED.lock().unwrap().clone()).expect("utf8");
+    assert_eq!(output.trim(), "1");
+}
+
+#[test]
+fn compile_and_run_if_else_false() {
+    let src = r#"x = False
+y = 0
+if x:
+    y = 1
+else:
+    y = 2
+print(y)
+"#;
+    let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");
+    unsafe {
+        let lib = Library::new(&lib_path).expect("load dylib");
+        let set_reporters: libloading::Symbol<
+            unsafe extern "C" fn(
+                extern "C" fn(*const u8, usize, i64),
+                extern "C" fn(*const u8, usize, *const u8, usize),
+            ),
+        > = lib
+            .get(b"kayton_set_reporters")
+            .expect("find reporters symbol");
+        let run: libloading::Symbol<unsafe extern "C" fn()> =
+            lib.get(b"run").expect("find run symbol");
+        CAPTURED.lock().unwrap().clear();
+        set_reporters(report_int, report_str);
+        run();
+    }
+    let output = String::from_utf8(CAPTURED.lock().unwrap().clone()).expect("utf8");
+    assert_eq!(output.trim(), "2");
+}
+
+#[test]
 fn compile_and_run_typed_vec_append_sum() {
     let src = "a: Vec<i64> = []\na.append(2)\na.append(3)\nres = a.sum()\nprint(res)\n";
     let lib_path = compile_lang_source_to_dylib(src).expect("compile to dylib");

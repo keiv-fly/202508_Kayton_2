@@ -133,6 +133,23 @@ impl<'a> Checker<'a> {
                     body: body_t,
                 }
             }
+            SStmt::If {
+                hir_id,
+                cond,
+                then_branch,
+                else_branch,
+            } => {
+                let tcond = self.check_expr(cond);
+                // For now, accept any type for condition
+                let then_t: Vec<TStmt> = then_branch.iter().map(|st| self.check_stmt(st)).collect();
+                let else_t: Vec<TStmt> = else_branch.iter().map(|st| self.check_stmt(st)).collect();
+                TStmt::If {
+                    hir_id: *hir_id,
+                    cond: tcond,
+                    then_branch: then_t,
+                    else_branch: else_t,
+                }
+            }
         }
     }
 
@@ -147,6 +164,11 @@ impl<'a> Checker<'a> {
                 hir_id: *hir_id,
                 value: value.clone(),
                 ty: Type::Str,
+            },
+            SExpr::Bool { hir_id, value } => TExpr::Bool {
+                hir_id: *hir_id,
+                value: *value,
+                ty: Type::Any,
             },
             SExpr::Name { hir_id, sym } => {
                 let var_name = &self.symbols.infos[sym.0 as usize].name;
@@ -337,6 +359,7 @@ impl TExpr {
         match self {
             TExpr::Int { ty, .. }
             | TExpr::Str { ty, .. }
+            | TExpr::Bool { ty, .. }
             | TExpr::Name { ty, .. }
             | TExpr::Binary { ty, .. }
             | TExpr::Call { ty, .. }

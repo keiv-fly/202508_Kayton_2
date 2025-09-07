@@ -76,6 +76,23 @@ impl<'a> Converter<'a> {
                 end: self.convert_expr(end),
                 body: body.iter().map(|st| self.convert_stmt(st)).collect(),
             },
+            TStmt::If {
+                hir_id,
+                cond,
+                then_branch,
+                else_branch,
+            } => RStmt::If {
+                hir_id: *hir_id,
+                cond: self.convert_expr(cond),
+                then_branch: then_branch
+                    .iter()
+                    .map(|st| self.convert_stmt(st))
+                    .collect(),
+                else_branch: else_branch
+                    .iter()
+                    .map(|st| self.convert_stmt(st))
+                    .collect(),
+            },
         }
     }
 
@@ -89,6 +106,11 @@ impl<'a> Converter<'a> {
             TExpr::Str { hir_id, value, ty } => RExpr::Str {
                 hir_id: *hir_id,
                 value: value.clone(),
+                ty: ty.clone(),
+            },
+            TExpr::Bool { hir_id, value, ty } => RExpr::Bool {
+                hir_id: *hir_id,
+                value: *value,
                 ty: ty.clone(),
             },
             TExpr::Name { hir_id, sym, ty } => RExpr::Name {

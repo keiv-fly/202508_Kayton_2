@@ -10,6 +10,10 @@ pub enum Token {
     LetKw,
     FnKw,
     ReturnKw,
+    IfKw,
+    ElseKw,
+    TrueKw,
+    FalseKw,
     Plus,
     Equal,
     LParen,
@@ -257,6 +261,10 @@ impl<'a> Lexer<'a> {
             "return" => Token::ReturnKw,
             "for" => Token::ForKw,
             "in" => Token::InKw,
+            "if" => Token::IfKw,
+            "else" => Token::ElseKw,
+            "True" => Token::TrueKw,
+            "False" => Token::FalseKw,
             _ => Token::Ident(ident),
         }
     }
