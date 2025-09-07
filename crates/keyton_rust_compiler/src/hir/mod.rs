@@ -42,12 +42,26 @@ pub fn lower_program_with_spans(ast: Vec<Stmt>) -> (Vec<HirStmt>, HashMap<HirId,
 
 fn lower_stmt(ctx: &mut LoweringCtx, stmt: Stmt) -> HirStmt {
     match stmt {
+        Stmt::RImportModule { module } => HirStmt::RImportModule {
+            hir_id: ctx.new_id(),
+            module,
+        },
+        Stmt::RImportItems { module, items } => HirStmt::RImportItems {
+            hir_id: ctx.new_id(),
+            module,
+            items,
+        },
         Stmt::Assign { name, expr } => HirStmt::Assign {
             hir_id: ctx.new_id(),
             name,
             expr: lower_expr(ctx, expr),
         },
-        Stmt::ForRange { var, start, end, body } => HirStmt::ForRange {
+        Stmt::ForRange {
+            var,
+            start,
+            end,
+            body,
+        } => HirStmt::ForRange {
             hir_id: ctx.new_id(),
             var,
             start: lower_expr(ctx, start),

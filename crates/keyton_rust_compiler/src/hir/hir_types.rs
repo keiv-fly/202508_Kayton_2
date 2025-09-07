@@ -3,6 +3,16 @@ pub struct HirId(pub u32);
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum HirStmt {
+    // Record rimport declarations in HIR for later phases
+    RImportModule {
+        hir_id: HirId,
+        module: String,
+    },
+    RImportItems {
+        hir_id: HirId,
+        module: String,
+        items: Vec<String>,
+    },
     Assign {
         hir_id: HirId,
         name: String,

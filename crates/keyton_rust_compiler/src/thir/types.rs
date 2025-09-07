@@ -3,6 +3,7 @@ use crate::shir::sym::{SymbolId, Type};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TStmt {
+    // rimport directives do not participate in type checking as expressions; skipped.
     Assign {
         hir_id: HirId,
         sym: SymbolId,

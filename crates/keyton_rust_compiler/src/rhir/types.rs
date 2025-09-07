@@ -3,6 +3,15 @@ use crate::shir::sym::{SymbolId, Type};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RStmt {
+    RImportModule {
+        hir_id: HirId,
+        module: String,
+    },
+    RImportItems {
+        hir_id: HirId,
+        module: String,
+        items: Vec<String>,
+    },
     Assign {
         hir_id: HirId,
         sym: SymbolId,

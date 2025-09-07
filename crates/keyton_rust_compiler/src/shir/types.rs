@@ -3,6 +3,15 @@ use crate::hir::hir_types::{HirBinOp, HirId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SStmt {
+    RImportModule {
+        hir_id: HirId,
+        module: String,
+    },
+    RImportItems {
+        hir_id: HirId,
+        module: String,
+        items: Vec<String>,
+    },
     Assign {
         hir_id: HirId,
         sym: SymbolId,

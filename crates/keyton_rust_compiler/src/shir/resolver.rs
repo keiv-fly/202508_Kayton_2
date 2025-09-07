@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::hir::hir_types::{HirExpr, HirId, HirStmt, HirStringPart};
+use crate::rimport::env::{load_active_env_registry, load_plugin_manifest};
 use crate::span::Span;
 
 use super::sym::{FuncSig, ScopeId, SymKind, SymbolId, SymbolTable, Type};
@@ -9,6 +10,7 @@ use super::types::{SExpr, SStmt, SStringPart};
 #[derive(Debug, Clone)]
 pub enum ResolveError {
     UnresolvedName { span: Span, name: String },
+    ImportError { span: Span, message: String },
 }
 
 #[derive(Debug, Default)]
@@ -23,6 +25,8 @@ pub struct Resolver {
     builtins: HashMap<String, SymbolId>,
     spans: HashMap<HirId, Span>,
     user_funcs: HashMap<SymbolId, UserFuncDef>,
+    // Loaded plugin manifests by module name
+    plugin_manifests: HashMap<String, kayton_plugin_sdk::manifest::Manifest>,
 }
 
 impl Resolver {
@@ -35,6 +39,7 @@ impl Resolver {
             builtins: HashMap::new(),
             spans,
             user_funcs: HashMap::new(),
+            plugin_manifests: HashMap::new(),
         }
     }
 
@@ -76,6 +81,16 @@ impl Resolver {
         let scope = self.current_scope();
         for stmt in hir {
             match stmt {
+                HirStmt::RImportModule { .. } => {
+                    // No symbol definitions; recorded as directives in SHIR
+                }
+                HirStmt::RImportItems {
+                    module: _,
+                    items: _,
+                    ..
+                } => {
+                    // No symbol definitions here; actual items resolved later using manifests
+                }
                 HirStmt::Assign { name, .. } => {
                     let kind = if scope == self.global_scope() {
                         SymKind::GlobalVar
@@ -105,28 +120,67 @@ impl Resolver {
                     );
                 }
                 HirStmt::ExprStmt { .. } => {}
-            HirStmt::ForRange { var, body, .. } => {
-                // Define loop variable in current scope as LocalVar
-                self.syms.define(scope, var, SymKind::LocalVar);
-                // Collect inner defs from the body in the same scope for simplicity
-                self.collect_defs(body);
-            }
-            HirStmt::If {
-                then_branch,
-                else_branch,
-                ..
-            } => {
-                self.collect_defs(then_branch);
-                self.collect_defs(else_branch);
+                HirStmt::ForRange { var, body, .. } => {
+                    // Define loop variable in current scope as LocalVar
+                    self.syms.define(scope, var, SymKind::LocalVar);
+                    // Collect inner defs from the body in the same scope for simplicity
+                    self.collect_defs(body);
+                }
+                HirStmt::If {
+                    then_branch,
+                    else_branch,
+                    ..
+                } => {
+                    self.collect_defs(then_branch);
+                    self.collect_defs(else_branch);
+                }
             }
         }
-    }
     }
 
     pub fn resolve_program(&mut self, hir: &[HirStmt]) -> Vec<SStmt> {
         self.collect_defs(hir);
+        // Load active environment registry once
+        if let Ok(env_dir) = load_active_env_registry() {
+            // no-op here; manifests loaded lazily per module
+            let _ = env_dir; // silence unused warning
+        }
         let mut out = Vec::with_capacity(hir.len());
         for stmt in hir {
+            // Pre-handle imports to populate symbol table for imported functions
+            if let HirStmt::RImportItems { module, items, .. } = stmt {
+                let span = self.spans.get(&HirId(0)).cloned().unwrap_or_default();
+                match load_plugin_manifest(module) {
+                    Ok(mani) => {
+                        self.plugin_manifests.insert(module.clone(), mani.clone());
+                        // Seed imported item symbols as BuiltinFunc with signatures from manifest
+                        for it in items {
+                            if let Some(func) = mani.functions.iter().find(|f| &f.stable_name == it)
+                            {
+                                let g = self.global_scope();
+                                let sid = self.syms.define(g, &it, SymKind::BuiltinFunc);
+                                if let Some(info) = self.syms.infos.get_mut(sid.0 as usize) {
+                                    let params = func.sig.params.iter().map(map_typekind).collect();
+                                    info.sig = Some(FuncSig {
+                                        params,
+                                        ret: map_typekind(&func.sig.ret),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        // Record an import error with remediation guidance
+                        self.report.errors.push(ResolveError::ImportError {
+                            span,
+                            message: format!(
+                                "ImportError: Library '{}' is not installed or invalid. Run: kik rinstall {}. Details: {}",
+                                module, module, e
+                            ),
+                        });
+                    }
+                }
+            }
             out.push(self.resolve_stmt(stmt));
         }
         out
@@ -134,6 +188,22 @@ impl Resolver {
 
     fn resolve_stmt(&mut self, s: &HirStmt) -> SStmt {
         match s {
+            HirStmt::RImportModule { hir_id, module } => {
+                // Carry import directive forward; env processing occurs later
+                SStmt::RImportModule {
+                    hir_id: *hir_id,
+                    module: module.clone(),
+                }
+            }
+            HirStmt::RImportItems {
+                hir_id,
+                module,
+                items,
+            } => SStmt::RImportItems {
+                hir_id: *hir_id,
+                module: module.clone(),
+                items: items.clone(),
+            },
             HirStmt::Assign { hir_id, name, expr } => {
                 let scope = self.current_scope();
                 let sym = self
@@ -202,8 +272,10 @@ impl Resolver {
                 else_branch,
             } => {
                 let c = self.resolve_expr(cond);
-                let then_r: Vec<SStmt> = then_branch.iter().map(|st| self.resolve_stmt(st)).collect();
-                let else_r: Vec<SStmt> = else_branch.iter().map(|st| self.resolve_stmt(st)).collect();
+                let then_r: Vec<SStmt> =
+                    then_branch.iter().map(|st| self.resolve_stmt(st)).collect();
+                let else_r: Vec<SStmt> =
+                    else_branch.iter().map(|st| self.resolve_stmt(st)).collect();
                 SStmt::If {
                     hir_id: *hir_id,
                     cond: c,
@@ -346,6 +418,18 @@ impl Resolver {
             name: name.to_string(),
         });
         sid
+    }
+}
+
+fn map_typekind(k: &kayton_plugin_sdk::manifest::TypeKind) -> Type {
+    use kayton_plugin_sdk::manifest::TypeKind as TK;
+    match k {
+        TK::I64 => Type::I64,
+        TK::F64 => Type::Any,
+        TK::U64 => Type::Any,
+        TK::Bool => Type::Any,
+        TK::StaticStr | TK::StringBuf => Type::Str,
+        TK::VecI64 | TK::VecF64 | TK::Dynamic | TK::Unit => Type::Any,
     }
 }
 

@@ -62,6 +62,17 @@ impl<'a> Checker<'a> {
 
     fn check_stmt(&mut self, s: &SStmt) -> TStmt {
         match s {
+            SStmt::RImportModule { .. } | SStmt::RImportItems { .. } => {
+                // rimport directives do not produce typed statements
+                TStmt::ExprStmt {
+                    hir_id: HirId(0),
+                    expr: TExpr::Int {
+                        hir_id: HirId(0),
+                        value: 0,
+                        ty: Type::Unit,
+                    },
+                }
+            }
             SStmt::Assign { hir_id, sym, expr } => {
                 let texpr = self.check_expr(expr);
                 let expr_ty = texpr.ty().clone();

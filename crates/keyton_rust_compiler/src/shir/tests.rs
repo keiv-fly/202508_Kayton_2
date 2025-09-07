@@ -233,6 +233,7 @@ fn unresolved_name_reports_error() {
             assert_eq!(*span, crate::span::Span::new(2, 2));
             assert_eq!(name, "x");
         }
+        ResolveError::ImportError { .. } => {}
     }
 
     // Symbols: y then x, both globals in scope 0
@@ -278,6 +279,7 @@ fn unresolved_name_in_call_reports_error() {
         ResolveError::UnresolvedName { name, .. } => {
             assert_eq!(name, "x");
         }
+        ResolveError::ImportError { .. } => {}
     }
 
     // Symbols: print (builtin) then x (global)

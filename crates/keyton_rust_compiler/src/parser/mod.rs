@@ -2,6 +2,15 @@ use crate::lexer::{FStringPart, Lexer, Token};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
+    // rimport reqwest
+    RImportModule {
+        module: String,
+    },
+    // from reqwest rimport Client, StatusCode
+    RImportItems {
+        module: String,
+        items: Vec<String>,
+    },
     Assign {
         name: String,
         expr: Expr,
@@ -94,6 +103,38 @@ impl Parser {
     fn parse_stmt(&mut self) -> Option<Stmt> {
         if self.is_at_end() {
             return None;
+        }
+        // rimport statements
+        if matches!(self.peek(), Token::RimportKw) {
+            self.advance(); // 'rimport'
+            let module = match self.advance() {
+                Token::Ident(s) => s,
+                other => panic!("expected module name after rimport, found {:?}", other),
+            };
+            return Some(Stmt::RImportModule { module });
+        }
+        // from X rimport A, B, ...
+        if matches!(self.peek(), Token::FromKw) {
+            self.advance(); // 'from'
+            let module = match self.advance() {
+                Token::Ident(s) => s,
+                other => panic!("expected module name after from, found {:?}", other),
+            };
+            self.expect(Token::RimportKw);
+            let mut items = Vec::new();
+            loop {
+                let name = match self.advance() {
+                    Token::Ident(s) => s,
+                    other => panic!("expected identifier in rimport list, found {:?}", other),
+                };
+                items.push(name);
+                if matches!(self.peek(), Token::Comma) {
+                    self.advance();
+                    continue;
+                }
+                break;
+            }
+            return Some(Stmt::RImportItems { module, items });
         }
         // Let declaration (desugars to assignment)
         if matches!(self.peek(), Token::LetKw) {

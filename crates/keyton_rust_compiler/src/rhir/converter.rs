@@ -54,6 +54,7 @@ impl<'a> Converter<'a> {
 
     fn convert_stmt(&mut self, s: &TStmt) -> RStmt {
         match s {
+            // rimport directives are not present in THIR; they are carried in SHIR only.
             TStmt::Assign { hir_id, sym, expr } => RStmt::Assign {
                 hir_id: *hir_id,
                 sym: *sym,
@@ -84,14 +85,8 @@ impl<'a> Converter<'a> {
             } => RStmt::If {
                 hir_id: *hir_id,
                 cond: self.convert_expr(cond),
-                then_branch: then_branch
-                    .iter()
-                    .map(|st| self.convert_stmt(st))
-                    .collect(),
-                else_branch: else_branch
-                    .iter()
-                    .map(|st| self.convert_stmt(st))
-                    .collect(),
+                then_branch: then_branch.iter().map(|st| self.convert_stmt(st)).collect(),
+                else_branch: else_branch.iter().map(|st| self.convert_stmt(st)).collect(),
             },
         }
     }

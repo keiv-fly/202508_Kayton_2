@@ -703,7 +703,11 @@ name = "keyton_rust_compiler"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "dirs",
+ "kayton_plugin_sdk",
  "libloading",
+ "serde",
+ "serde_json",
  "tempfile",
 ]
 

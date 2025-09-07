@@ -143,6 +143,10 @@ impl<'a> CodeGenerator<'a> {
 
     fn convert_stmt_to_string(&mut self, stmt: &RStmt) -> String {
         match stmt {
+            RStmt::RImportModule { .. } | RStmt::RImportItems { .. } => {
+                // rimport directives don't emit runtime code in this phase
+                String::from(";")
+            }
             RStmt::Assign { sym, expr, .. } => {
                 let var_name = self.get_or_create_var_name(*sym);
                 let expr_str = self.convert_expr_to_string(expr);
@@ -225,6 +229,7 @@ impl<'a> CodeGenerator<'a> {
 
     fn should_skip_stmt(&self, stmt: &RStmt) -> bool {
         match stmt {
+            RStmt::RImportModule { .. } | RStmt::RImportItems { .. } => true,
             RStmt::ExprStmt { expr, .. } => match expr {
                 RExpr::Int { value, .. } if *value == 0 => true,
                 _ => false,
