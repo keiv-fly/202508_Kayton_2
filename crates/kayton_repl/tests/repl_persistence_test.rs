@@ -1,46 +1,70 @@
-use assert_cmd::Command;
+use anyhow::Result;
+use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_input};
 
 #[test]
-fn variable_persists_across_lines_and_is_printable() {
-    let mut cmd = Command::cargo_bin("kayton_repl").expect("binary exists");
-    // Provide two lines of input and then close stdin to terminate the REPL
-    let assert = cmd.write_stdin("x = 1\nprint(x)\n").assert().success();
+fn variable_persists_across_lines() -> Result<()> {
+    let mut state = InteractiveState::new();
 
-    let out = assert.get_output();
-    let mut combined = String::new();
-    combined.push_str(&String::from_utf8_lossy(&out.stdout));
-    combined.push_str(&String::from_utf8_lossy(&out.stderr));
+    // First line assigns a value to x
+    let prepared1 = prepare_input(&mut state, "x = 1")?;
+    execute_prepared(&mut state, &prepared1)?;
 
-    assert!(
-        combined.contains("1"),
-        "Output did not contain expected value.\n{}",
-        combined
-    );
-    assert!(
-        !combined.contains("NameError"),
-        "REPL reported NameError unexpectedly.\n{}",
-        combined
-    );
+    // Second line evaluates x so the value is captured in __last
+    let prepared2 = prepare_input(&mut state, "x")?;
+    execute_prepared(&mut state, &prepared2)?;
+
+    let last_text = if let Some(h) = state.vm().resolve_name("__last") {
+        state.vm_mut().format_value_by_handle(h).unwrap_or_default()
+    } else {
+        String::new()
+    };
+    assert_eq!(last_text, "1");
+
+    Ok(())
 }
 
 #[test]
-fn define_function_in_one_block_and_call_it() {
-    let mut cmd = Command::cargo_bin("kayton_repl").expect("binary exists");
-    // Enter a function block with Python-style prompts: fn header, indented body, blank line
-    let input = "fn my_sum(x, y):\n    x + y\n\n".to_string()
-        + "x = 1\n"
-        + "y = 2\n"
-        + "print(my_sum(x,y))\n";
-    let assert = cmd.write_stdin(input).assert().success();
+fn define_function_in_one_block_and_call_it() -> Result<()> {
+    let mut state = InteractiveState::new();
 
-    let out = assert.get_output();
-    let mut combined = String::new();
-    combined.push_str(&String::from_utf8_lossy(&out.stdout));
-    combined.push_str(&String::from_utf8_lossy(&out.stderr));
+    let code = r#"fn my_sum(x, y):
+    x + y
+x = 1
+y = 2
+my_sum(x,y)"#;
+    let prepared = prepare_input(&mut state, code)?;
+    execute_prepared(&mut state, &prepared)?;
 
-    assert!(
-        combined.contains("3"),
-        "Output did not contain expected value.\n{}",
-        combined
-    );
+    let last_text = if let Some(h) = state.vm().resolve_name("__last") {
+        state.vm_mut().format_value_by_handle(h).unwrap_or_default()
+    } else {
+        String::new()
+    };
+    assert_eq!(last_text, "3");
+
+    Ok(())
+}
+
+#[test]
+fn print_all_values_in_one_test() -> Result<()> {
+    let mut state = InteractiveState::new();
+
+    let code = r#"x = 1
+fn my_sum(a,b):
+    a + b
+y = my_sum(x,2)
+print(x)
+print(y)"#;
+    let prepared = prepare_input(&mut state, code)?;
+    execute_prepared(&mut state, &prepared)?;
+
+    let text = if let Some(h) = state.vm().resolve_name("__stdout") {
+        let s = state.vm_mut().format_value_by_handle(h).unwrap_or_default();
+        s.trim_end_matches('\n').to_string()
+    } else {
+        String::new()
+    };
+    assert_eq!(text, "1\n3");
+
+    Ok(())
 }
