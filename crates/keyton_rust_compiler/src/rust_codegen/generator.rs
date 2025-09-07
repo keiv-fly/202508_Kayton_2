@@ -161,13 +161,22 @@ impl<'a> CodeGenerator<'a> {
                 let expr_str = self.convert_expr_to_string(expr);
                 format!("{};", expr_str)
             }
-            RStmt::ForRange { sym, start, end, body, .. } => {
+            RStmt::ForRange {
+                sym,
+                start,
+                end,
+                body,
+                ..
+            } => {
                 let var_name = self.get_or_create_var_name(*sym);
                 let start_str = self.convert_expr_to_string(start);
                 let end_str = self.convert_expr_to_string(end);
                 // Emit body statements with relative indentation (4 spaces). The caller adds the base indent.
                 let mut out = String::new();
-                out.push_str(&format!("for {} in {}..{} {{\n", var_name, start_str, end_str));
+                out.push_str(&format!(
+                    "for {} in {}..{} {{\n",
+                    var_name, start_str, end_str
+                ));
                 for inner in body {
                     if self.should_skip_stmt(inner) {
                         continue;
@@ -208,6 +217,30 @@ impl<'a> CodeGenerator<'a> {
                 format!("({} {} {})", left_str, op_str, right_str)
             }
             RExpr::Call { func, args, .. } => {
+                if let RExpr::Name { sym, .. } = func.as_ref() {
+                    if let Some(info) = self.resolved.symbols.infos.get(sym.0 as usize) {
+                        match info.name.as_str() {
+                            "vec" => {
+                                let elems = args
+                                    .iter()
+                                    .map(|a| self.convert_expr_to_string(a))
+                                    .collect::<Vec<_>>()
+                                    .join(", ");
+                                return format!("vec![{}]", elems);
+                            }
+                            "append" => {
+                                let target = self.convert_expr_to_string(&args[0]);
+                                let value = self.convert_expr_to_string(&args[1]);
+                                return format!("{}.push({})", target, value);
+                            }
+                            "sum" => {
+                                let target = self.convert_expr_to_string(&args[0]);
+                                return format!("{}.iter().sum::<i64>()", target);
+                            }
+                            _ => {}
+                        }
+                    }
+                }
                 let func_str = self.convert_expr_to_string(func);
                 let args_str = args
                     .iter()
