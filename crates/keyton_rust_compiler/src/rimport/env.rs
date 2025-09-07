@@ -81,3 +81,55 @@ pub fn load_plugin_manifest(module: &str) -> Result<Manifest> {
     let mani: Manifest = serde_json::from_slice(&bytes)?;
     Ok(mani)
 }
+
+/// Discover the plugin DLL/SO/DYLIB path for a given module name in the active environment.
+pub fn discover_plugin_dll_path(module: &str) -> Result<PathBuf> {
+    let env_dir = discover_active_env_dir()?;
+    let libs = env_dir.join("libs").join(module);
+    // Search libs/<module>/<version>/<target> for a library file
+    if libs.exists() {
+        for entry in fs::read_dir(&libs)? {
+            let entry = entry?;
+            let ver_dir = entry.path();
+            if ver_dir.is_dir() {
+                for target_entry in fs::read_dir(&ver_dir)? {
+                    let target_dir = target_entry?.path();
+                    if target_dir.is_dir() {
+                        // Prefer canonical plugin filename; fallback to first dll-like
+                        #[cfg(target_os = "windows")]
+                        let candidates = ["plugin.dll".to_string()];
+                        #[cfg(target_os = "linux")]
+                        let candidates = ["libplugin.so".to_string(), format!("lib{}.so", module)];
+                        #[cfg(target_os = "macos")]
+                        let candidates = [
+                            "libplugin.dylib".to_string(),
+                            format!("lib{}.dylib", module),
+                        ];
+
+                        for cand in &candidates {
+                            let p = target_dir.join(cand);
+                            if p.exists() {
+                                return Ok(p);
+                            }
+                        }
+
+                        // Fallback: pick the first file with dll/so/dylib extension
+                        for f in fs::read_dir(&target_dir)? {
+                            let f = f?.path();
+                            if let Some(ext) = f.extension().and_then(|s| s.to_str()) {
+                                let e = ext.to_ascii_lowercase();
+                                if e == "dll" || e == "so" || e == "dylib" {
+                                    return Ok(f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    anyhow::bail!(
+        "plugin library not found for module '{}' in active environment",
+        module
+    )
+}

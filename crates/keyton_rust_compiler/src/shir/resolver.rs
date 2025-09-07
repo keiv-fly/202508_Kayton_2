@@ -147,7 +147,7 @@ impl Resolver {
         }
         let mut out = Vec::with_capacity(hir.len());
         for stmt in hir {
-            // Pre-handle imports to populate symbol table for imported functions
+            // Pre-handle imports to populate symbol table for imported functions and record manifests
             if let HirStmt::RImportItems { module, items, .. } = stmt {
                 let span = self.spans.get(&HirId(0)).cloned().unwrap_or_default();
                 match load_plugin_manifest(module) {
@@ -171,6 +171,23 @@ impl Resolver {
                     }
                     Err(e) => {
                         // Record an import error with remediation guidance
+                        self.report.errors.push(ResolveError::ImportError {
+                            span,
+                            message: format!(
+                                "ImportError: Library '{}' is not installed or invalid. Run: kik rinstall {}. Details: {}",
+                                module, module, e
+                            ),
+                        });
+                    }
+                }
+            } else if let HirStmt::RImportModule { module, .. } = stmt {
+                // Module-level rimport: attempt to load manifest so codegen knows which plugins to load
+                let span = self.spans.get(&HirId(0)).cloned().unwrap_or_default();
+                match load_plugin_manifest(module) {
+                    Ok(mani) => {
+                        self.plugin_manifests.insert(module.clone(), mani.clone());
+                    }
+                    Err(e) => {
                         self.report.errors.push(ResolveError::ImportError {
                             span,
                             message: format!(
@@ -436,6 +453,8 @@ fn map_typekind(k: &kayton_plugin_sdk::manifest::TypeKind) -> Type {
 pub struct ResolvedProgram {
     pub shir: Vec<SStmt>,
     pub symbols: SymbolTable,
+    /// Loaded plugin manifests keyed by module name for rimported modules.
+    pub plugins: std::collections::HashMap<String, kayton_plugin_sdk::manifest::Manifest>,
 }
 
 pub fn resolve_program(hir: &[HirStmt]) -> ResolvedProgram {
@@ -449,6 +468,7 @@ pub fn resolve_program_with_spans(hir: &[HirStmt], spans: HashMap<HirId, Span>) 
     ResolvedProgram {
         shir,
         symbols: resolver.syms,
+        plugins: resolver.plugin_manifests,
     }
 }
 

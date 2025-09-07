@@ -88,6 +88,34 @@ unsafe fn report_int(name: &str, value: i64) {
 unsafe fn report_str(name: &str, s: &str) {
     if let Some(f) = REPORT_STR { f(name.as_ptr(), name.len(), s.as_ptr(), s.len()); }
 }
+
+// ----- VM hooks for plugin loading and function lookup (set by host via kayton_set_vm_hooks) -----
+use core::ffi::c_void;
+
+#[allow(non_camel_case_types)]
+type LoadPluginFn = extern "C" fn(module_ptr: *const u8, module_len: usize) -> i32;
+#[allow(non_camel_case_types)]
+type GetFunctionPtrFn = extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
+
+static mut LOAD_PLUGIN: Option<LoadPluginFn> = None;
+static mut GET_FUNCTION_PTR: Option<GetFunctionPtrFn> = None;
+
+#[no_mangle]
+pub extern "C" fn kayton_set_vm_hooks(load: LoadPluginFn, get_fn: GetFunctionPtrFn) {
+    unsafe {
+        LOAD_PLUGIN = Some(load);
+        GET_FUNCTION_PTR = Some(get_fn);
+    }
+}
+
+#[inline]
+unsafe fn load_plugin(name: &str) -> bool {
+    if let Some(f) = LOAD_PLUGIN { f(name.as_ptr(), name.len()) == 0 } else { false }
+}
+#[inline]
+unsafe fn get_fn_ptr(name: &str) -> *const c_void {
+    if let Some(f) = GET_FUNCTION_PTR { f(name.as_ptr(), name.len()) } else { core::ptr::null() }
+}
 "#;
 
     let lib_src = format!("{}\n{}", macro_header, lib_body);

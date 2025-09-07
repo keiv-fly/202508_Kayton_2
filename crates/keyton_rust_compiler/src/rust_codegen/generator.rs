@@ -29,6 +29,15 @@ impl<'a> CodeGenerator<'a> {
         // Add the main function
         source_code.push_str("fn main() {\n");
 
+        // Insert plugin loading prelude if any rimports were resolved
+        for line in self.build_plugin_prelude_lines(rhir_program) {
+            source_code.push_str("    ");
+            source_code.push_str(&line);
+            if !line.ends_with('\n') {
+                source_code.push('\n');
+            }
+        }
+
         // Generate statements
         for stmt in &rhir_program.rhir {
             if self.should_skip_stmt(stmt) {
@@ -63,7 +72,15 @@ impl<'a> CodeGenerator<'a> {
         let mut source_code = String::new();
         source_code.push_str("fn main() {\n");
 
-        // Insert prelude lines (already indented by 4 spaces here)
+        // Insert plugin prelude first, then provided prelude lines (already indented by 4 spaces here)
+        for line in self.build_plugin_prelude_lines(rhir_program) {
+            source_code.push_str("    ");
+            source_code.push_str(&line);
+            if !line.ends_with('\n') {
+                source_code.push('\n');
+            }
+        }
+        // Insert prelude lines
         for line in prelude_lines {
             source_code.push_str("    ");
             source_code.push_str(line);
@@ -138,6 +155,117 @@ impl<'a> CodeGenerator<'a> {
         RustCode {
             source_code,
             var_names: self.var_names.clone(),
+        }
+    }
+
+    /// Build prelude lines to load required plugins and fetch any used function pointers.
+    fn build_plugin_prelude_lines(&self, rhir_program: &RustProgram) -> Vec<String> {
+        use std::collections::HashSet;
+
+        // Collect imported modules from resolved.plugins
+        let mut lines: Vec<String> = Vec::new();
+        if self.resolved.plugins.is_empty() {
+            return lines;
+        }
+
+        // Load each plugin by module name
+        for module in self.resolved.plugins.keys() {
+            let mod_escaped = module.replace("\\", "\\\\").replace('"', "\\\"");
+            lines.push(format!(
+                "let _ = unsafe {{ load_plugin(\"{}\") }};",
+                mod_escaped
+            ));
+        }
+
+        // Build a set of function names declared by manifests
+        let mut manifest_funcs: HashSet<&str> = HashSet::new();
+        for mani in self.resolved.plugins.values() {
+            for f in &mani.functions {
+                manifest_funcs.insert(f.stable_name.as_str());
+            }
+        }
+
+        // Walk program to find used function names
+        let mut used_funcs: HashSet<String> = HashSet::new();
+        for s in &rhir_program.rhir {
+            self.collect_used_in_stmt(s, &mut used_funcs);
+        }
+
+        // Emit pointer fetches for used functions that are in manifests (no typing yet; just fetch)
+        for name in used_funcs {
+            if manifest_funcs.contains(name.as_str()) {
+                let nm_escaped = name.replace('"', "\\\"");
+                lines.push(format!(
+                    "let _ = unsafe {{ get_fn_ptr(\"{}\") }};",
+                    nm_escaped
+                ));
+            }
+        }
+
+        lines
+    }
+
+    fn collect_used_in_stmt(&self, s: &RStmt, used: &mut std::collections::HashSet<String>) {
+        match s {
+            RStmt::Assign { expr, .. } => self.collect_used_in_expr(expr, used),
+            RStmt::ExprStmt { expr, .. } => self.collect_used_in_expr(expr, used),
+            RStmt::ForRange {
+                start, end, body, ..
+            } => {
+                self.collect_used_in_expr(start, used);
+                self.collect_used_in_expr(end, used);
+                for st in body {
+                    self.collect_used_in_stmt(st, used);
+                }
+            }
+            RStmt::If {
+                cond,
+                then_branch,
+                else_branch,
+                ..
+            } => {
+                self.collect_used_in_expr(cond, used);
+                for st in then_branch {
+                    self.collect_used_in_stmt(st, used);
+                }
+                for st in else_branch {
+                    self.collect_used_in_stmt(st, used);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn collect_used_in_expr(&self, e: &RExpr, used: &mut std::collections::HashSet<String>) {
+        match e {
+            RExpr::Name { sym, .. } => {
+                if let Some(info) = self.resolved.symbols.infos.get(sym.0 as usize) {
+                    used.insert(info.name.clone());
+                }
+            }
+            RExpr::Binary { left, right, .. } => {
+                self.collect_used_in_expr(left, used);
+                self.collect_used_in_expr(right, used);
+            }
+            RExpr::Call { func, args, .. } => {
+                self.collect_used_in_expr(func, used);
+                for a in args {
+                    self.collect_used_in_expr(a, used);
+                }
+            }
+            RExpr::MacroCall { args, .. } => {
+                for a in args {
+                    self.collect_used_in_expr(a, used);
+                }
+            }
+            RExpr::InterpolatedString { parts, .. } => {
+                for p in parts {
+                    if let RStringPart::Expr { expr, .. } = p {
+                        self.collect_used_in_expr(expr, used);
+                    }
+                }
+            }
+            _ => {}
         }
     }
 

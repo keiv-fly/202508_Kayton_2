@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, Result};
+use core::ffi::c_void;
 use kayton_vm::{
     Api, KaytonVm, ReportIntFn, ReportStrFn, VmKaytonContext, host_report_int, host_report_str,
     set_report_host_from_ctx, set_stdout_callback,
@@ -14,6 +15,7 @@ use keyton_rust_compiler::rhir::{RustProgram, convert_to_rhir};
 use keyton_rust_compiler::rust_codegen::{CodeGenerator, RustCode};
 use keyton_rust_compiler::shir::{resolve_program, sym::SymbolId};
 use libloading::Library;
+use keyton_rust_compiler::rimport::env::discover_plugin_dll_path;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VarKind {
@@ -312,6 +314,15 @@ pub fn execute_prepared(state: &mut InteractiveState, prepared: &PreparedCode) -
                 );
             }
 
+            // Set VM hooks for plugin loading and function pointer lookups
+            type LoadPluginFn = extern "C" fn(module_ptr: *const u8, module_len: usize) -> i32;
+            type GetFunctionPtrFn = extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
+            type SetVmHooksFn = unsafe extern "C" fn(LoadPluginFn, GetFunctionPtrFn);
+            if let Ok(set_vm_hooks) = lib.get::<SetVmHooksFn>(b"kayton_set_vm_hooks") {
+                set_current_vm_ptr(state.vm_mut());
+                set_vm_hooks(load_plugin_host, get_function_ptr_host);
+            }
+
             let func: libloading::Symbol<unsafe extern "C" fn()> =
                 lib.get(b"run").context("find run symbol")?;
             func();
@@ -366,6 +377,15 @@ where
                 );
             }
 
+            // Set VM hooks for plugin loading and function pointer lookups
+            type LoadPluginFn = extern "C" fn(module_ptr: *const u8, module_len: usize) -> i32;
+            type GetFunctionPtrFn = extern "C" fn(name_ptr: *const u8, name_len: usize) -> *const c_void;
+            type SetVmHooksFn = unsafe extern "C" fn(LoadPluginFn, GetFunctionPtrFn);
+            if let Ok(set_vm_hooks) = lib.get::<SetVmHooksFn>(b"kayton_set_vm_hooks") {
+                set_current_vm_ptr(state.vm_mut());
+                set_vm_hooks(load_plugin_host, get_function_ptr_host);
+            }
+
             // Install stdout streaming callback
             STDOUT_SINK.with(|slot| {
                 *slot.borrow_mut() = Some(Box::new(move |s: &str| on_stdout(s)));
@@ -413,4 +433,49 @@ pub fn take_stdout(state: &mut InteractiveState) -> String {
     let _ = (api.set_global_static_str)(&mut ctx, "__stdout", "");
 
     s
+}
+
+// -------- VM hooks implementation for generated code --------
+// We hold a raw pointer to the active KaytonVm while executing user code so we can route callbacks.
+static mut CURRENT_VM_PTR: Option<*mut KaytonVm> = None;
+
+fn set_current_vm_ptr(vm: &mut KaytonVm) {
+    unsafe { CURRENT_VM_PTR = Some(vm as *mut KaytonVm); }
+}
+
+extern "C" fn load_plugin_host(module_ptr: *const u8, module_len: usize) -> i32 {
+    unsafe {
+        let slice = core::slice::from_raw_parts(module_ptr, module_len);
+        if let Ok(module) = core::str::from_utf8(slice) {
+            if let Some(vm_ptr) = CURRENT_VM_PTR {
+                let vm = &mut *vm_ptr;
+                match discover_plugin_dll_path(module) {
+                    Ok(p) => match vm.load_plugin_from_path(&p) {
+                        Ok(_) => 0,
+                        Err(_) => 2,
+                    },
+                    Err(_) => 1,
+                }
+            } else {
+                3
+            }
+        } else {
+            4
+        }
+    }
+}
+
+extern "C" fn get_function_ptr_host(name_ptr: *const u8, name_len: usize) -> *const c_void {
+    unsafe {
+        let slice = core::slice::from_raw_parts(name_ptr, name_len);
+        if let Ok(name) = core::str::from_utf8(slice) {
+            if let Some(vm_ptr) = CURRENT_VM_PTR {
+                let vm = &mut *vm_ptr;
+                if let Some(p) = vm.get_function_ptr(name) {
+                    return p as *const c_void;
+                }
+            }
+        }
+        core::ptr::null()
+    }
 }
