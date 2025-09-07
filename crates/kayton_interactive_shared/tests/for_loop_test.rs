@@ -5,7 +5,7 @@ use kayton_interactive_shared::{InteractiveState, execute_prepared, prepare_inpu
 fn for_loop_sums_to_three() -> Result<()> {
     let mut state = InteractiveState::new();
 
-    let code = r#"n = 2
+    let code = r#"n = 3
 s = 0
 for x in 0..n:
     s += x
