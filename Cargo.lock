@@ -695,6 +695,7 @@ name = "kayton_vm"
 version = "0.1.0"
 dependencies = [
  "kayton_api",
+ "libloading",
 ]
 
 [[package]]

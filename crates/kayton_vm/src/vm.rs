@@ -1,8 +1,9 @@
 use std::boxed::Box;
 use std::ffi::c_void;
+use std::path::Path;
 
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{GlobalStrBuf, KaytonContext, KaytonError};
+use kayton_api::types::{GlobalStrBuf, KaytonContext, KaytonError, RawFnPtr, TypeMeta};
 
 use crate::host::HostState;
 
@@ -11,6 +12,7 @@ use crate::host::HostState;
 pub struct KaytonVm {
     host: Box<HostState>,
     api: Box<KaytonApi>,
+    plugins: Vec<libloading::Library>,
 }
 
 impl KaytonVm {
@@ -346,9 +348,31 @@ impl KaytonVm {
                 let s = unsafe { &*(ctx.host_data as *mut HostState) };
                 s.read_tuple_into_slice_by_handle(h, out, cap)
             },
+
+            // ---- Registries ----
+            register_function: |ctx, name, raw_ptr, sig_id| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.register_function(name, raw_ptr, sig_id)
+            },
+            get_function: |ctx, name| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_function(name)
+            },
+            register_type: |ctx, name, meta| {
+                let s = unsafe { &mut *(ctx.host_data as *mut HostState) };
+                s.register_type(name, meta)
+            },
+            get_type: |ctx, name| {
+                let s = unsafe { &*(ctx.host_data as *mut HostState) };
+                s.get_type(name)
+            },
         });
 
-        KaytonVm { host, api }
+        KaytonVm {
+            host,
+            api,
+            plugins: Vec::new(),
+        }
     }
 
     pub fn context(&mut self) -> KaytonContext {
@@ -458,5 +482,69 @@ impl KaytonVm {
             }
         }
         out
+    }
+
+    // ---- Registries convenience ----
+    pub fn get_function_ptr(&self, name: &str) -> Option<RawFnPtr> {
+        self.host.get_function(name).ok()
+    }
+
+    pub fn get_type_meta(&self, name: &str) -> Option<TypeMeta> {
+        self.host.get_type(name).ok()
+    }
+
+    // ---- Plugin loading ----
+    pub fn load_plugin_from_path(&mut self, path: &Path) -> Result<(), KaytonError> {
+        let lib = unsafe {
+            libloading::Library::new(path).map_err(|e| {
+                KaytonError::with_source(
+                    kayton_api::types::ErrorKind::Generic,
+                    "Failed to load plugin DLL",
+                    e,
+                )
+            })?
+        };
+
+        unsafe {
+            type AbiVersionFn = extern "Rust" fn() -> u32;
+            type ManifestFn = extern "Rust" fn() -> &'static [u8];
+            type RegisterFn = extern "Rust" fn(ctx: &mut KaytonContext);
+
+            let abi_sym: libloading::Symbol<AbiVersionFn> =
+                lib.get(b"kayton_plugin_abi_version").map_err(|e| {
+                    KaytonError::with_source(
+                        kayton_api::types::ErrorKind::Generic,
+                        "Missing kayton_plugin_abi_version",
+                        e,
+                    )
+                })?;
+            if (abi_sym)() != kayton_api::KAYTON_PLUGIN_ABI_VERSION {
+                return Err(KaytonError::generic("Plugin ABI mismatch"));
+            }
+
+            let _manifest_sym: libloading::Symbol<ManifestFn> =
+                lib.get(b"kayton_plugin_manifest_json").map_err(|e| {
+                    KaytonError::with_source(
+                        kayton_api::types::ErrorKind::Generic,
+                        "Missing kayton_plugin_manifest_json",
+                        e,
+                    )
+                })?;
+
+            let register_sym: libloading::Symbol<RegisterFn> =
+                lib.get(b"kayton_plugin_register").map_err(|e| {
+                    KaytonError::with_source(
+                        kayton_api::types::ErrorKind::Generic,
+                        "Missing kayton_plugin_register",
+                        e,
+                    )
+                })?;
+
+            let mut ctx = self.context();
+            (register_sym)(&mut ctx);
+        }
+
+        self.plugins.push(lib);
+        Ok(())
     }
 }

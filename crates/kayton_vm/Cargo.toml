@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 kayton_api = { path = "../kayton_api" }
+libloading = { version = "0.8", default-features = false }

@@ -3,7 +3,7 @@ use core::ptr::null_mut;
 use core::ffi::c_void;
 use kayton_api::KVec;
 use kayton_api::api::KaytonApi;
-use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonContext, KaytonError};
+use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonContext, KaytonError, TypeMeta};
 
 // Dummy implementations to populate the vtable
 fn set_u64(_ctx: &mut KaytonContext, _name: &str, _value: u64) -> Result<HKayRef, KaytonError> {
@@ -279,6 +279,32 @@ fn get_bool_by_handle(_ctx: &mut KaytonContext, _h: HKayRef) -> Result<bool, Kay
     Ok(true)
 }
 
+// ---- Registry dummies ----
+fn register_function(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _raw_ptr: *const c_void,
+    _sig_id: u64,
+) -> Result<(), KaytonError> {
+    Ok(())
+}
+
+fn get_function(_ctx: &mut KaytonContext, _name: &str) -> Result<*const c_void, KaytonError> {
+    Ok(core::ptr::null())
+}
+
+fn register_type(
+    _ctx: &mut KaytonContext,
+    _name: &str,
+    _meta: TypeMeta,
+) -> Result<(), KaytonError> {
+    Ok(())
+}
+
+fn get_type(_ctx: &mut KaytonContext, _name: &str) -> Result<TypeMeta, KaytonError> {
+    Ok(TypeMeta::pod(0, 1))
+}
+
 #[test]
 fn context_api_accessor_and_calls() {
     // Dummy interners and tuples (not exercised here)
@@ -427,6 +453,10 @@ fn context_api_accessor_and_calls() {
         get_global_tuple_item: get_global_tuple_item,
         get_global_tuple_item_by_handle: get_global_tuple_item_by_handle,
         read_tuple_into_slice_by_handle: read_tuple_into_slice_by_handle,
+        register_function: register_function,
+        get_function: get_function,
+        register_type: register_type,
+        get_type: get_type,
     };
 
     let api_box = Box::new(api);

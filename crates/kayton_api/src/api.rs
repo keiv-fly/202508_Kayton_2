@@ -102,6 +102,12 @@ pub struct KaytonApi {
     pub get_global_tuple_item: crate::fns_tuple::GetGlobalTupleItemFn,
     pub get_global_tuple_item_by_handle: crate::fns_tuple::GetGlobalTupleItemByHandleFn,
     pub read_tuple_into_slice_by_handle: crate::fns_tuple::ReadTupleIntoSliceByHandleFn,
+
+    // ---- Registries (functions and types) ----
+    pub register_function: crate::fns_registry::RegisterFunctionFn,
+    pub get_function: crate::fns_registry::GetFunctionFn,
+    pub register_type: crate::fns_registry::RegisterTypeFn,
+    pub get_type: crate::fns_registry::GetTypeFn,
 }
 
 impl crate::types::KaytonContext {

@@ -172,3 +172,45 @@ impl Drop for GlobalStrBuf {
         }
     }
 }
+
+// ---------------- Registry-related core types ----------------
+
+/// Opaque raw function pointer used for registry lookups. Cast by the caller to the desired Rust ABI function type.
+pub type RawFnPtr = *const c_void;
+
+/// Function pointer type for dropping a value of a registered type in-place.
+/// Receives a pointer to the value's storage; implementors must respect `TypeMeta::size` and `align`.
+pub type DropValueFn = unsafe fn(ptr: *mut u8);
+
+/// Optional clone function to duplicate a value from `src` into `dst` (both properly aligned and non-overlapping).
+pub type CloneValueFn = unsafe fn(dst: *mut u8, src: *const u8);
+
+/// Metadata describing a value type crossing the plugin boundary.
+/// All functions use the Rust ABI and operate on raw memory locations.
+#[repr(C)]
+#[derive(Copy, Clone, Debug)]
+pub struct TypeMeta {
+    /// Size in bytes of the value type
+    pub size: usize,
+    /// Alignment in bytes of the value type
+    pub align: usize,
+    /// Optional opaque tag describing layout category for fast-path checks (0 = unspecified)
+    pub layout_tag: u64,
+    /// Optional drop function to clean up resources for this value when dropped
+    pub drop_value: Option<DropValueFn>,
+    /// Optional clone function to copy from src to dst
+    pub clone_value: Option<CloneValueFn>,
+}
+
+impl TypeMeta {
+    /// Construct a POD (plain-old-data) meta (no drop/clone).
+    pub const fn pod(size: usize, align: usize) -> Self {
+        Self {
+            size,
+            align,
+            layout_tag: 0,
+            drop_value: None,
+            clone_value: None,
+        }
+    }
+}

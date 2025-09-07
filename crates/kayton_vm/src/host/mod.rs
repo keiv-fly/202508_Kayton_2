@@ -4,7 +4,7 @@ use std::vec::Vec;
 
 use kayton_api::KVec;
 use kayton_api::kinds::KindId;
-use kayton_api::types::{GlobalStrBuf, HKayRef};
+use kayton_api::types::{GlobalStrBuf, HKayRef, KaytonError, RawFnPtr, TypeMeta};
 
 mod dyn_store;
 mod vm_fns_dynamic;
@@ -48,6 +48,10 @@ pub struct HostState {
 
     next_kind_id: KindId,
     dyn_kinds: BTreeMap<KindId, DynKindStore>,
+
+    // ---- Registries ----
+    functions: BTreeMap<String, (RawFnPtr, u64)>,
+    types_meta: BTreeMap<String, TypeMeta>,
 }
 
 impl HostState {
@@ -77,6 +81,8 @@ impl HostState {
             tuples: Vec::new(),
             next_kind_id: 1000,
             dyn_kinds: BTreeMap::new(),
+            functions: BTreeMap::new(),
+            types_meta: BTreeMap::new(),
         }
     }
 
@@ -98,6 +104,36 @@ impl HostState {
             .iter()
             .map(|(k, v)| (k.clone(), *v))
             .collect()
+    }
+
+    // ---- Registries ----
+    pub fn register_function(
+        &mut self,
+        name: &str,
+        raw_ptr: RawFnPtr,
+        sig_id: u64,
+    ) -> Result<(), KaytonError> {
+        self.functions.insert(String::from(name), (raw_ptr, sig_id));
+        Ok(())
+    }
+
+    pub fn get_function(&self, name: &str) -> Result<RawFnPtr, KaytonError> {
+        self.functions
+            .get(name)
+            .map(|(p, _)| *p)
+            .ok_or_else(|| KaytonError::not_found("function not found"))
+    }
+
+    pub fn register_type(&mut self, name: &str, meta: TypeMeta) -> Result<(), KaytonError> {
+        self.types_meta.insert(String::from(name), meta);
+        Ok(())
+    }
+
+    pub fn get_type(&self, name: &str) -> Result<TypeMeta, KaytonError> {
+        self.types_meta
+            .get(name)
+            .copied()
+            .ok_or_else(|| KaytonError::not_found("type not found"))
     }
 }
 
